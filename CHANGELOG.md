@@ -1,10 +1,3 @@
-_   _ _   _ _____ _
-| | | | \ | |_   _| |    
-| | | |  \| | | | | |__  
-| | | | . ` | | | | '_ \
-| |_| | |\  |_| |_| |_) |
-\___/|_| \_|_____|_.__/
-
 # Changelog
 
 All notable changes to this project will be documented in this file.
