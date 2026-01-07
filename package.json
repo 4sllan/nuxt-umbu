@@ -1,15 +1,17 @@
 {
-  "name": "nuxt-simple-auth",
-  "version": "1.7.3",
+  "name": "nuxt-umbu",
+  "version": "0.0.1",
   "description": "Authentication module simple for Nuxt.js",
-  "repository": "https://github.com/4sllan/nuxt-simple-auth",
+  "repository": "https://github.com/4sllan/nuxt-umbu",
   "author": "Aslan Gama <@4slan>",
   "keywords": [
     "Nuxt 3 authentication",
+    "Nuxt 4 authentication",
     "Laravel Passport integration",
     "Nuxt authentication module",
     "Server-side authentication Nuxt",
     "Nuxt 3 2FA support",
+    "Nuxt 4 2FA support",
     "Secure cookies authentication",
     "Nuxt httpOnly cookies",
     "OAuth authentication Nuxt"
@@ -18,43 +20,51 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/module.mjs",
-      "require": "./dist/module.cjs"
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
     }
   },
-  "main": "./dist/module.cjs",
-  "types": "./dist/types.d.ts",
+  "main": "./dist/module.mjs",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types.d.mts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "prepack": "nuxt-module-build",
+    "prepack": "nuxt-module-build build",
     "build": "nuxi build",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "nuxi prepare playground && tsc --noEmit",
     "dev": "nuxi dev playground",
     "dev:prepare": "nuxt-module-build --stub",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@nuxt/eslint-config": "^1.2.0",
-    "@nuxt/module-builder": "latest",
-    "@nuxt/schema": "^3.15.4",
-    "@nuxt/test-utils": "^3.17.2",
+    "@nuxt/eslint-config": "^1.12.1",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/schema": "^4.2.2",
+    "@nuxt/test-utils": "^3.23.0",
     "@types/lodash.kebabcase": "^4.1.9",
-    "eslint": "^9.22.0",
-    "nuxt": "^3.15.4",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.8"
+    "eslint": "^9.39.2",
+    "nuxt": "^4.2.2",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@nuxt/kit": "^3.15.4",
-    "@vueuse/core": "^12.7.0",
+    "@nuxt/kit": "^4.2.2",
+    "@vueuse/core": "^14.1.0",
     "defu": "^6.1.4",
-    "h3": "^1.15.0",
+    "h3": "^1.15.4",
     "lodash.kebabcase": "^4.1.1",
-    "ofetch": "^1.4.1",
-    "unstorage": "^1.15.0"
+    "ofetch": "^1.5.1",
+    "unstorage": "^1.17.3"
   }
 }

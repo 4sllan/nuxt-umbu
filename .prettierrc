@@ -4,14 +4,5 @@
   "printWidth": 100,
   "tabWidth": 2,
   "trailingComma": "es5",
-  "arrowParens": "always",
-  "plugins": ["prettier-plugin-tailwindcss"],
-  "overrides": [
-    {
-      "files": ["*.pcss", "*.css", "*.scss"],
-      "options": {
-        "singleQuote": false
-      }
-    }
-  ]
+  "arrowParens": "always"
 }
