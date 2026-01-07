@@ -55,6 +55,7 @@
     "@types/lodash.kebabcase": "^4.1.9",
     "eslint": "^9.39.2",
     "nuxt": "^4.2.2",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
