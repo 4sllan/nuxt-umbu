@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { setup, $fetch } from '@nuxt/test-utils';
+import type { FetchOptions } from 'ofetch';
 
 beforeAll(async () => {
     await setup({
@@ -7,7 +8,12 @@ beforeAll(async () => {
     });
 });
 describe('Auth Module API', () => {
-    const routes = [
+    interface Route {
+        url: string;
+        method: FetchOptions['method'];
+    };
+
+    const routes: Route[] = [
         { url: '/api/auth-token', method: 'POST' },
         { url: '/api/send-token-2fa', method: 'POST' },
         { url: '/api/logout', method: 'GET' }
@@ -21,9 +27,11 @@ describe('Auth Module API', () => {
                     method
                 });
                 expect(response).toBeDefined();
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error(`Error on route ${url}:`, error);
-                expect(error.response).toBeDefined();
+                if (error && typeof error === 'object' && 'response' in error) {
+                    expect((error as { response: any }).response).toBeDefined();
+                }
             }
         });
     });
