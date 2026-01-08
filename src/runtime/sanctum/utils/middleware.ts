@@ -42,6 +42,7 @@ export const handleLogout = async (
  * @param strategy - The authentication strategy in use.
  * @param session - The authentication token.
  * @param xsrf - Expiration timestamp of the token.
+ * @param isServer - Whether the validation is happening on the server side.
  * @returns `true` if the session is valid, otherwise `false`.
  */
 export const validateSession = (
@@ -71,17 +72,26 @@ export const validateSession = (
  * @param strategy - The authentication strategy in use.
  * @param token - The authentication token.
  * @param expires - Expiration timestamp of the token.
+ * @param isServer - Whether the validation is happening on the server side.
  * @returns `true` if the session is valid, otherwise `false`.
  */
 export const validateSessionHas2FA = (
   strategy: string | null,
   token: string | null,
-  expires: string | null
+  expires: string | null,
+  isServer: boolean
 ): boolean => {
-  if (!strategy || !token) return false;
+  if (!strategy) return false;
 
-  const expirationTime = expires ? Number(expires) : 0;
-  return expirationTime > Date.now();
+  // SERVER-SIDE: consegue acessar httpOnly
+  if (isServer) {
+    if (!token) return false; // precisa do laravel-session
+    return true;
+  }
+
+  // CLIENT: não decide expiração
+  // apenas verifica se existe estado local de 2FA
+  return !!token;
 };
 
 /**

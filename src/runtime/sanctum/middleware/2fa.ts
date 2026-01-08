@@ -26,43 +26,29 @@ export default defineNuxtRouteMiddleware(async () => {
     const event = useRequestEvent();
     if (!event) return;
 
-    const token = strategyName
-      ? useCookie<string | null>($auth.prefix + `_2fa.` + strategyName).value
-      : null;
-    const expires = strategyName
-      ? useCookie<string | null>($auth.prefix + `_2fa_expiration.` + strategyName).value
-      : null;
+    // Cookie httpOnly - somente SSR consegue ler
+    const token = useCookie<string | null>(`token_2fa`).value;
 
-    if (!validateSessionHas2FA(strategyName, token, expires)) {
+    if (!validateSessionHas2FA(strategyName, token, null, true)) {
       return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');
-    }
-
-    if (token) {
-      $auth.headers.set('2fa', token);
     }
   }
 
   if (import.meta.client) {
-    const strategy = localStorage.getItem($auth.prefix + `strategy`);
-    const token = strategy ? localStorage.getItem($auth.prefix + `_2fa.` + strategy) : null;
-    const expires = strategy
-      ? localStorage.getItem($auth.prefix + `_2fa_expiration.` + strategy)
+    const token2FA = strategyName
+      ? localStorage.getItem($auth.prefix + `_2fa.` + strategyName)
       : null;
-    //
+
     if (
-      !validateSessionHas2FA(strategy, token, expires) ||
-      $auth.strategy !== strategy ||
+      !validateSessionHas2FA(strategyName, token2FA, null, false) ||
+      $auth.strategy !== strategyName ||
       $auth.strategy !== store.value.strategy
     ) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
-    }
-
-    if (token) {
-      $auth.headers.set('2fa', token);
+      return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');
     }
 
     if (!$auth.user || !$auth.loggedIn || !store.value.user || !store.value.loggedIn) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
+      return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');
     }
   }
 });

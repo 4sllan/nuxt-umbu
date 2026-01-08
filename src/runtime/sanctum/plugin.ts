@@ -189,9 +189,17 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           throw new Error('Logout endpoint not found');
         }
 
+        const headers =
+          this.$headers instanceof Headers
+            ? Object.fromEntries(this.$headers.entries())
+            : this.$headers;
+
         const response = await $fetch<{ logout?: string }>(endpoint?.url, {
+          baseURL: config.public.baseURL,
+          credentials: 'include',
           method: endpoint?.method || 'POST',
           body: { strategyName },
+          headers,
         });
 
         this._state = {
@@ -221,35 +229,27 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           throw new Error('2FA endpoint not found');
         }
 
-        const response = await $fetch<{ token?: string; expires?: string }>(endpoint?.url, {
-          method: endpoint?.method || 'POST',
-          body: { strategyName, code },
-        });
+        const headers =
+          this.$headers instanceof Headers
+            ? Object.fromEntries(this.$headers.entries())
+            : this.$headers;
 
-        if (!response?.token || !response?.expires) {
+        const response = await $fetch<{ access_token?: string; expires_in?: string }>(
+          endpoint?.url,
+          {
+            baseURL: config.public.baseURL,
+            credentials: 'include',
+            method: endpoint?.method || 'POST',
+            body: { strategyName, code },
+            headers,
+          }
+        );
+
+        if (!response?.access_token || !response?.expires_in) {
           throw new Error('Invalid 2FA response');
         }
 
-        localStorage.setItem(this._prefix + '_2fa.' + strategyName, response.token);
-        localStorage.setItem(this._prefix + '_2fa_expiration.' + strategyName, response.expires);
-
-        const options = this.options.cookie.options || {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'strict',
-          path: '/',
-        };
-
-        const setToken2fa = useCookie(this._prefix + '_2fa.' + strategyName, options);
-        const set2faExpiration = useCookie(
-          this._prefix + '_2fa_expiration.' + strategyName,
-          options
-        );
-
-        setToken2fa.value = response.token;
-        set2faExpiration.value = response.expires;
-
-        this.$headers.set('2fa', response.token);
+        localStorage.setItem(this._prefix + '_2fa.' + strategyName, response.access_token);
 
         return { success: true };
       } catch (error) {
@@ -364,6 +364,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   exposed._2fa = async (strategyName: string, code: string) => {
     return await $auth._2fa(strategyName, code);
+  };
+  exposed.csrfToken = async (event: any) => {
+    return await $auth.csrfToken(event);
   };
 
   nuxtApp.provide('auth', exposed);
