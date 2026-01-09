@@ -5,6 +5,7 @@ import {
   useAuthStore,
   useAuthConfig,
   useRuntimeConfig,
+  createError,
 } from '#imports';
 import { parseCookies, setCookie } from 'h3';
 import { $fetch } from 'ofetch';
@@ -188,7 +189,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         };
         store.value = this._state;
 
-        localStorage.clear();
+        Object.keys(localStorage)
+          .filter((key) => key.startsWith(this._prefix))
+          .forEach((key) => localStorage.removeItem(key));
 
         const redirectUrl = this.getRedirect(strategyName)?.logout ?? '/';
         await navigateTo(redirectUrl);

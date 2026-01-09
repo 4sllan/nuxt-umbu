@@ -1,5 +1,5 @@
 import { $fetch, type FetchOptions, type FetchResponse, type FetchContext } from 'ofetch';
-import { useNuxtApp, useRuntimeConfig, reloadNuxtApp } from '#imports';
+import { useNuxtApp, useRuntimeConfig, reloadNuxtApp, useAuthConfig, createError } from '#imports';
 import type { AuthInstance } from '../types';
 
 export type AutxOptions<T = any> = FetchOptions<'json', T>;
@@ -7,22 +7,30 @@ export type AutxOptions<T = any> = FetchOptions<'json', T>;
 export async function $autx<T = any>(request: string, options: AutxOptions<T> = {}): Promise<T> {
   const { $auth } = useNuxtApp() as unknown as { $auth: AuthInstance };
   const baseURL = useRuntimeConfig().public.baseURL as string | undefined;
+  const { provider } = useAuthConfig();
 
-  if (!$auth || !$auth.$headers) {
+  if (!$auth || !$auth.headers) {
     throw new Error('Auth instance is not available or missing headers.');
   }
 
   const authHeaders =
     $auth.headers instanceof Headers ? Object.fromEntries($auth.headers.entries()) : $auth.headers;
 
-  const url = new URL(request, baseURL).href;
+  const runtimeBaseURL = typeof baseURL === 'string' ? baseURL : undefined;
 
-  return $fetch<T>(url, {
+  const fetchOptions: AutxOptions<T> = {
     ...options,
+    baseURL: options.baseURL ?? runtimeBaseURL,
+    credentials: options.credentials ?? (provider === 'sanctum' ? 'include' : undefined),
     headers: {
       ...authHeaders,
       ...options.headers,
     },
+  };
+
+  return $fetch<T>(request, {
+    ...fetchOptions,
+
     async onResponseError(context: FetchContext<T, 'json'> & { response: FetchResponse<T> }) {
       const { request, response } = context;
       let errorBody: any;
@@ -40,10 +48,16 @@ export async function $autx<T = any>(request: string, options: AutxOptions<T> = 
       });
 
       if (response.status === 401) {
-        reloadNuxtApp();
-      } else {
-        throw new Error(errorBody);
+        if (import.meta.client) {
+          reloadNuxtApp();
+        }
+        return;
       }
+
+      throw createError({
+        statusCode: response.status,
+        data: errorBody,
+      });
     },
   });
 }

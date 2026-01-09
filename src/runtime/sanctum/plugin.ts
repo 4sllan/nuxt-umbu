@@ -6,6 +6,7 @@ import {
   useAuthConfig,
   useRuntimeConfig,
   useCookie,
+  createError,
 } from '#imports';
 import { parseCookies, setCookie } from 'h3';
 import { $fetch } from 'ofetch';
@@ -96,37 +97,39 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             return;
           }
 
-          const cookies = parseCookies(event);
-          strategy = cookies[this._prefix + `strategy`];
-          session = cookies[`laravel-session`];
-          xsrf = cookies[`XSRF-TOKEN`];
+          // TypeScript now knows event is defined here
+          const cookies = parseCookies(event as any);
+          strategy = cookies[this._prefix + `strategy`] ?? null;
+          session = cookies[`laravel-session`] ?? null;
+          xsrf = cookies[`XSRF-TOKEN`] ?? null;
+
+          if (!strategy || !session) return;
         } else {
           strategy = useCookie<string | null>(this._prefix + `strategy`).value;
-          session = useCookie<string | null>(`laravel-session`).value;
           xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
         }
 
-        if (!strategy || !session || !xsrf) {
+        if (!strategy || !xsrf) {
           console.warn('No valid session found. Skipping profile fetch.');
           return;
         }
-
         this._state.strategy = strategy ?? null;
         this.$headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
 
+        if (import.meta.server) return;
+
+        if (!xsrf) {
+          const csrf = await this.csrfToken();
+
+          if (!csrf) {
+            console.warn('Could not initialize CSRF protection.');
+          }
+        }
+
         const data = await this._setProfile(strategy);
 
-        if (data) {
-          const property = this.getUserProperty(this._state.strategy);
-          const user = this.hasValidProperty(data, property as keyof ProfileResponse)
-            ? data[property as keyof ProfileResponse]
-            : (data ?? null);
-
-          this._state = {
-            user,
-            loggedIn: true,
-            strategy: strategy ?? null,
-          };
+        if (!data) {
+          console.warn('Failed to load user profile.');
         }
       } catch (error) {
         console.error('Failed to initialize auth:', error);
@@ -135,10 +138,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     async loginWith(strategyName: string, value: any): Promise<any> {
       try {
-        const csrf = await this.csrfToken();
+        const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
 
-        if (!csrf) {
-          throw new Error('Could not initialize CSRF protection.');
+        if (!xsrf) {
+          const csrf = await this.csrfToken();
+
+          if (!csrf) {
+            throw new Error('Could not initialize CSRF protection.');
+          }
         }
 
         const endpoint = this.getHandler(strategyName, 'login');
@@ -209,7 +216,12 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         };
         store.value = this._state;
 
-        localStorage.clear();
+        useCookie(this._prefix + 'strategy').value = undefined;
+        useCookie('XSRF-TOKEN').value = undefined;
+
+        Object.keys(localStorage)
+          .filter((key) => key.startsWith(this._prefix))
+          .forEach((key) => localStorage.removeItem(key));
 
         const redirectUrl = this.getRedirect(strategyName)?.logout ?? '/';
         await navigateTo(redirectUrl);
@@ -258,7 +270,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       }
     }
 
-    async csrfToken(event?: any): Promise<boolean> {
+    async csrfToken(): Promise<boolean> {
       try {
         const csrfEndpoint = this.options?.csrf;
 
@@ -289,6 +301,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     private async _setProfile(strategyName: string): Promise<ProfileResponse | false> {
       try {
+        if (import.meta.server) return false;
+
         const endpoint = this.getHandler(strategyName, 'user');
 
         if (!endpoint?.url || !endpoint?.method) throw new Error('User endpoint not found');
@@ -365,8 +379,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   exposed._2fa = async (strategyName: string, code: string) => {
     return await $auth._2fa(strategyName, code);
   };
-  exposed.csrfToken = async (event: any) => {
-    return await $auth.csrfToken(event);
+
+  exposed.csrfToken = async () => {
+    return await $auth.csrfToken();
   };
 
   nuxtApp.provide('auth', exposed);

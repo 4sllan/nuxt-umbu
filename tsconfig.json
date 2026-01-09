@@ -3,13 +3,24 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+
     "strict": true,
     "declaration": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
+
+    "lib": ["ESNext", "DOM"],
+
     "jsx": "preserve",
-    "allowJs": true,
     "resolveJsonModule": true,
-    "types": ["node", "vue"]
+
+    "baseUrl": ".",
+    "paths": {
+      "#runtime/*": ["src/runtime/*"],
+      "#types/*": ["src/runtime/types/*"]
+    },
+
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["test", "playground", "node_modules"]
 }
