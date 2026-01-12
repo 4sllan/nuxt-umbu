@@ -9,7 +9,7 @@ import {
   addImportsDir,
 } from '@nuxt/kit';
 import { defu } from 'defu';
-import kebabCase from 'lodash/kebabCase';
+import kebabCase from 'lodash.kebabcase';
 import fs from 'fs';
 
 import type {
