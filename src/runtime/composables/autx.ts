@@ -1,8 +1,11 @@
 import { $fetch, type FetchOptions, type FetchResponse, type FetchContext } from 'ofetch';
 import { useNuxtApp, useRuntimeConfig, reloadNuxtApp, useAuthConfig, createError } from '#imports';
 import type { AuthInstance } from '../types';
+import { useEnsureCsrf } from '../composables/useEnsureCsrf';
 
 export type AutxOptions<T = any> = FetchOptions<'json', T>;
+
+const CSRF_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
 export async function $autx<T = any>(request: string, options: AutxOptions<T> = {}): Promise<T> {
   const { $auth } = useNuxtApp() as unknown as { $auth: AuthInstance };
@@ -11,6 +14,16 @@ export async function $autx<T = any>(request: string, options: AutxOptions<T> = 
 
   if (!$auth || !$auth.headers) {
     throw new Error('Auth instance is not available or missing headers.');
+  }
+
+  const method = (options.method || 'GET').toUpperCase();
+
+  /**
+   * CSRF SOMENTE PARA SANCTUM
+   */
+
+  if (provider === 'sanctum' && CSRF_METHODS.includes(method)) {
+    await useEnsureCsrf($auth);
   }
 
   const authHeaders =
@@ -49,7 +62,15 @@ export async function $autx<T = any>(request: string, options: AutxOptions<T> = 
 
       if (response.status === 401) {
         if (import.meta.client) {
-          reloadNuxtApp();
+          console.warn('[auth] 401 Unauthorized – reloading app');
+          const strategy = $auth.strategy;
+
+          if (strategy) {
+            await $auth.logout(strategy);
+          }
+          if (provider === 'sanctum') {
+            reloadNuxtApp();
+          }
         }
         return;
       }

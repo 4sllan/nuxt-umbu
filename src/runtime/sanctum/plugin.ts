@@ -272,6 +272,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     async csrfToken(): Promise<boolean> {
       try {
+        if (import.meta.server) return false;
+
         const csrfEndpoint = this.options?.csrf;
 
         if (!csrfEndpoint) {
