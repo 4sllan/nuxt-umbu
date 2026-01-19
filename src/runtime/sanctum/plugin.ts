@@ -86,7 +86,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     async initialize(): Promise<void> {
       try {
         let strategy: string | null = null;
-        let session: string | null = null;
         let xsrf: string | null = null;
 
         if (import.meta.server) {
@@ -97,16 +96,18 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             return;
           }
 
-          // TypeScript now knows event is defined here
           const cookies = parseCookies(event as any);
           strategy = cookies[this._prefix + `strategy`] ?? null;
-          session = cookies[`laravel-session`] ?? null;
           xsrf = cookies[`XSRF-TOKEN`] ?? null;
-
-          if (!strategy || !session) return;
         } else {
           strategy = useCookie<string | null>(this._prefix + `strategy`).value;
           xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+        }
+
+        const csrf = await this.csrfToken();
+
+        if (!csrf) {
+          console.warn('Could not initialize CSRF protection.');
         }
 
         if (!strategy || !xsrf) {
@@ -115,16 +116,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         }
         this._state.strategy = strategy ?? null;
         this.$headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
-
-        if (import.meta.server) return;
-
-        if (!xsrf) {
-          const csrf = await this.csrfToken();
-
-          if (!csrf) {
-            console.warn('Could not initialize CSRF protection.');
-          }
-        }
 
         const data = await this._setProfile(strategy);
 
