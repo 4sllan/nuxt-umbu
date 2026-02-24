@@ -139,7 +139,7 @@ declare module 'vue' {
 }
 
 declare module '#imports' {
-  import type { AuthState } from '../types';
+  import type { AuthState } from './runtime/types';
 
   /**
    * Provides access to the authentication store, managing user state and authentication strategy.
