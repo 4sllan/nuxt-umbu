@@ -14,42 +14,31 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      # Corrige bug npm + oxc
       npm_config_optional: true
       npm_config_force: true
 
+      # ENV da lib
+      baseURL: http://localhost:3000
+      AUTH_CLIENT_ID: test-client-id
+      AUTH_CLIENT_SECRET: test-client-secret
+      AUTH_GRANT_TYPE: password
+
     steps:
-      - name: 🛎️ Checkout do código
+      - name: 🛎️ Checkout
         uses: actions/checkout@v4
 
-      - name: ⚙️ Configurar Node.js
+      - name: ⚙️ Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
-      # 🔥 Limpeza preventiva contra bug do npm
-      - name: 🧹 Limpar node_modules e lock
-        run: |
-          rm -rf node_modules package-lock.json
-          rm -rf playground/node_modules playground/package-lock.json
-
-      - name: 📦 Instalar dependências (root)
+      - name: 📦 Install dependencies
         run: npm install --include=optional --no-audit --no-fund
 
-      - name: 📦 Instalar dependências do playground
-        run: cd playground && npm install --include=optional --no-audit --no-fund
-
-      - name: 🔧 Preparar ambiente Nuxt
+      - name: 🔧 Generate Nuxt types
         run: npx nuxi prepare
 
-      - name: 🔧 Preparar ambiente do Playground
-        run: cd playground && npx nuxi prepare
-
-      - name: 🚀 Iniciar Nuxt no Playground
-        run: cd playground && npm run dev &
-
-      - name: ⏳ Aguardar o servidor estar pronto
-        run: sleep 15
-
-      - name: 🔍 Rodar testes
+      - name: 🧪 Run tests
         run: npm run test
