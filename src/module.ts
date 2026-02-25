@@ -160,6 +160,12 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
       mode: 'all',
     });
 
+    // Add type template for auth declarations
+    addTypeTemplate({
+      src: resolve('./auth.d.ts'),
+      filename: 'auth.d.ts',
+    });
+
     nuxt.options.alias['#auth-utils'] = resolve('./runtime/' + provider + '/utils');
 
     logger.success('`nuxt-umbu` setup done');
