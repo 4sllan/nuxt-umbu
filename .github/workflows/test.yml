@@ -2,43 +2,21 @@ name: Run Tests
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:
-      # Corrige bug npm + oxc
-      npm_config_optional: true
-      npm_config_force: true
-
-      # ENV da lib
-      baseURL: http://localhost:3000
-      AUTH_CLIENT_ID: test-client-id
-      AUTH_CLIENT_SECRET: test-client-secret
-      AUTH_GRANT_TYPE: password
-
     steps:
-      - name: 🛎️ Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: 📦 Install dependencies
-        run: npm install --include=optional --no-audit --no-fund
-
-      - name: 🔧 Generate Nuxt types
-        run: npx nuxi prepare
-
-      - name: 🧪 Run tests
-        run: npm run test
+      - run: npm install
+      - run: npm run test
