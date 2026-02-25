@@ -1,6 +1,7 @@
-import { useRuntimeConfig, useAuthConfig } from '#imports';
+import { useRuntimeConfig } from '#imports';
 import { deleteCookie, defineEventHandler, readBody } from 'h3';
 import protectedMiddleware from '../middleware/protected';
+import type { PassportModuleOptions } from '../../../types';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,7 +14,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const runtimeConfig = useRuntimeConfig();
-    const config = useAuthConfig();
+    const config = runtimeConfig.public['nuxt-umbu'] as PassportModuleOptions & {
+      twoFactorAuth: boolean;
+    };
 
     if (!config) {
       throw new Error('Auth configuration is missing.');

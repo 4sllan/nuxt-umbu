@@ -1,8 +1,12 @@
-import { useRuntimeConfig, useAuthConfig } from '#imports';
+import { useRuntimeConfig } from '#imports';
 import { defineEventHandler, readBody, setCookie, createError } from 'h3';
 import { defu } from 'defu';
 import { $fetch } from 'ofetch';
-import type { PassportStrategiesOptions } from '../../../types';
+import type {
+  PassportModuleOptions,
+  PassportStrategiesOptions,
+  AuthSecretConfig,
+} from '../../../types';
 
 interface AuthRequestBody {
   strategyName: string;
@@ -20,6 +24,10 @@ interface TokenErrorResponse {
   message: string;
 }
 
+type SecretConfigMap = {
+  [key: string]: AuthSecretConfig;
+};
+
 type TokenResponse = TokenSuccessResponse | TokenErrorResponse;
 
 export default defineEventHandler(async (event) => {
@@ -31,8 +39,8 @@ export default defineEventHandler(async (event) => {
 
     const runtimeConfig = useRuntimeConfig();
     const baseURL = runtimeConfig.public.baseURL;
-    const config = useAuthConfig();
-    const secret = runtimeConfig.secret;
+    const config = runtimeConfig.public['nuxt-umbu'] as PassportModuleOptions;
+    const secret = runtimeConfig.secret as SecretConfigMap;
 
     if (!config) {
       throw createError({ statusCode: 500, statusMessage: 'Authentication module not configured' });

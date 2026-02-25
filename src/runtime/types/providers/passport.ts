@@ -2,7 +2,7 @@ import type { AuthOptionsCookie, RedirectOptions } from '../shared';
 
 // Configuração de credenciais secretas para autenticação (baseada em OAuth)
 export interface AuthSecretConfig {
-  client_id: string; // ID do cliente OAuth
+  client_id: string | number; // ID do cliente OAuth
   client_secret: string; // Segredo do cliente OAuth
   grant_type: 'password' | 'authorization_code'; // Tipo de concessão para autenticação
 }

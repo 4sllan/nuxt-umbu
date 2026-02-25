@@ -1,8 +1,8 @@
-import { useRuntimeConfig, useAuthConfig } from '#imports';
+import { useRuntimeConfig } from '#imports';
 import { defineEventHandler, readBody, getCookie, setCookie, createError, setHeader } from 'h3';
 import { $fetch } from 'ofetch';
 import protectedMiddleware from '../middleware/protected';
-import type { PassportStrategiesOptions } from '../../../types';
+import type { PassportModuleOptions, PassportStrategiesOptions } from '../../../types';
 
 interface Get2FAResponse {
   access_token: string;
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
     const runtimeConfig = useRuntimeConfig();
     const baseURL = runtimeConfig.public.baseURL;
-    const config = useAuthConfig();
+    const config = runtimeConfig.public['nuxt-umbu'] as PassportModuleOptions;
 
     if (!config) {
       throw createError({ statusCode: 500, statusMessage: 'Authentication module not configured' });

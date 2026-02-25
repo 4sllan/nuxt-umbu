@@ -1,5 +1,6 @@
-import { useRuntimeConfig, useAuthConfig } from '#imports';
+import { useRuntimeConfig } from '#imports';
 import { getCookie, createError, H3Event } from 'h3';
+import type { PassportModuleOptions } from '../../../types';
 
 interface AuthSession {
   token?: string;
@@ -15,7 +16,7 @@ interface AuthSession {
  */
 export function getAuthSession(event: H3Event): AuthSession {
   const runtimeConfig = useRuntimeConfig();
-  const config = useAuthConfig();
+  const config = runtimeConfig.public['nuxt-umbu'] as PassportModuleOptions;
 
   if (!config?.cookie) {
     throw createError({ statusCode: 500, statusMessage: 'Authentication module not configured' });
