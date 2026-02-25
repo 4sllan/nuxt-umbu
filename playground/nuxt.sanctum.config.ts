@@ -32,31 +32,9 @@ export default defineNuxtConfig({
     // Nuxt-simple-auth Configuration
 
     auth: {
-        cookie: {
-            options: {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'lax',
-                priority: 'high',
-            },
-            prefix: '__Secure-'
-        },
-        provider: 'passport',
+        csrf: '/sanctum/csrf-cookie',
+        provider: 'sanctum',
         strategies: {
-            admin: {
-                redirect: {
-                    logout: "/",
-                    login: "/"
-                },
-                user: {
-                    property: "profile",
-                },
-                endpoints: {
-                    login: {url: "/oauth/token", method: "post", alias: "auth token"},
-                    user: {url: "/api/admin/profile", method: "get"},
-                    "2fa": {url: '/api/admin/token_2fa', method: 'post'},
-                },
-            },
             client:{
                 redirect: {
                     logout: "/auth",
@@ -66,33 +44,16 @@ export default defineNuxtConfig({
                     property: "profile",
                 },
                 endpoints: {
-                    login: {url: "/oauth/token", method: "post"},
+                    login: {url: "/login", method: "post"},
                     user: {url: "/api/profile", method: "get"},
-                    "2fa": {url: "/api/send-token-2fa", method: "post"},
-                    logout: {alias: 'logout client'}
+                    "2fa": {url: "/api/token-2fa", method: "post"},
+                    logout: {url: "/api/logout", method: "post"}
                 },
             }
         }
     },
 
     runtimeConfig: {
-        // The private keys which are only available server-side
-        secret: {
-            admin: {
-                client_id: process.env.AUTH_CLIENT_ID || '',
-                client_secret: process.env.AUTH_CLIENT_SECRET || '',
-                grant_type:
-                    (process.env.AUTH_GRANT_TYPE as 'password' | 'authorization_code') || 'password',
-            },
-            client: {
-                client_id: process.env.AUTH_CLIENT_ID || '',
-                client_secret: process.env.AUTH_CLIENT_SECRET || '',
-                grant_type:
-                    (process.env.AUTH_GRANT_TYPE as 'password' | 'authorization_code') || 'password',
-            },
-        },
-
-
         // Keys within public are also exposed client-side
         public: {
             apiBase: '/api',
