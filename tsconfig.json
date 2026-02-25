@@ -8,19 +8,15 @@
     "declaration": true,
     "emitDeclarationOnly": true,
 
-    "lib": ["ESNext", "DOM"],
-
-    "jsx": "preserve",
-    "resolveJsonModule": true,
+    "lib": ["ESNext"],
+    "types": ["node"],
 
     "baseUrl": ".",
     "paths": {
       "#runtime/*": ["src/runtime/*"],
       "#types/*": ["src/runtime/types/*"]
-    },
-
-    "types": ["node"]
+    }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["test", "playground", "node_modules"]
+  "exclude": ["playground", ".nuxt", "node_modules"]
 }

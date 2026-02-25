@@ -7,6 +7,7 @@ import {
   useRuntimeConfig,
   useCookie,
   createError,
+  $autx,
 } from '#imports';
 import { parseCookies, setCookie } from 'h3';
 import { $fetch } from 'ofetch';
@@ -86,7 +87,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     async initialize(): Promise<void> {
       try {
         let strategy: string | null = null;
-        let session: string | null = null;
         let xsrf: string | null = null;
 
         if (import.meta.server) {
@@ -97,16 +97,18 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             return;
           }
 
-          // TypeScript now knows event is defined here
           const cookies = parseCookies(event as any);
           strategy = cookies[this._prefix + `strategy`] ?? null;
-          session = cookies[`laravel-session`] ?? null;
           xsrf = cookies[`XSRF-TOKEN`] ?? null;
-
-          if (!strategy || !session) return;
         } else {
           strategy = useCookie<string | null>(this._prefix + `strategy`).value;
           xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+        }
+
+        const csrf = await this.csrfToken();
+
+        if (!csrf) {
+          console.warn('Could not initialize CSRF protection.');
         }
 
         if (!strategy || !xsrf) {
@@ -115,16 +117,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         }
         this._state.strategy = strategy ?? null;
         this.$headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
-
-        if (import.meta.server) return;
-
-        if (!xsrf) {
-          const csrf = await this.csrfToken();
-
-          if (!csrf) {
-            console.warn('Could not initialize CSRF protection.');
-          }
-        }
 
         const data = await this._setProfile(strategy);
 
@@ -153,17 +145,22 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           throw new Error(`Login endpoint missing for strategy: ${strategyName}`);
         }
 
-        const headers =
-          this.$headers instanceof Headers
-            ? Object.fromEntries(this.$headers.entries())
-            : this.$headers;
+        // const headers =
+        //   this.$headers instanceof Headers
+        //     ? Object.fromEntries(this.$headers.entries())
+        //     : this.$headers;
+        //
+        // await $fetch<AuthResponse>(endpoint.url, {
+        //   baseURL: config.public.baseURL,
+        //   credentials: 'include',
+        //   method: endpoint.method || 'POST',
+        //   body: value,
+        //   headers,
+        // });
 
-        await $fetch<AuthResponse>(endpoint.url, {
-          baseURL: config.public.baseURL,
-          credentials: 'include',
+        await $autx<AuthResponse>(endpoint.url, {
           method: endpoint.method || 'POST',
           body: value,
-          headers,
         });
 
         useCookie(this._prefix + `strategy`).value = strategyName;
@@ -208,7 +205,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           body: { strategyName },
           headers,
         });
-
+      } catch (error) {
+        console.error('Logout failed:', error);
+      } finally {
         this._state = {
           user: null,
           loggedIn: false,
@@ -225,8 +224,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         const redirectUrl = this.getRedirect(strategyName)?.logout ?? '/';
         await navigateTo(redirectUrl);
-      } catch (error) {
-        console.error('Logout failed:', error);
       }
     }
 
@@ -241,19 +238,27 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           throw new Error('2FA endpoint not found');
         }
 
-        const headers =
-          this.$headers instanceof Headers
-            ? Object.fromEntries(this.$headers.entries())
-            : this.$headers;
+        // const headers =
+        //   this.$headers instanceof Headers
+        //     ? Object.fromEntries(this.$headers.entries())
+        //     : this.$headers;
+        //
+        // const response = await $fetch<{ access_token?: string; expires_in?: string }>(
+        //   endpoint?.url,
+        //   {
+        //     baseURL: config.public.baseURL,
+        //     credentials: 'include',
+        //     method: endpoint?.method || 'POST',
+        //     body: { strategyName, code },
+        //     headers,
+        //   }
+        // );
 
-        const response = await $fetch<{ access_token?: string; expires_in?: string }>(
+        const response = await $autx<{ access_token?: string; expires_in?: string }>(
           endpoint?.url,
           {
-            baseURL: config.public.baseURL,
-            credentials: 'include',
             method: endpoint?.method || 'POST',
             body: { strategyName, code },
-            headers,
           }
         );
 
@@ -309,16 +314,20 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         if (!endpoint?.url || !endpoint?.method) throw new Error('User endpoint not found');
 
-        const headers =
-          this.$headers instanceof Headers
-            ? Object.fromEntries(this.$headers.entries())
-            : this.$headers;
+        // const headers =
+        //     this.$headers instanceof Headers
+        //         ? Object.fromEntries(this.$headers.entries())
+        //         : this.$headers;
+        //
+        // const data = await $fetch<ProfileResponse>(endpoint.url, {
+        //     baseURL: config.public.baseURL,
+        //     credentials: 'include',
+        //     method: endpoint.method,
+        //     headers,
+        // });
 
-        const data = await $fetch<ProfileResponse>(endpoint.url, {
-          baseURL: config.public.baseURL,
-          credentials: 'include',
+        const data = await $autx<ProfileResponse>(endpoint.url, {
           method: endpoint.method,
-          headers,
         });
 
         if (!data) return false;
