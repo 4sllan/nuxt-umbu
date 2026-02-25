@@ -13,6 +13,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      npm_config_optional: true
+      npm_config_force: true
+
     steps:
       - name: 🛎️ Checkout do código
         uses: actions/checkout@v4
@@ -20,20 +24,20 @@ jobs:
       - name: ⚙️ Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
-      # 🔥 LIMPEZA FORÇADA (resolve bug optional deps)
-      - name: 🧹 Limpar instalação anterior
+      # 🔥 Limpeza preventiva contra bug do npm
+      - name: 🧹 Limpar node_modules e lock
         run: |
           rm -rf node_modules package-lock.json
           rm -rf playground/node_modules playground/package-lock.json
 
       - name: 📦 Instalar dependências (root)
-        run: npm install
+        run: npm install --include=optional --no-audit --no-fund
 
       - name: 📦 Instalar dependências do playground
-        run: cd playground && npm install
+        run: cd playground && npm install --include=optional --no-audit --no-fund
 
       - name: 🔧 Preparar ambiente Nuxt
         run: npx nuxi prepare
