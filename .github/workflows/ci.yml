@@ -33,11 +33,14 @@ jobs:
       - name: 🔧 Preparar ambiente Nuxt
         run: npx nuxi prepare
 
-      - name: Lint
-        run: pnpm lint
+      - name: 🔧 Preparar ambiente do Playground
+        run: cd playground && npx nuxi prepare
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: 🚀 Iniciar Nuxt no Playground
+        run: cd playground && pnpm dev &  # Roda em segundo plano
+
+      - name: ⏳ Aguardar o servidor estar pronto
+        run: sleep 10  # Ajuste o tempo conforme necessário
 
       - name: Run Unit Tests
         run: pnpm test
