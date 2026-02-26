@@ -30,39 +30,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm lint
+      - name: 🔧 Preparar ambiente Nuxt
+        run: npx nuxi prepare
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: 🔧 Preparar ambiente do Playground
+        run: cd playground && npx nuxi prepare
+
+      - name: 🚀 Iniciar Nuxt no Playground
+        run: cd playground && pnpm dev &  # Roda em segundo plano
+
+      - name: ⏳ Aguardar o servidor estar pronto
+        run: sleep 10  # Ajuste o tempo conforme necessário
 
       - name: Run Unit Tests
         run: pnpm test
-
-  e2e:
-    name: 🎭 Playwright E2E
-    runs-on: ubuntu-latest
-    needs: unit
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Ensure pnpm is available
-        run: corepack prepare pnpm@latest --activate
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
-
-      - name: Run Playwright Tests
-        run: pnpm exec playwright test

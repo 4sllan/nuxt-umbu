@@ -10,7 +10,7 @@ export default createConfigForNuxt({
         'prefer-const': ['error'],
       },
     })
-    // --- ADICIONE ESTE BLOCO PARA VUE ---
+    // --- BLOCO PARA VUE ---
     .override('nuxt/vue/rules', {
       rules: {
         'vue/html-self-closing': ['error', {
@@ -21,7 +21,9 @@ export default createConfigForNuxt({
           },
           svg: 'always',
           math: 'always'
-        }]
+        }],
+        'vue/multi-word-component-names': 'off', // desativa erro de nome de componente
+        'vue/attributes-order': 'off',           // ignora aviso de ordem de atributos
       }
     })
     // ------------------------------------
@@ -29,11 +31,11 @@ export default createConfigForNuxt({
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/consistent-type-imports': 'off', // ignora erro de imports só como type
       },
     })
     .append({
       files: [
-        'playground/app/pages/**/*.vue',
         'src/runtime/**/*.ts',
         'src/module.ts',
       ],

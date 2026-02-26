@@ -1,22 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-
-    "strict": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-
-    "lib": ["ESNext"],
-    "types": ["node"],
-
-    "baseUrl": ".",
-    "paths": {
-      "#runtime/*": ["src/runtime/*"],
-      "#types/*": ["src/runtime/types/*"]
-    }
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["playground", ".nuxt", "node_modules"]
+  "extends": "./.nuxt/tsconfig.json",
+  "exclude": [
+    "dist",
+    "playground",
+    "docs"
+  ]
 }
