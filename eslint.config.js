@@ -34,7 +34,6 @@ export default createConfigForNuxt({
     })
     .append({
       files: [
-        'playground/app/pages/**/*.vue',
         'src/runtime/**/*.ts',
         'src/module.ts',
       ],
