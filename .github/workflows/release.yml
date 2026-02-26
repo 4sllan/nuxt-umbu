@@ -3,39 +3,46 @@ name: 🚀 Release
 on:
   push:
     tags:
-      - 'v*.*.*' # dispara apenas em tags tipo v0.1.0
+      - 'v*.*.*' # Trigger only on version tags like v1.0.0
 
 jobs:
   release:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
 
     steps:
-      - name: Checkout
+      # 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 📦 Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      # 🟢 Setup Node.js with pnpm cache
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Ensure pnpm is available
-        run: corepack prepare pnpm@latest --activate
-
+      # 📥 Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Package
+      # 🏗 Build package
+      - name: Build package
         run: pnpm build
 
+      # 📝 Generate CHANGELOG
       - name: Generate CHANGELOG.md
         run: pnpm changelogen --release
 
+      # ✅ Verify CHANGELOG exists
       - name: Verify CHANGELOG.md
         run: |
           if [ ! -f CHANGELOG.md ]; then
@@ -43,6 +50,7 @@ jobs:
             exit 1
           fi
 
+      # 🚀 Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
