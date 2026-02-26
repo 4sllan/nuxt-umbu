@@ -54,7 +54,6 @@
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/schema": "^4.2.2",
     "@nuxt/test-utils": "^3.23.0",
-    "@playwright/test": "^1.58.2",
     "@types/lodash.kebabcase": "^4.1.9",
     "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",

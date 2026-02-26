@@ -8,13 +8,15 @@
     "declaration": true,
     "emitDeclarationOnly": true,
 
-    "lib": ["ESNext"],
-    "types": ["node"],
+    "lib": ["ESNext", "DOM"],          // Adicionado DOM
+    "types": ["node"],                // Node para server-side
+    "skipLibCheck": true,             // Ignora erros de tipos externos
 
     "baseUrl": ".",
     "paths": {
       "#runtime/*": ["src/runtime/*"],
-      "#types/*": ["src/runtime/types/*"]
+      "#types/*": ["src/runtime/types/*"],
+      "#imports/*": [".nuxt/imports/*"]   // Necessário se usar auto-imports do Nuxt 4
     }
   },
   "include": ["src/**/*.ts"],
