@@ -10,7 +10,7 @@ export default createConfigForNuxt({
     // Regras gerais de JavaScript
     .override('nuxt/javascript', {
       rules: {
-        curly: ['error', 'all'], // sempre usar {}
+        curly: 'off', // ⬅ desativa a obrigatoriedade
         'no-console': ['warn', { allow: ['warn', 'error'] }], // só warn, error e debug
         'prefer-const': ['error'], // prefira const
       },
