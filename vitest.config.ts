@@ -7,10 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       // Resolve imports de Nuxt 4 dentro da lib
-      '#imports': join(__dirname, 'src'),       // composables e helpers
-      '#runtime': join(__dirname, 'src/runtime'), // runtime do módulo
-      '#modules': join(__dirname, 'src/module.ts'), // módulo principal
-    },
+      '#imports': join(__dirname, 'src'),
+      '#runtime': join(__dirname, 'src/runtime'),
+      '#modules': join(__dirname, 'src/module.ts')
+    }
   },
   test: {
     globals: true,
@@ -20,7 +20,7 @@ export default defineConfig({
     setupFiles: join(__dirname, 'test/setup.ts'), // mocks globais opcionais
     coverage: {
       reporter: ['text', 'lcov'],
-      exclude: ['playground/**', 'test/**'],
-    },
-  },
+      exclude: ['playground/**', 'test/e2e/**']
+    }
+  }
 })
