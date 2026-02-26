@@ -15,9 +15,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom', // ambiente leve para testes de Vue/Nuxt
-    include: ['test/**/*.test.ts'], // testa apenas arquivos da lib
-    exclude: ['playground/**', 'test/e2e/**'], // ignora playground e e2e
-    setupFiles: join(__dirname, 'test/setup.ts'), // mocks globais opcionais
+    include: ['test/**/*.test.ts'], // apenas arquivos de teste da lib
+    exclude: ['playground/**', 'test/e2e/**'], // ignora playground e testes e2e
     coverage: {
       reporter: ['text', 'lcov'],
       exclude: ['playground/**', 'test/e2e/**']
