@@ -1,4 +1,4 @@
-name: 🧪 CI
+name: 🧪 CI Develop
 
 on:
   push:
@@ -20,14 +20,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
+      - name: Enable Corepack
+        run: corepack enable
 
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
+      - name: Ensure pnpm is available
+        run: corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run Unit Tests
+        run: pnpm test
 
   e2e:
     name: 🎭 Playwright E2E
@@ -41,13 +51,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Instalar browsers Playwright
+      - name: Ensure pnpm is available
+        run: corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
 
-      - name: Rodar testes E2E
+      - name: Run Playwright Tests
         run: pnpm exec playwright test
