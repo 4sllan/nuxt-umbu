@@ -10,7 +10,7 @@ export default createConfigForNuxt({
         'prefer-const': ['error'],
       },
     })
-    // --- ADICIONE ESTE BLOCO PARA VUE ---
+    // --- BLOCO PARA VUE ---
     .override('nuxt/vue/rules', {
       rules: {
         'vue/html-self-closing': ['error', {
@@ -21,7 +21,8 @@ export default createConfigForNuxt({
           },
           svg: 'always',
           math: 'always'
-        }]
+        }],
+        'vue/multi-word-component-names': 'off', // <-- desativa o erro de nome de componente
       }
     })
     // ------------------------------------
