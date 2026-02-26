@@ -1,0 +1,52 @@
+name: 🚀 Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # dispara apenas em tags tipo v0.1.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # necessário para criar release GitHub
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Ativar Corepack
+        run: corepack enable
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build do pacote
+        run: pnpm build
+
+      - name: Gerar CHANGELOG.md
+        run: pnpm changelogen --release
+
+      - name: Verificar se CHANGELOG.md existe
+        run: |
+          if [ ! -f CHANGELOG.md ]; then
+            echo "Arquivo CHANGELOG.md não encontrado!"
+            exit 1
+          fi
+
+      - name: Criar Release no GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

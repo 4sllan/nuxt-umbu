@@ -1,61 +1,53 @@
-name: 🚀 Criar Release
+name: 🧪 CI
 
 on:
   push:
-    tags:
-      - 'v*'  # Dispara quando um novo tag versão é criado (ex: v1.0.0)
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+      - release
 
 jobs:
-  release:
+  unit:
+    name: 🧩 Unit + Lint + Typecheck
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Necessário para criar releases com GITHUB_TOKEN
 
     steps:
-      - name: 🛎️ Checkout do código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: ⚙️ Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: 'pnpm'
 
-      - name: 📦 Instalar dependências
-        run: npm ci
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
 
-      - name: 📦 Construir pacote
-        run: npm run build
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
 
-      - name: 🧰 Instalar changelogen
-        run: npm install -g changelogen@0.3.2
+  e2e:
+    name: 🎭 Playwright E2E
+    runs-on: ubuntu-latest
+    needs: unit
+    if: github.event_name == 'pull_request'
 
-      - name: 📝 Gerar CHANGELOG.md
-        run: changelogen
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: 📄 Verificar se CHANGELOG.md existe
-        run: |
-          if [ ! -f CHANGELOG.md ]; then
-            echo "Arquivo CHANGELOG.md não encontrado!"
-            exit 1
-          fi
-
-      - name: 📄 Adicionar Changelog na Release
-        id: changelog
-        run: |
-          VERSION="${{ github.ref_name }}"
-          awk "/^## \[/{if (p) exit; p=1} p" CHANGELOG.md > temp_changelog.md
-          echo "BODY<<EOF" >> $GITHUB_ENV
-          cat temp_changelog.md >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: 🚀 Criar Release no GitHub
-        uses: softprops/action-gh-release@v2
+      - uses: actions/setup-node@v4
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: ${{ env.BODY }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Ou remova essa linha se estiver usando GITHUB_TOKEN padrão
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+
+      - name: Instalar browsers Playwright
+        run: pnpm exec playwright install --with-deps
+
+      - name: Rodar testes E2E
+        run: pnpm exec playwright test

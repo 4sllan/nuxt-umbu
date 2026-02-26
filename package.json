@@ -1,6 +1,6 @@
 {
   "name": "nuxt-umbu",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Authentication module simple for Nuxt.js",
   "repository": "https://github.com/4sllan/nuxt-umbu",
   "author": "Aslan Gama <@4slan>",
@@ -50,15 +50,21 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@codspeed/core": "^5.2.0",
+    "@codspeed/vitest-plugin": "^5.2.0",
     "@nuxt/eslint-config": "^1.12.1",
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/schema": "^4.2.2",
     "@nuxt/test-utils": "^3.23.0",
+    "@playwright/test": "^1.58.2",
     "@types/lodash.kebabcase": "^4.1.9",
     "@types/node": "^25.3.0",
+    "changelogen": "^0.6.2",
     "eslint": "^9.39.2",
     "nuxt": "^4.2.2",
+    "pathe": "^2.0.3",
     "prettier": "^3.7.4",
+    "std-env": "4.0.0-rc.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },

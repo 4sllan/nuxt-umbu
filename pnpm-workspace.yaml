@@ -1,0 +1,26 @@
+packages:
+  - docs
+  - packages/**
+  - '!packages/nuxi'
+  - '!packages/test-utils'
+  - '!packages/nuxt/test/package-fixture/pkg'
+  - playground
+  - test/fixtures/*
+
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - esbuild
+  - oxc-resolver
+  - unrs-resolver
+
+patchedDependencies:
+  changelogen: patches/changelogen.patch
+
+publicHoistPattern:
+  - '*-loader'
+  - 'webpack-*'
+
+shellEmulator: true
+
+verifyDepsBeforeRun: install
+
