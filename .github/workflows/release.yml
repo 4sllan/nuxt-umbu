@@ -13,39 +13,31 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
       # 📥 Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 📦 Setup pnpm
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v6
 
       # 🟢 Setup Node.js with pnpm cache
-      - name: Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
 
-      # 📥 Install dependencies
-      - name: Install dependencies
+      # 📦 Install dependencies
+      - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
       # 🏗 Build package
-      - name: Build package
+      - name: 🏗 Build package
         run: pnpm build
 
       # 📝 Generate CHANGELOG
-      - name: Generate CHANGELOG.md
+      - name: 📝 Generate CHANGELOG.md
         run: pnpm changelogen --release
 
       # ✅ Verify CHANGELOG exists
-      - name: Verify CHANGELOG.md
+      - name: ✅ Verify CHANGELOG.md
         run: |
           if [ ! -f CHANGELOG.md ]; then
             echo "CHANGELOG.md not found!"
@@ -53,7 +45,7 @@ jobs:
           fi
 
       # 🚀 Create GitHub Release
-      - name: Create GitHub Release
+      - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
