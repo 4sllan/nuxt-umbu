@@ -55,6 +55,17 @@ jobs:
             exit 1
           fi
 
+      # 📄 Extrair Changelog da versão atual
+      - name: 📄 Extract current version changelog
+        id: changelog
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          awk "/^## \[$VERSION\]/{flag=1;next}/^## \[/{flag=0}flag" CHANGELOG.md > temp_changelog.md
+          echo "BODY<<EOF" >> $GITHUB_ENV
+          cat temp_changelog.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV  
+
       # 🚀 Create GitHub Release
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
