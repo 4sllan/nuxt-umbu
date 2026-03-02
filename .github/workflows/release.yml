@@ -37,6 +37,12 @@ jobs:
       - name: 🏗 Build package
         run: pnpm build
 
+      # 🧾 Configure Git user
+      - name: 🧾 Configure Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"  
+
       # 📝 Generate CHANGELOG
       - name: 📝 Generate CHANGELOG.md
         run: pnpm changelogen --release
