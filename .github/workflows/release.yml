@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 20
+          registry-url: 'https://registry.npmjs.org'
 
       # 📦 Enable pnpm via Corepack
       - name: 📦 Enable Corepack
@@ -38,6 +39,20 @@ jobs:
       # 🏗 Build package
       - name: 🏗 Build package
         run: pnpm build
+
+      # 🔎 Verify tag version matches package.json
+      - name: 🔎 Validate version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          echo "Tag version: $TAG_VERSION"
+          echo "Package version: $PACKAGE_VERSION"
+          
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "❌ Tag version does not match package.json version"
+            exit 1
+          fi   
 
       # ✅ Verify CHANGELOG exists
       - name: ✅ Verify CHANGELOG.md
@@ -65,6 +80,10 @@ jobs:
           echo "BODY<<EOF" >> $GITHUB_ENV
           cat temp_changelog.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
+      # 🚀 Publish to npm
+      - name: 🚀 Publish to npm
+        run: pnpm publish --provenance --access public
 
       # 🚀 Create GitHub Release
       - name: 🚀 Create GitHub Release
