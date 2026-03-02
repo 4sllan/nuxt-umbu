@@ -22,7 +22,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 20
-          cache: 'pnpm'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Ensure pnpm is available
+        run: corepack prepare pnpm@latest --activate
 
       # 📦 Install dependencies
       - name: 📦 Install dependencies
