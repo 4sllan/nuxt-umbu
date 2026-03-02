@@ -15,21 +15,22 @@ jobs:
     steps:
       # 📥 Checkout repository
       - name: 📥 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 🟢 Setup Node.js with pnpm cache
+      # 🟢 Setup Node.js
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Ensure pnpm is available
-        run: corepack prepare pnpm@latest --activate
+      # 📦 Enable pnpm via Corepack
+      - name: 📦 Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.0.0 --activate
 
       # 📦 Install dependencies
       - name: 📦 Install dependencies
@@ -39,34 +40,32 @@ jobs:
       - name: 🏗 Build package
         run: pnpm build
 
-      # 🧾 Configure Git user
-      - name: 🧾 Configure Git user
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"  
-
-      # 📝 Generate CHANGELOG
-      - name: 📝 Generate CHANGELOG.md
-        run: pnpm changelogen
-
       # ✅ Verify CHANGELOG exists
       - name: ✅ Verify CHANGELOG.md
         run: |
           if [ ! -f CHANGELOG.md ]; then
-            echo "CHANGELOG.md not found!"
+            echo "❌ CHANGELOG.md not found!"
             exit 1
           fi
 
-      # 📄 Extrair Changelog da versão atual
+      # 📄 Extract current version changelog
       - name: 📄 Extract current version changelog
         id: changelog
         run: |
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
+
           awk "/^## \[$VERSION\]/{flag=1;next}/^## \[/{flag=0}flag" CHANGELOG.md > temp_changelog.md
+
+          # ❌ Fail if version section not found
+          if [ ! -s temp_changelog.md ]; then
+            echo "❌ No changelog section found for version ${VERSION} in CHANGELOG.md"
+            exit 1
+          fi
+
           echo "BODY<<EOF" >> $GITHUB_ENV
           cat temp_changelog.md >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV  
+          echo "EOF" >> $GITHUB_ENV
 
       # 🚀 Create GitHub Release
       - name: 🚀 Create GitHub Release
