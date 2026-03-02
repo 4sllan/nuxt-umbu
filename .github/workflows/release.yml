@@ -16,6 +16,8 @@ jobs:
       # 📥 Checkout repository
       - name: 📥 Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       # 🟢 Setup Node.js with pnpm cache
       - name: 🟢 Setup Node.js
@@ -45,7 +47,7 @@ jobs:
 
       # 📝 Generate CHANGELOG
       - name: 📝 Generate CHANGELOG.md
-        run: pnpm changelogen --release
+        run: pnpm changelogen
 
       # ✅ Verify CHANGELOG exists
       - name: ✅ Verify CHANGELOG.md
@@ -55,13 +57,24 @@ jobs:
             exit 1
           fi
 
+      # 📄 Extrair Changelog da versão atual
+      - name: 📄 Extract current version changelog
+        id: changelog
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          awk "/^## \[$VERSION\]/{flag=1;next}/^## \[/{flag=0}flag" CHANGELOG.md > temp_changelog.md
+          echo "BODY<<EOF" >> $GITHUB_ENV
+          cat temp_changelog.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV  
+
       # 🚀 Create GitHub Release
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body_path: CHANGELOG.md
+          name: 🚀 Release ${{ github.ref_name }}
+          body: ${{ env.BODY }}
           draft: false
           prerelease: false
         env:
