@@ -6,9 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2026-03-02
 
+> ⚠️ **History Reset / First Stable Release**
+>
+> This version marks the first stable release of the project.
+> Previous tags were related to CI/CD setup, workflow experimentation,
+> and internal release iterations. Historical changes have been consolidated
+> into this 1.0.0 release.
+
 ### 🚀 Features
 - feat: add LICENSE (#34)
-- Initial project development and structure improvements (#1, #3, #8, #16, #20, #23, #26, #28, #36, #39, #41)
+- Initial project development and structural improvements (#1, #3, #8, #16, #20, #23, #26, #28, #36, #39, #41)
 
 ### 🛠 Improvements
 - chore(ci): configure ESLint 9+ with Nuxt 4 + TypeScript (#12, #13, #14, #15)
@@ -23,7 +30,7 @@ All notable changes to this project will be documented in this file.
 - chore(deps): update actions/checkout to v6 (#18)
 - chore(deps): update actions/setup-node to v6 (#22, #25, #27)
 
-### 🔄 Releases & Internal Maintenance
+### 🔄 Internal Maintenance
 - Multiple release workflow refinements and internal release iterations (#2, #5, #7, #9, #11, #17, #21, #24, #29, #31, #33, #35, #37, #40, #42)
 
 ---
