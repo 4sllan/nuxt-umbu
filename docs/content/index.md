@@ -1,10 +1,9 @@
 ---
 seo:
-  title: Nuxt - Laravel Sanctum
-  description: This module provides a simple way to use Laravel Sanctum with Nuxt. SSR-ready!
+  title: Nuxt - Laravel Sanctum & Laravel Passport
+  description: Simplified authentication for Nuxt with full support for Laravel Sanctum and Passport, SSR-ready!
 ---
-
-::u-page-hero{class="dark:bg-gradient-to-b from-neutral-900 to-neutral-950"}
+::u-page-hero{class="dark:bg-gradient-to-b from-[#7FA039] to-neutral-950"}
 ---
 orientation: horizontal
 ---
@@ -15,7 +14,7 @@ orientation: horizontal
 Authenticate users [easily]{.text-primary}.
 
 #description
-The only module you need to set up Laravel Sanctum authentication for Nuxt application!
+The only module you need to set up Laravel Sanctum and Passport authentication for your Nuxt application — SSR-ready and secure!
 
 #links
   :::u-button
@@ -33,34 +32,22 @@ The only module you need to set up Laravel Sanctum authentication for Nuxt appli
   color: neutral
   variant: outline
   size: xl
-  to: https://github.com/sponsors/manchenkoff?o=esb
+  to: https://github.com/sponsors/4sllan
   target: _blank
   ---
   Support project
-  :::
-
-  :::u-button
-  ---
-  icon: i-simple-icons-buymeacoffee
-  color: neutral
-  variant: outline
-  size: xl
-  to: https://buymeacoffee.com/manchenkoff
-  target: _blank
-  ---
-  Buy me a coffee
   :::
 
 
 #default
   :::prose-pre
   ---
-  code: npx nuxi@latest module add nuxt-auth-sanctum
+  code: npx nuxi@latest module add nuxt-umbu
   filename: Install module
   ---
 
   ```bash
-  npx nuxi@latest module add nuxt-auth-sanctum
+  npx nuxi@latest module add nuxt-umbu
   ```
   :::
 ::
@@ -78,7 +65,7 @@ Features
   trailingIcon: i-lucide-arrow-right
   variant: subtle
   ---
-  Explore Nuxt Laravel Sanctum
+  Explore Nuxt Umbuzeiro
   :::
 
 #features
@@ -157,12 +144,12 @@ Features
       to: '/getting-started'
       trailingIcon: i-lucide-arrow-right
     - label: View on GitHub
-      to: 'https://github.com/manchenkoff/nuxt-auth-sanctum'
+      to: 'https://github.com/4sllan/nuxt-umbu'
       target: _blank
       variant: subtle
       icon: i-simple-icons-github
   title: Ready to build?
-  description: Authenticate users with Laravel, Sanctum and Nuxt today!
+  description: Seamless authentication for Nuxt 3 powered by Laravel Sanctum and Passport. Secure. SSR-ready. Production-ready.
   class: dark:bg-neutral-950
   ---
 

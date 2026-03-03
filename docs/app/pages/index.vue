@@ -19,7 +19,7 @@ useSeoMeta({
 defineOgImageComponent(
   'Docs',
   {
-    headline: 'Nuxt Laravel Sanctum'
+    headline: 'Nuxt Umbuzeiro'
   }
 )
 </script>
