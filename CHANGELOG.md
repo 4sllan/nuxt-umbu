@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-# [1.0.1] - 2026-03-02
+## [1.0.1] - 2026-03-02
 
 ## 🚀 Overview
 This release focuses on stabilizing the CI/CD pipeline and automating the NPM library publishing process.
