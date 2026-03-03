@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feat/docs
+
 
 permissions:
   contents: read
