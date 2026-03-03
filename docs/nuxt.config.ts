@@ -1,5 +1,6 @@
 export default defineNuxtConfig({
     app: {
+        baseURL: '/nuxt-umbu/',
         head: {
             script: [
                 {
@@ -25,19 +26,10 @@ export default defineNuxtConfig({
         'nuxt-llms'
     ],
 
-    content: {
-        build: {
-            markdown: {
-                toc: {
-                    searchDepth: 1
-                }
-            }
-        }
-    },
-
     compatibilityDate: '2024-07-11',
 
     nitro: {
+        preset: 'static',
         prerender: {
             routes: [
                 '/'
@@ -136,5 +128,12 @@ export default defineNuxtConfig({
 
     content: {
         experimental: { nativeSqlite: true },
+        build: {
+            markdown: {
+                toc: {
+                    searchDepth: 1
+                }
+            }
+        }
     },
 })

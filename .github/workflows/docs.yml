@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd docs
-          pnpm install --frozen-lockfile
+          pnpm install
 
       - name: Build static site (Nuxt 4)
         run: |
