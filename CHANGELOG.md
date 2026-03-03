@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+# [1.0.1] - 2026-03-02
+
+## 🚀 Overview
+This release focuses on stabilizing the CI/CD pipeline and automating the NPM library publishing process.
+
+## 📦 What's Changed
+
+### 🤖 CI/CD & Automation
+- **NPM Publication:** Automated the release process for the NPM library through GitHub Actions to ensure consistent and reliable deployments.
+- **Node.js Setup:** Updated `actions/setup-node` action to **v6** for improved build performance and security.
+
+### 🛠️ Maintenance (Chore)
+- Infrastructure dependency updates managed by `@renovate[bot]`.
+- General branch synchronization and development workflow improvements.
+
+---
+
+## 📝 Pull Request Details
+* **chore(deps):** update actions/setup-node action to v6 ([#46](https://github.com/4sllan/nuxt-umbu/pull/46), [#47](https://github.com/4sllan/nuxt-umbu/pull/47))
+* **ci(publish):** automate npm library release through GitHub Actions ([#50](https://github.com/4sllan/nuxt-umbu/pull/50), [#53](https://github.com/4sllan/nuxt-umbu/pull/53), [#55](https://github.com/4sllan/nuxt-umbu/pull/55), [#57](https://github.com/4sllan/nuxt-umbu/pull/57))
+* **Develop/Release:** Version synchronization ([#48](https://github.com/4sllan/nuxt-umbu/pull/48), [#49](https://github.com/4sllan/nuxt-umbu/pull/49), [#51](https://github.com/4sllan/nuxt-umbu/pull/51), [#52](https://github.com/4sllan/nuxt-umbu/pull/52), [#54](https://github.com/4sllan/nuxt-umbu/pull/54), [#56](https://github.com/4sllan/nuxt-umbu/pull/56), [#58](https://github.com/4sllan/nuxt-umbu/pull/58))
+
+**Full Changelog**: [v1.0.0...v1.0.1](https://github.com/4sllan/nuxt-umbu/compare/v1.0.0...v1.0.1)
+
+---
+
 ## [1.0.0] - 2026-03-02
 
 > ⚠️ **History Reset / First Stable Release**
