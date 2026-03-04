@@ -16,10 +16,10 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom', // ambiente leve para testes de Vue/Nuxt
     include: ['test/**/*.test.ts'], // apenas arquivos de teste da lib
-    exclude: ['playground/**'], // ignora playground e testes e2e
+    exclude: ['playground/**', 'test/e2e/**'], // ignora playground e testes e2e
     coverage: {
       reporter: ['text', 'lcov'],
-      exclude: ['playground/**']
+      exclude: ['playground/**', 'test/e2e/**']
     }
   }
 })
