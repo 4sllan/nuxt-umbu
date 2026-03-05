@@ -44,7 +44,7 @@ export default defineNuxtConfig({
     },
 
     llms: {
-        domain: 'https://nuxt-umbu.dev',
+        domain: 'https://4sllan.github.io/nuxt-umbu/',
         title: 'Nuxt Umbu',
         description: 'Authentication module for Nuxt 4 with first-class Laravel Sanctum support and optional Passport driver.',
         full: {
@@ -53,13 +53,6 @@ export default defineNuxtConfig({
         },
 
         sections: [
-            {
-                title: 'Introduction',
-                contentCollection: 'docs',
-                contentFilters: [
-                    {field: 'path', operator: 'LIKE', value: '/introduction%'}
-                ]
-            },
             {
                 title: 'Getting Started',
                 contentCollection: 'docs',
@@ -75,7 +68,7 @@ export default defineNuxtConfig({
                 ]
             },
             {
-                title: 'Passport Strategies (Optional)',
+                title: 'Passport Integration',
                 contentCollection: 'docs',
                 contentFilters: [
                     {field: 'path', operator: 'LIKE', value: '/passport%'}
@@ -93,13 +86,6 @@ export default defineNuxtConfig({
                 contentCollection: 'docs',
                 contentFilters: [
                     {field: 'path', operator: 'LIKE', value: '/middleware%'}
-                ]
-            },
-            {
-                title: 'Two-Factor Authentication (2FA)',
-                contentCollection: 'docs',
-                contentFilters: [
-                    {field: 'path', operator: 'LIKE', value: '/2fa%'}
                 ]
             },
             {
