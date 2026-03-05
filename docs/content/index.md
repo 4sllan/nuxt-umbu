@@ -11,7 +11,7 @@ orientation: horizontal
 :hero-background
 
 #title
-Authenticate users [easily]{.text-primary}.
+Authentication with [Nuxt Umbuzeiro]{.text-primary}.
 
 #description
 The only module you need to set up Laravel Sanctum and Passport authentication for your Nuxt application — SSR-ready and secure!
