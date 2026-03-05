@@ -6,7 +6,7 @@ It provides a secure and SSR-compatible authentication layer with built-in suppo
 
 ## Features
 
-- 🔐 Authentication for **Nuxt 3**
+- 🔐 Authentication for **Nuxt**
 - ⚡ Built for **SSR and SPA**
 - 🍪 Secure **HTTP-only cookie authentication (Sanctum)**
 - 🔑 **OAuth2 token authentication (Passport)**
