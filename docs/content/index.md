@@ -149,7 +149,7 @@ Features
       variant: subtle
       icon: i-simple-icons-github
   title: Ready to build?
-  description: Seamless authentication for Nuxt 3 powered by Laravel Sanctum and Passport. Secure. SSR-ready. Production-ready.
+  description: Seamless authentication for Nuxt powered by Laravel Sanctum and Passport. Secure. SSR-ready. Production-ready.
   class: dark:bg-neutral-950
   ---
 
