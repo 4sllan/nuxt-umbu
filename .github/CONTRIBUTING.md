@@ -70,3 +70,81 @@ Run the development environment:
 ```bash
 pnpm dev
 ```
+
+## 🌿 Branch Strategy
+
+Please follow this workflow:
+
+1. Fork the repository
+
+2. Create a new branch from main
+
+Example:
+
+```bash
+git checkout -b feat/my-feature
+```
+
+| Type     | Example                    |
+| -------- | -------------------------- |
+| Feature  | `feat/add-sanctum-support` |
+| Fix      | `fix/token-refresh`        |
+| Docs     | `docs/update-auth-flow`    |
+| Refactor | `refactor/auth-module`     |
+
+## ✍️ Commit Guidelines
+
+We follow Conventional Commits:
+```text
+type(scope): description
+```
+
+Examples:
+
+```text
+feat(auth): add 2FA support
+fix(sanctum): resolve csrf token issue
+docs: update installation guide
+```
+
+Common commit types:
+
+- feat
+- fix
+- docs
+- refactor
+- test
+- chore
+
+## 📦 Pull Request Guidelines
+
+Before submitting a Pull Request, please ensure the following:
+
+- Your code follows the project coding style
+- Documentation is updated when necessary
+- The module builds correctly
+
+### PR Checklist
+
+Before opening your PR, confirm that:
+
+- [ ] Code compiles without errors
+- [ ] Documentation has been updated (if needed)
+- [ ] No unnecessary files were included
+- [ ] Pull request contains a clear and descriptive explanation
+
+## 🔐 Security Issues
+
+If you discover a security vulnerability, please do not open a public issue.
+
+Instead, report it privately by contacting the maintainer.
+
+## ❤️ Community
+
+Please be respectful and constructive in discussions.
+
+We aim to build a welcoming environment for all contributors.
+
+## 🙌 Thank You
+
+Thank you for helping improve Nuxt Umbu!
