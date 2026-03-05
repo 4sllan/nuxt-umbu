@@ -1,6 +1,6 @@
 # Nuxt Umbu
 
-Nuxt Umbu is an authentication module for **Nuxt 3** designed to work seamlessly with **Laravel Sanctum** and **Laravel Passport**.
+Nuxt Umbu is an authentication module for **Nuxt** designed to work seamlessly with **Laravel Sanctum** and **Laravel Passport**.
 
 It provides a secure and SSR-compatible authentication layer with built-in support for cookies, tokens, middleware, composables, and optional Two-Factor Authentication (2FA).
 
