@@ -1,6 +1,6 @@
 ---
 seo:
-  title: Nuxt - Laravel Sanctum & Laravel Passport
+  title: Nuxt Umbuzeiro - Laravel Sanctum & Laravel Passport
   description: Simplified authentication for Nuxt with full support for Laravel Sanctum and Passport, SSR-ready!
 ---
 ::u-page-hero{class="dark:bg-gradient-to-b from-[#7FA039] to-neutral-950"}
@@ -11,7 +11,7 @@ orientation: horizontal
 :hero-background
 
 #title
-Authenticate users [easily]{.text-primary}.
+Authentication with [Nuxt Umbuzeiro]{.text-primary}.
 
 #description
 The only module you need to set up Laravel Sanctum and Passport authentication for your Nuxt application — SSR-ready and secure!
@@ -149,7 +149,7 @@ Features
       variant: subtle
       icon: i-simple-icons-github
   title: Ready to build?
-  description: Seamless authentication for Nuxt 3 powered by Laravel Sanctum and Passport. Secure. SSR-ready. Production-ready.
+  description: Seamless authentication for Nuxt powered by Laravel Sanctum and Passport. Secure. SSR-ready. Production-ready.
   class: dark:bg-neutral-950
   ---
 

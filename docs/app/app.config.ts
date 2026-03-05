@@ -1,4 +1,4 @@
-const siteName = 'Nuxt - Umbuzeiro'
+const siteName = 'Nuxt Umbuzeiro'
 
 export default defineAppConfig({
   ui: {
@@ -20,7 +20,7 @@ export default defineAppConfig({
     title: siteName,
     to: '/',
     logo: {
-      alt: 'Laravel Sanctum & Laravel Passport',
+      alt: 'Nuxt Umbuzeiro - Laravel Sanctum & Laravel Passport',
       light: 'logo.svg',
       dark: 'logo.svg'
     },
