@@ -1,6 +1,6 @@
 ---
 seo:
-  title: Nuxt - Laravel Sanctum & Laravel Passport
+  title: Nuxt Umbuzeiro - Laravel Sanctum & Laravel Passport
   description: Simplified authentication for Nuxt with full support for Laravel Sanctum and Passport, SSR-ready!
 ---
 ::u-page-hero{class="dark:bg-gradient-to-b from-[#7FA039] to-neutral-950"}
