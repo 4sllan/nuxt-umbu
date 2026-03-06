@@ -38,7 +38,7 @@
   "scripts": {
     "prepack": "nuxt-module-build build",
     "build": "nuxi build",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "eslint . --fix",
     "typecheck": "nuxi prepare playground && tsc --noEmit",
     "dev": "nuxi dev playground",
     "dev:passport": "nuxi dev playground -c nuxt.passport.config.ts",

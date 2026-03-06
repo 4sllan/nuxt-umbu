@@ -1,5 +1,7 @@
 node_modules
-.nuxt
 dist
+.nuxt
+.output
+.nitro
 coverage
-public
+.playground
