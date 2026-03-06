@@ -130,7 +130,7 @@ const starLayers = computed(() => [
         :style="{
           '--star-duration': `${layer.duration}s`,
           '--star-opacity': layer.opacity,
-          '--star-color': color
+          '--star-color': props.color
         }"
       >
         <div
