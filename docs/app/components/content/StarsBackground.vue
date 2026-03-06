@@ -2,7 +2,6 @@
 interface ComponentProps {
   starCount?: number
   color?: string
-  speed?: 'slow' | 'normal' | 'fast'
   size?: { min: number, max: number }
 }
 
@@ -17,7 +16,6 @@ const props = withDefaults(
   {
     starCount: 300,
     color: 'var(--ui-primary)',
-    speed: 'normal',
     size: () => ({
       min: 1,
       max: 2
