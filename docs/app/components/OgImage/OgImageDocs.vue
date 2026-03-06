@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 interface ComponentProps {
   title?: string
-  description?: string
+  description?: string,
+  headline?: string
 }
 
 const props = withDefaults(
