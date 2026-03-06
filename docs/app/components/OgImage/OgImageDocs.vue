@@ -2,7 +2,6 @@
 interface ComponentProps {
   title?: string
   description?: string
-  headline?: string
 }
 
 const props = withDefaults(
