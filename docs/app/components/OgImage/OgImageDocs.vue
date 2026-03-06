@@ -9,7 +9,8 @@ const props = withDefaults(
   defineProps<ComponentProps>(),
   {
     title: 'title',
-    description: 'description'
+    description: 'description',
+    headline: 'headline'
   }
 )
 
@@ -63,10 +64,10 @@ const description = computed(() => (props.description || '').slice(0, 200))
 
     <div class="pl-[100px]">
       <p
-        v-if="headline"
+        v-if="props.headline"
         class="uppercase text-[24px] text-[#00DC82] mb-4 font-semibold"
       >
-        {{ headline }}
+        {{ props.headline }}
       </p>
       <h1
         v-if="title"
