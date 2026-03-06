@@ -10,6 +10,7 @@ const props = withDefaults(
   {
     title: 'title',
     description: 'description',
+    headline: ''
   }
 )
 
