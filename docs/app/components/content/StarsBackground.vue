@@ -2,7 +2,6 @@
 interface ComponentProps {
   starCount?: number
   color?: string
-  speed?: 'slow' | 'normal' | 'fast'
   size?: { min: number, max: number }
 }
 
@@ -17,7 +16,6 @@ const props = withDefaults(
   {
     starCount: 300,
     color: 'var(--ui-primary)',
-    speed: 'normal',
     size: () => ({
       min: 1,
       max: 2
@@ -44,12 +42,10 @@ const speedMap = {
 }
 
 // Use a more efficient approach to generate and store stars
-const stars = useState<{ slow: Star[], normal: Star[], fast: Star[] }>('stars', () => {
-  return {
-    slow: generateStars(Math.floor(props.starCount * speedMap.slow.ratio)),
-    normal: generateStars(Math.floor(props.starCount * speedMap.normal.ratio)),
-    fast: generateStars(Math.floor(props.starCount * speedMap.fast.ratio))
-  }
+const stars = ref({
+  slow: generateStars(Math.floor(props.starCount * speedMap.slow.ratio)),
+  normal: generateStars(Math.floor(props.starCount * speedMap.normal.ratio)),
+  fast: generateStars(Math.floor(props.starCount * speedMap.fast.ratio))
 })
 
 // Compute star layers with different speeds and opacities
