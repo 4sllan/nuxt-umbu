@@ -1,5 +1,5 @@
 
-## v0.0.2
+## v0.0.3
 
 ## 🚀 Overview
 This release focuses on stabilizing the CI/CD pipeline and automating the NPM library publishing process.
@@ -15,6 +15,8 @@ This release focuses on stabilizing the CI/CD pipeline and automating the NPM li
 - General branch synchronization and development workflow improvements.
 
 ---
+
+## v0.0.2
 
 ## 📝 Pull Request Details
 * **chore(deps):** update actions/setup-node action to v6 ([#46](https://github.com/4sllan/nuxt-umbu/pull/46), [#47](https://github.com/4sllan/nuxt-umbu/pull/47))
@@ -32,7 +34,7 @@ This release focuses on stabilizing the CI/CD pipeline and automating the NPM li
 > This version marks the first stable release of the project.
 > Previous tags were related to CI/CD setup, workflow experimentation,
 > and internal release iterations. Historical changes have been consolidated
-> into this 1.0.0 release.
+> into this 0.0.1 release.
 
 ### 🚀 Features
 - feat: add LICENSE (#34)
@@ -63,4 +65,4 @@ This release focuses on stabilizing the CI/CD pipeline and automating the NPM li
 ---
 
 **Full Changelog:**  
-https://github.com/4sllan/nuxt-umbu/commits/v1.0.0
+https://github.com/4sllan/nuxt-umbu/commits/v.0.1
