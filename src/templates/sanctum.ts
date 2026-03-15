@@ -1,3 +1,5 @@
+export const sanctumTemplate = () => `
+
 import {
   defineNuxtPlugin,
   useRequestEvent,
@@ -12,7 +14,7 @@ import {
 import { parseCookies, setCookie } from 'h3';
 import { $fetch } from 'ofetch';
 
-import type { AuthState, ProfileResponse, AuthResponse, AuthInstance } from '../types';
+import type { AuthState, ProfileResponse, AuthResponse, AuthInstance } from '#auth-types';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const store = useAuthStore();
@@ -98,11 +100,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           }
 
           const cookies = parseCookies(event as any);
-          strategy = cookies[this._prefix + `strategy`] ?? null;
-          xsrf = cookies[`XSRF-TOKEN`] ?? null;
+          strategy = cookies[this._prefix + \`strategy\`] ?? null;
+          xsrf = cookies[\`XSRF-TOKEN\`] ?? null;
         } else {
-          strategy = useCookie<string | null>(this._prefix + `strategy`).value;
-          xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+          strategy = useCookie<string | null>(this._prefix + \`strategy\`).value;
+          xsrf = useCookie<string | null>(\`XSRF-TOKEN\`).value;
         }
 
         const csrf = await this.csrfToken();
@@ -130,7 +132,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     async loginWith(strategyName: string, value: any): Promise<any> {
       try {
-        const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+        const xsrf = useCookie<string | null>(\`XSRF-TOKEN\`).value;
 
         if (!xsrf) {
           const csrf = await this.csrfToken();
@@ -142,28 +144,15 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         const endpoint = this.getHandler(strategyName, 'login');
         if (!endpoint?.url || !endpoint?.method) {
-          throw new Error(`Login endpoint missing for strategy: ${strategyName}`);
+          throw new Error(\`Login endpoint missing for strategy: ${strategyName}\`);
         }
-
-        // const headers =
-        //   this.$headers instanceof Headers
-        //     ? Object.fromEntries(this.$headers.entries())
-        //     : this.$headers;
-        //
-        // await $fetch<AuthResponse>(endpoint.url, {
-        //   baseURL: config.public.baseURL,
-        //   credentials: 'include',
-        //   method: endpoint.method || 'POST',
-        //   body: value,
-        //   headers,
-        // });
 
         await $autx<AuthResponse>(endpoint.url, {
           method: endpoint.method || 'POST',
           body: value,
         });
 
-        useCookie(this._prefix + `strategy`).value = strategyName;
+        useCookie(this._prefix + \`strategy\`).value = strategyName;
 
         this._state.strategy = strategyName ?? null;
 
@@ -238,22 +227,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           throw new Error('2FA endpoint not found');
         }
 
-        // const headers =
-        //   this.$headers instanceof Headers
-        //     ? Object.fromEntries(this.$headers.entries())
-        //     : this.$headers;
-        //
-        // const response = await $fetch<{ access_token?: string; expires_in?: string }>(
-        //   endpoint?.url,
-        //   {
-        //     baseURL: config.public.baseURL,
-        //     credentials: 'include',
-        //     method: endpoint?.method || 'POST',
-        //     body: { strategyName, code },
-        //     headers,
-        //   }
-        // );
-
         const response = await $autx<{ access_token?: string; expires_in?: string }>(
           endpoint?.url,
           {
@@ -290,7 +263,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           credentials: 'include',
         });
 
-        const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+        const xsrf = useCookie<string | null>(\`XSRF-TOKEN\`).value;
 
         if (!xsrf) {
           throw new Error('Invalid CSRF response: Missing token.');
@@ -313,18 +286,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         const endpoint = this.getHandler(strategyName, 'user');
 
         if (!endpoint?.url || !endpoint?.method) throw new Error('User endpoint not found');
-
-        // const headers =
-        //     this.$headers instanceof Headers
-        //         ? Object.fromEntries(this.$headers.entries())
-        //         : this.$headers;
-        //
-        // const data = await $fetch<ProfileResponse>(endpoint.url, {
-        //     baseURL: config.public.baseURL,
-        //     credentials: 'include',
-        //     method: endpoint.method,
-        //     headers,
-        // });
 
         const data = await $autx<ProfileResponse>(endpoint.url, {
           method: endpoint.method,
@@ -397,3 +358,5 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   nuxtApp.provide('auth', exposed);
 });
+
+`.trim();
