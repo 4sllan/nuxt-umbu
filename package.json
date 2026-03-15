@@ -1,17 +1,15 @@
 {
   "name": "nuxt-umbu",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "description": "Authentication module simple for Nuxt.js",
   "repository": "https://github.com/4sllan/nuxt-umbu",
   "author": "Aslan Gama <@4slan>",
   "keywords": [
-    "Nuxt 3 authentication",
-    "Nuxt 4 authentication",
+    "Nuxt authentication",
     "Laravel Passport integration",
     "Nuxt authentication module",
     "Server-side authentication Nuxt",
-    "Nuxt 3 2FA support",
-    "Nuxt 4 2FA support",
+    "Nuxt 2FA support",
     "Secure cookies authentication",
     "Nuxt httpOnly cookies",
     "OAuth authentication Nuxt"
