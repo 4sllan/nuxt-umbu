@@ -32,7 +32,7 @@ This release focuses on stabilizing the CI/CD pipeline and automating the NPM li
 > This version marks the first stable release of the project.
 > Previous tags were related to CI/CD setup, workflow experimentation,
 > and internal release iterations. Historical changes have been consolidated
-> into this 1.0.0 release.
+> into this 0.0.1 release.
 
 ### 🚀 Features
 - feat: add LICENSE (#34)
@@ -63,4 +63,4 @@ This release focuses on stabilizing the CI/CD pipeline and automating the NPM li
 ---
 
 **Full Changelog:**  
-https://github.com/4sllan/nuxt-umbu/commits/v1.0.0
+https://github.com/4sllan/nuxt-umbu/commits/v0.0.1
