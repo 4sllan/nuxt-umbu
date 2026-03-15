@@ -1,3 +1,5 @@
+export const passportTemplate = () => `
+
 import {
   defineNuxtPlugin,
   useRequestEvent,
@@ -10,7 +12,7 @@ import {
 import { parseCookies, setCookie } from 'h3';
 import { $fetch } from 'ofetch';
 
-import type { AuthState, ProfileResponse, AuthResponse, AuthInstance } from '../types';
+import type { AuthState, ProfileResponse, AuthResponse, AuthInstance } from '#auth-types';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const store = useAuthStore();
@@ -101,11 +103,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           }
 
           const cookies = parseCookies(event);
-          strategy = cookies[this._prefix + `strategy`];
-          token = strategy ? cookies[this._prefix + `_token.` + strategy] : null;
+          strategy = cookies[this._prefix + \`strategy\`];
+          token = strategy ? cookies[this._prefix + \`_token.\` + strategy] : null;
         } else {
-          strategy = localStorage.getItem(this._prefix + `strategy`);
-          token = strategy ? localStorage.getItem(this._prefix + `_token.` + strategy) : null;
+          strategy = localStorage.getItem(this._prefix + \`strategy\`);
+          token = strategy ? localStorage.getItem(this._prefix + \`_token.\` + strategy) : null;
         }
 
         if (!strategy || !token) {
@@ -146,9 +148,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         if (!response.token) throw new Error('Token is missing in the response');
 
-        localStorage.setItem(this._prefix + `_token.` + strategyName, response.token);
-        localStorage.setItem(this._prefix + `strategy`, strategyName);
-        localStorage.setItem(this._prefix + `_token_expiration.` + strategyName, response.expires);
+        localStorage.setItem(this._prefix + \`_token.\` + strategyName, response.token);
+        localStorage.setItem(this._prefix + \`strategy\`, strategyName);
+        localStorage.setItem(this._prefix + \`_token_expiration.\` + strategyName, response.expires);
 
         this._state.strategy = strategyName ?? null;
         this.$headers.set('Authorization', response.token);
@@ -238,49 +240,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       return new Promise((resolve, reject) => {});
     }
 
-    async csrfToken(event?: any): Promise<boolean> {
-      try {
-        const baseURL = useRuntimeConfig().public.baseURL;
-        const csrfEndpoint = this.options?.csrf;
-
-        if (!csrfEndpoint) {
-          return false;
-        }
-
-        const data = await $fetch<{ csrf_token?: string }>(csrfEndpoint, { baseURL });
-
-        if (!data?.csrf_token) {
-          throw new Error('Invalid CSRF response: Missing token.');
-        }
-
-        this.$headers.set('X-CSRF-TOKEN', data.csrf_token);
-
-        if (import.meta.server && event) {
-          const cookies = parseCookies(event);
-          const csrfCookie = cookies['X-CSRF-TOKEN'];
-
-          if (!csrfCookie) {
-            setCookie(
-              event,
-              'X-CSRF-TOKEN',
-              data.csrf_token,
-              this.options.cookie.options || {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                path: '/',
-              }
-            );
-          }
-        }
-
-        return true;
-      } catch (error) {
-        console.error('Error fetching CSRF token:', error instanceof Error ? error.message : error);
-        return false;
-      }
-    }
-
     private async _setProfile(): Promise<ProfileResponse | false> {
       try {
         const baseURL = useRuntimeConfig().public.baseURL;
@@ -328,7 +287,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   const $auth = new Auth(useAuthConfig());
   const event = import.meta.server ? useRequestEvent() : undefined;
-  await $auth.csrfToken(event);
   await $auth.initialize();
 
   const exposed = Object.defineProperties(
@@ -366,3 +324,5 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   nuxtApp.provide('auth', exposed);
 });
+
+`.trim();
