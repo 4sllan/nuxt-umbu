@@ -13,6 +13,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const {
         store,
         config,
+        getRedirect,
         publicConfig,
         getEndpoint,
         extractUser,
@@ -157,9 +158,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         get headers() { return authHeaders },
         get prefix() { return prefix },
 
-        // GARANTA QUE ESTA LINHA EXISTA:
-        getRedirect: (strategyName: string) => getStrategyConfig(strategyName).redirect ?? null,
-
+        getRedirect,
         loginWith,
         logout,
         _2fa,
