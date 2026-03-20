@@ -12,6 +12,8 @@ export default defineNuxtRouteMiddleware(async () => {
   const { $auth } = useNuxtApp();
   const store = useAuthStore();
 
+  console.log('teste')
+
   if (!$auth) {
     throw createError({
       statusCode: 500,
@@ -20,6 +22,8 @@ export default defineNuxtRouteMiddleware(async () => {
   }
 
   if (import.meta.server) {
+    console.log('server teste')
+
     const event = useRequestEvent();
     if (!event) return;
 
@@ -41,17 +45,26 @@ export default defineNuxtRouteMiddleware(async () => {
   }
 
   if (import.meta.client) {
+    console.log('client teste')
     const strategy = localStorage.getItem($auth.prefix + `strategy`);
+
+    console.log(strategy)
     const token = strategy ? localStorage.getItem($auth.prefix + `_token.` + strategy) : null;
+
+    console.log(token)
+
     const expires = strategy
       ? localStorage.getItem($auth.prefix + `_token_expiration.` + strategy)
       : null;
+
+    console.log(expires)
     //
     if (
       !validateSession(strategy, token, expires) ||
       $auth.strategy !== strategy ||
       $auth.strategy !== store.value.strategy
     ) {
+      console.log($auth.strategy )
       return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
     }
 
