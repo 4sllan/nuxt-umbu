@@ -2,7 +2,7 @@ import { useRuntimeConfig } from '#imports';
 import { defineEventHandler, readBody, setCookie, createError, getCookie } from 'h3';
 import { $fetch } from 'ofetch';
 import protectedMiddleware from '../middleware/protected';
-import type { PassportModuleOptions, PassportStrategiesOptions } from '../../../types';
+import type { PassportModuleOptions, PassportStrategiesOptions } from '#auth-typeses';
 
 interface AuthRequestBody {
   strategyName: string;
