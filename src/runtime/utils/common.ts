@@ -2,13 +2,21 @@ import { useCookie, navigateTo, useRuntimeConfig, useAuthStore, useAuthConfig } 
 
 export const useUmbuUtils = () => {
     const store = useAuthStore()
-    const config = useAuthConfig()
+    const config = useAuthConfig() // Pega a configuração injetada no module.ts
     const publicConfig = useRuntimeConfig().public
+
 
     /**
      * Retorna a configuração de uma estratégia específica
      */
     const getStrategyConfig = (name: string) => config.strategies?.[name] || {}
+
+    /**
+     * Retorna os redirecionamentos de uma estratégia específica
+     */
+    const getRedirect = (strategyName: string): Record<string, string> | null => {
+        return config.strategies?.[strategyName]?.redirect ?? null
+    }
 
     /**
      * Resolve a URL e o Método de um endpoint (Passport vs Sanctum)
@@ -66,8 +74,8 @@ export const useUmbuUtils = () => {
      * Gerencia o redirecionamento após ações de auth
      */
     const handleRedirect = async (strategyName: string, type: 'login' | 'logout') => {
-        const cfg = getStrategyConfig(strategyName)
-        const url = cfg.redirect?.[type] || (type === 'logout' ? '/' : null)
+        const redirects = getRedirect(strategyName)
+        const url = redirects?.[type] || (type === 'logout' ? '/' : null)
         if (url) await navigateTo(url)
     }
 
@@ -75,6 +83,7 @@ export const useUmbuUtils = () => {
         config,
         publicConfig,
         store,
+        getRedirect,
         getStrategyConfig,
         getEndpoint,
         extractUser,
