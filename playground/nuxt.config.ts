@@ -53,8 +53,20 @@ export default defineNuxtConfig({
                 },
                 endpoints: {
                     login: {url: "/oauth/token", method: "post", alias: "auth token"},
-                    user: {url: "/api/admin/profile", method: "get"},
-                    "2fa": {url: '/api/admin/token_2fa', method: 'post'},
+                    user: {
+                        url: "/api/admin/profile",
+                        method: "get",
+                        property: "profile"
+                    },
+                    "2fa": {
+                        url: '/api/admin/token_2fa',
+                        method: 'post',
+                        alias: "two factor auth",
+                        property: "access_token",
+                        expires: "expires_in",
+                        headerName: "2fa", // default
+                        type: "Bearer" // opcional
+                    },
                 },
             },
             client:{
