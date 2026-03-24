@@ -26,11 +26,18 @@ export type PassportFetchOption = {
   alias?: string; // Optional alias for easier reference
 };
 
+export type TwoFactorFetchOption = PassportFetchOption & {
+  property?: string; // onde vem o token (default: access_token)
+  expires?: string; // onde vem o tempo (default: expires_in)
+  headerName?: string; // nome do header (default: '2fa')
+  // type?: 'Bearer' | 'Token';  // tipo do header (default: Bearer)
+};
+
 // Type definition for authentication-related API endpoints
 type EndpointsOptions = {
   login: PassportFetchOption; // Endpoint for user login
-  user: { url: string; method: string }; // Endpoint to fetch user data
-  '2fa'?: PassportFetchOption; // Optional endpoint for two-factor authentication (2FA)
+  user: { url: string; method: string, property?: string; }; // Endpoint to fetch user data
+  '2fa'?: TwoFactorFetchOption // Optional endpoint for two-factor authentication (2FA)
   refresh?: PassportFetchOption; // Optional endpoint to refresh authentication tokens
   logout?: { alias?: string }; // Optional alias for the logout function
 };
