@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: false,
-  middleware: ['auth', '_2fa']
+  middleware: ['umbu:auth', 'umbu:two-factor']
 })
 
 const {$auth} = useNuxtApp();
