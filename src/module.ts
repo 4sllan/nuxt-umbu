@@ -70,7 +70,7 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
 
         // Add middleware template
         addRouteMiddleware({
-            name: 'auth',
+            name: 'umbu:auth',
             path: resolve('./runtime/' + provider + '/middleware/auth'),
         });
 
@@ -138,17 +138,17 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
         }
 
         const has2FA = Object.values(options.strategies).some(
-            (strategy) => strategy.endpoints?.['2fa']?.url && strategy.endpoints?.['2fa']?.method
+            (strategy) => strategy.endpoints?.['twoFactor']?.url && strategy.endpoints?.['twoFactor']?.method
         );
 
         if (has2FA) {
             options.twoFactorAuth = true;
 
             addRouteMiddleware({
-                name: '_2fa',
-                path: resolve('./runtime/' + provider + '/middleware/2fa'),
+                name: 'umbu:two-factor',
+                path: resolve('./runtime/' + provider + '/middleware/twoFactor'),
             });
-            logger.success('Middleware `_2fa` enabled');
+            logger.success('Middleware `two-factor` enabled');
         }
 
         nuxt.options.runtimeConfig.public[PACKAGE_NAME] = options;
