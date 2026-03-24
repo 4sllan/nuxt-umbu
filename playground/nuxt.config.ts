@@ -2,11 +2,11 @@ import myModule from '../src/module'
 
 export default defineNuxtConfig({
     devtools: {
-      enabled: true,
-
-      timeline: {
         enabled: true,
-      },
+
+        timeline: {
+            enabled: true,
+        },
     },
 
     ssr: true,
@@ -15,9 +15,9 @@ export default defineNuxtConfig({
         head: {
             title: 'Secure Login - 2FA Authentication',
             meta: [
-                { charset: 'utf-8' },
-                { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-                { name: 'description', content: 'Secure authentication with two-factor verification' }
+                {charset: 'utf-8'},
+                {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+                {name: 'description', content: 'Secure authentication with two-factor verification'}
             ]
         }
     },
@@ -58,7 +58,7 @@ export default defineNuxtConfig({
                         method: "get",
                         property: "profile"
                     },
-                    "2fa": {
+                    twoFactor: {
                         url: '/api/admin/token_2fa',
                         method: 'post',
                         alias: "two factor auth",
@@ -69,7 +69,7 @@ export default defineNuxtConfig({
                     },
                 },
             },
-            client:{
+            client: {
                 redirect: {
                     logout: "/auth",
                     login: "/auth"
@@ -80,7 +80,7 @@ export default defineNuxtConfig({
                 endpoints: {
                     login: {url: "/oauth/token", method: "post"},
                     user: {url: "/api/profile", method: "get"},
-                    "2fa": {url: "/api/send-token-2fa", method: "post"},
+                    twoFactor: {url: "/api/send-token-2fa", method: "post"},
                     logout: {alias: 'logout client'}
                 },
             }
