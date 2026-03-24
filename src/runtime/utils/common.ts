@@ -22,22 +22,33 @@ export const useUmbuUtils = () => {
      * Resolve a URL e o Método de um endpoint (Passport vs Sanctum)
      */
     const getEndpoint = (strategyName: string, key: string): { url: string; method: string } | null => {
-        const cfg = getStrategyConfig(strategyName)
+        const cfg = getStrategyConfig(strategyName);
 
-        // Suporte ao formato do Passport (array de handlers)
+        // --- Lógica Específica para Passport (Proxy vs Direct) ---
         if (Array.isArray(cfg.handler)) {
-            const route = cfg.handler.find((h: any) => h[key])?.[key]
-            return route ? { url: route, method: 'POST' } : null
+            // Se a chave for 'user', ignoramos o proxy e pegamos direto de 'endpoints.user'
+            if (key === 'user') {
+                const userEndpoint = cfg.endpoints?.user;
+                if (!userEndpoint) return null;
+
+                return typeof userEndpoint === 'string'
+                    ? { url: userEndpoint, method: 'GET' }
+                    : { url: userEndpoint.url, method: userEndpoint.method || 'GET' };
+            }
+
+            // Para login, logout, 2fa, etc., buscamos no array de handlers (Proxy)
+            const route = cfg.handler.find((h: any) => h[key])?.[key];
+            return route ? { url: route, method: 'POST' } : null;
         }
 
-        // Suporte ao formato do Sanctum (objeto de endpoints direto)
-        const endpoint = cfg.endpoints?.[key]
-        if (!endpoint) return null
+        // --- Lógica Específica para Sanctum (Direct Only) ---
+        const endpoint = cfg.endpoints?.[key];
+        if (!endpoint) return null;
 
         return typeof endpoint === 'string'
             ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
-            : { url: endpoint.url, method: endpoint.method || 'POST' }
-    }
+            : { url: endpoint.url, method: endpoint.method || 'POST' };
+    };
 
     /**
      * Extrai o objeto do usuário baseado na propriedade configurada (ex: data.user)
