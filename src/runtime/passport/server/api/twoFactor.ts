@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const { endpoints } = strategy;
-    if (!endpoints?.['2fa']) {
+    if (!endpoints?.twoFactor) {
       throw createError({
         statusCode: 400,
         statusMessage: '2FA endpoint not configured for strategy ' + body.strategyName,
@@ -51,9 +51,9 @@ export default defineEventHandler(async (event) => {
 
     const token = getCookie(event, prefix + '_token.' + body.strategyName) || '';
 
-    const response: Get2FAResponse = await $fetch<Get2FAResponse>(endpoints['2fa'].url, {
+    const response: Get2FAResponse = await $fetch<Get2FAResponse>(endpoints.twoFactor.url, {
       baseURL,
-      method: endpoints['2fa'].method || 'POST',
+      method: endpoints.twoFactor.method || 'POST',
       body: { code: body.code },
       headers: {
         'Content-Type': 'application/json',
