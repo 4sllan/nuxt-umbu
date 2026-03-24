@@ -17,7 +17,7 @@ export interface NuxtAuth {
   getRedirect(strategyName: string): Record<string, string> | null;
   loginWith(strategyName: string, value: any): Promise<any>;
   logout(strategyName: string): Promise<void>;
-  _2fa(strategyName: string, code: string): Promise<{ success: boolean }>;
+  twoFactor(strategyName: string, code: string): Promise<{ success: boolean }>;
 }
 
 // Declaração do Alias de Utilitários
