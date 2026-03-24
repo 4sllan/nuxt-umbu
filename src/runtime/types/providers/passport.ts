@@ -32,7 +32,6 @@ export type TwoFactorFetchOption = PassportFetchOption & {
     property?: string; // onde vem o token (default: access_token)
     expires?: string; // onde vem o tempo (default: expires_in)
     headerName?: string; // nome do header (default: '2fa')
-    // type?: 'Bearer' | 'Token';  // tipo do header (default: Bearer)
 };
 
 // Type definition for authentication-related API endpoints
@@ -46,7 +45,7 @@ type EndpointsOptions = {
 
 // Options for different authentication strategies
 export type PassportStrategiesOptions = {
-    user?: { property?: string }; // Name of the object containing user data (optional)
+    // user?: { property?: string }; // Name of the object containing user data (optional)
     endpoints: EndpointsOptions; // Endpoints for the authentication strategy
     redirect: RedirectOptions; // Redirection configuration
 };
