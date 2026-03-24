@@ -112,8 +112,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     /**
      * Fluxo de Segundo Fator de Autenticação
      */
-    const _2fa = async (strategyName: string, code: string) => {
-        const endpoint = getEndpoint(strategyName, '2fa');
+    const twoFactor = async (strategyName: string, code: string) => {
+        const endpoint = getEndpoint(strategyName, 'twoFactor');
         if (!endpoint?.url) throw new Error('Two Factor Auth endpoint not found');
 
         const response = await $fetch<{ token?: string, expires?: string }>(endpoint.url, {
@@ -177,7 +177,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         getRedirect,
         loginWith,
         logout,
-        _2fa,
+        twoFactor,
         fetchProfile
     };
 
