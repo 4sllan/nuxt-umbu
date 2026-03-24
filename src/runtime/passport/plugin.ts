@@ -4,10 +4,10 @@ import {
     useUmbuUtils,
     createError,
 } from '#imports';
-import { parseCookies } from 'h3';
-import { $fetch } from 'ofetch';
+import {parseCookies} from 'h3';
+import {$fetch} from 'ofetch';
 
-import type { ProfileResponse, AuthResponse } from '#auth-types';
+import type {ProfileResponse, AuthResponse} from '#auth-types';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
     const {
@@ -22,17 +22,18 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     } = useUmbuUtils();
 
     const prefix = config.cookie.prefix;
-    const authHeaders = new Headers();
+    const $headers = new Headers();
 
     /**
      * Busca o perfil do usuário e atualiza o estado global
      */
     const fetchProfile = async (strategyName: string, token?: string): Promise<ProfileResponse | null> => {
         const endpoint = getEndpoint(strategyName, 'user');
+
         if (!endpoint?.url) return null;
 
         if (token) {
-            authHeaders.set('Authorization', token);
+            $headers.set('Authorization', token);
         }
 
         try {
@@ -40,7 +41,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                 baseURL: publicConfig.baseURL,
                 method: endpoint.method || 'GET',
                 headers: {
-                    ...Object.fromEntries(authHeaders.entries()),
+                    ...Object.fromEntries($headers.entries()),
                     'Content-Type': 'application/json',
                 },
             });
@@ -70,7 +71,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         const response = await $fetch<AuthResponse>(endpoint.url, {
             method: endpoint.method || 'POST',
-            body: { strategyName, value: credentials },
+            body: {strategyName, value: credentials},
         });
 
         if (!response.token) throw new Error('Token is missing in the response');
@@ -86,6 +87,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         await fetchProfile(strategyName, response.token);
         await handleRedirect(strategyName, 'login');
 
+
         return response;
     };
 
@@ -98,8 +100,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         if (endpoint?.url) {
             await $fetch(endpoint.url, {
                 method: endpoint.method || 'POST',
-                body: { strategyName }
-            }).catch(() => {});
+                body: {strategyName}
+            }).catch(() => {
+            });
         }
 
         clearAuthData(prefix);
@@ -115,17 +118,17 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         const response = await $fetch<{ token?: string }>(endpoint.url, {
             method: endpoint.method || 'POST',
-            body: { strategyName, code },
+            body: {strategyName, code},
         });
 
         if (response?.token) {
-            authHeaders.set('2fa', response.token);
+            $headers.set('2fa', response.token);
             if (import.meta.client) {
                 localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.token);
             }
         }
 
-        return { success: !!response?.token };
+        return {success: !!response?.token};
     };
 
     // --- Inicialização Automática ---
@@ -152,11 +155,21 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     // Interface Reativa Exposta
     const auth = {
-        get user() { return store.value.user },
-        get loggedIn() { return store.value.loggedIn },
-        get strategy() { return store.value.strategy },
-        get headers() { return authHeaders },
-        get prefix() { return prefix },
+        get user() {
+            return store.value.user
+        },
+        get loggedIn() {
+            return store.value.loggedIn
+        },
+        get strategy() {
+            return store.value.strategy
+        },
+        get headers() {
+            return $headers
+        },
+        get prefix() {
+            return prefix
+        },
 
         getRedirect,
         loginWith,
