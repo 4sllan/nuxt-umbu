@@ -6,18 +6,21 @@ type SanctumFetchOption = {
   method: string; // HTTP method (e.g., GET, POST, PUT, DELETE)
 };
 
+export type UserFetchOption = SanctumFetchOption & {
+  property?: string; // Name of the object containing user data (optional)
+}
+
 // Type definition for authentication-related API endpoints
 type EndpointsOptions = {
   login: SanctumFetchOption; // Endpoint for user login
-  user: SanctumFetchOption; // Endpoint to fetch user data
-  '2fa'?: SanctumFetchOption; // Optional endpoint for two-factor authentication (2FA)
+  user: UserFetchOption; // Endpoint to fetch user data
+  twoFactor?: SanctumFetchOption; // Optional endpoint for two-factor authentication (2FA)
   refresh?: SanctumFetchOption; // Optional endpoint to refresh authentication tokens
   logout?: SanctumFetchOption; // Endpoint for user logout
 };
 
 // Options for different authentication strategies
 export type SanctumStrategiesOptions = {
-  user?: { property?: string }; // Name of the object containing user data (optional)
   endpoints: EndpointsOptions; // Endpoints for the authentication strategy
   redirect: RedirectOptions; // Redirection configuration
 };
