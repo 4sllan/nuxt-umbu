@@ -54,7 +54,7 @@ export const useUmbuUtils = () => {
      * Extrai o objeto do usuário baseado na propriedade configurada (ex: data.user)
      */
     const extractUser = (data: any, strategyName: string) => {
-        const property = getStrategyConfig(strategyName).user?.property
+        const property = getStrategyConfig(strategyName).endpoints?.user?.property
         if (property && data && typeof data === 'object' && property in data) {
             return data[property]
         }
