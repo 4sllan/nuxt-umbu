@@ -48,9 +48,6 @@ export default defineNuxtConfig({
                     logout: "/",
                     login: "/"
                 },
-                user: {
-                    property: "profile",
-                },
                 endpoints: {
                     login: {url: "/oauth/token", method: "post", alias: "auth token"},
                     user: {
@@ -65,7 +62,6 @@ export default defineNuxtConfig({
                         property: "access_token",
                         expires: "expires_in",
                         headerName: "2fa", // default
-                        type: "Bearer" // opcional
                     },
                 },
             },
@@ -79,7 +75,7 @@ export default defineNuxtConfig({
                 },
                 endpoints: {
                     login: {url: "/oauth/token", method: "post"},
-                    user: {url: "/api/profile", method: "get"},
+                    user: {url: "/api/profile", method: "get", property: "profile"},
                     twoFactor: {url: "/api/send-token-2fa", method: "post"},
                     logout: {alias: 'logout client'}
                 },
