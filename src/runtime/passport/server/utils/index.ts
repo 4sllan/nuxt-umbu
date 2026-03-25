@@ -1,6 +1,6 @@
 import { useRuntimeConfig } from '#imports';
 import { getCookie, createError, H3Event } from 'h3';
-import type { PassportModuleOptions } from '../../../types';
+import type { PassportModuleOptions } from '#auth-types';
 
 interface AuthSession {
   token?: string;
