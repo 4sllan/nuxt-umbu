@@ -45,7 +45,7 @@ export interface AuthInstance {
   logout(strategyName: string): Promise<void>;
 
   // Sends the two-factor authentication (2FA) code for validation
-  _2fa(strategyName: string, code: string): Promise<{ success: boolean }>;
+  twoFactor(strategyName: string, code: string): Promise<{ success: boolean }>;
 }
 
 export * from './shared';
