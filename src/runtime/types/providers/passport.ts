@@ -45,7 +45,6 @@ type EndpointsOptions = {
 
 // Options for different authentication strategies
 export type PassportStrategiesOptions = {
-    // user?: { property?: string }; // Name of the object containing user data (optional)
     endpoints: EndpointsOptions; // Endpoints for the authentication strategy
     redirect: RedirectOptions; // Redirection configuration
 };
