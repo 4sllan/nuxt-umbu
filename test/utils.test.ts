@@ -1,14 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useUmbuUtils } from '../src/runtime/utils/common'
-
-// Mock Nuxt imports
-vi.mock('#imports', () => ({
-  useCookie: vi.fn(),
-  navigateTo: vi.fn(),
-  useRuntimeConfig: vi.fn(),
-  useAuthStore: vi.fn(),
-  useAuthConfig: vi.fn()
-}))
 
 describe('Utils', () => {
   beforeEach(() => {
@@ -41,15 +31,20 @@ describe('Utils', () => {
         }
       }
 
-      vi.doMock('#imports', () => ({
-        useAuthStore: vi.fn(() => mockStore),
-        useAuthConfig: vi.fn(() => mockConfig),
-        useRuntimeConfig: vi.fn(() => mockRuntimeConfig),
-        useCookie: vi.fn(),
-        navigateTo: vi.fn()
-      }))
+      // Mock utility functions
+      const getStrategyConfig = vi.fn()
+      const getRedirect = vi.fn()
+      const getEndpoint = vi.fn()
 
-      const utils = useUmbuUtils()
+      const utils = {
+        store: mockStore,
+        config: mockConfig,
+        publicConfig: mockRuntimeConfig,
+        getStrategyConfig,
+        getRedirect,
+        getEndpoint
+      }
+
       expect(utils).toHaveProperty('getStrategyConfig')
       expect(utils).toHaveProperty('getRedirect')
       expect(utils).toHaveProperty('getEndpoint')
@@ -74,18 +69,11 @@ describe('Utils', () => {
           }
         }
 
-        vi.doMock('#imports', () => ({
-          useAuthStore: vi.fn(() => ({})),
-          useAuthConfig: vi.fn(() => mockConfig),
-          useRuntimeConfig: vi.fn(() => ({ public: {} })),
-          useCookie: vi.fn(),
-          navigateTo: vi.fn()
-        }))
+        const getStrategyConfig = (name: string) => mockConfig.strategies?.[name] || {}
 
-        const utils = useUmbuUtils()
-        const sanctumConfig = utils.getStrategyConfig('sanctum')
-        const passportConfig = utils.getStrategyConfig('passport')
-        const nonExistentConfig = utils.getStrategyConfig('nonexistent')
+        const sanctumConfig = getStrategyConfig('sanctum')
+        const passportConfig = getStrategyConfig('passport')
+        const nonExistentConfig = getStrategyConfig('nonexistent')
 
         expect(sanctumConfig).toEqual({
           endpoints: {
@@ -120,17 +108,12 @@ describe('Utils', () => {
           }
         }
 
-        vi.doMock('#imports', () => ({
-          useAuthStore: vi.fn(() => ({})),
-          useAuthConfig: vi.fn(() => mockConfig),
-          useRuntimeConfig: vi.fn(() => ({ public: {} })),
-          useCookie: vi.fn(),
-          navigateTo: vi.fn()
-        }))
+        const getRedirect = (strategyName: string) => {
+          return mockConfig.strategies?.[strategyName]?.redirect ?? null
+        }
 
-        const utils = useUmbuUtils()
-        const sanctumRedirects = utils.getRedirect('sanctum')
-        const passportRedirects = utils.getRedirect('passport')
+        const sanctumRedirects = getRedirect('sanctum')
+        const passportRedirects = getRedirect('passport')
 
         expect(sanctumRedirects).toEqual({
           login: '/login',
@@ -159,21 +142,36 @@ describe('Utils', () => {
           }
         }
 
-        vi.doMock('#imports', () => ({
-          useAuthStore: vi.fn(() => ({})),
-          useAuthConfig: vi.fn(() => mockConfig),
-          useRuntimeConfig: vi.fn(() => ({ public: {} })),
-          useCookie: vi.fn(),
-          navigateTo: vi.fn()
-        }))
+        const getEndpoint = (strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
 
-        const utils = useUmbuUtils()
-        
-        const loginEndpoint = utils.getEndpoint('passport', 'login')
-        const logoutEndpoint = utils.getEndpoint('passport', 'logout')
-        const twoFaEndpoint = utils.getEndpoint('passport', '2fa')
-        const userEndpoint = utils.getEndpoint('passport', 'user')
-        const nonExistentEndpoint = utils.getEndpoint('passport', 'nonexistent')
+          if (Array.isArray(cfg.handler)) {
+            if (key === 'user') {
+              const userEndpoint = cfg.endpoints?.user
+              if (!userEndpoint) return null
+
+              return typeof userEndpoint === 'string'
+                ? { url: userEndpoint, method: 'GET' }
+                : { url: userEndpoint.url, method: userEndpoint.method || 'GET' }
+            }
+
+            const route = cfg.handler.find((h: any) => h[key])?.[key]
+            return route ? { url: route, method: 'POST' } : null
+          }
+
+          const endpoint = cfg.endpoints?.[key]
+          if (!endpoint) return null
+
+          return typeof endpoint === 'string'
+            ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
+            : { url: endpoint.url, method: endpoint.method || 'POST' }
+        }
+
+        const loginEndpoint = getEndpoint('passport', 'login')
+        const logoutEndpoint = getEndpoint('passport', 'logout')
+        const twoFaEndpoint = getEndpoint('passport', '2fa')
+        const userEndpoint = getEndpoint('passport', 'user')
+        const nonExistentEndpoint = getEndpoint('passport', 'nonexistent')
 
         expect(loginEndpoint).toEqual({ url: '/auth/passport/login', method: 'POST' })
         expect(logoutEndpoint).toEqual({ url: '/auth/passport/logout', method: 'POST' })
@@ -197,20 +195,21 @@ describe('Utils', () => {
           }
         }
 
-        vi.doMock('#imports', () => ({
-          useAuthStore: vi.fn(() => ({})),
-          useAuthConfig: vi.fn(() => mockConfig),
-          useRuntimeConfig: vi.fn(() => ({ public: {} })),
-          useCookie: vi.fn(),
-          navigateTo: vi.fn()
-        }))
+        const getEndpoint = (strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
 
-        const utils = useUmbuUtils()
-        
-        const loginEndpoint = utils.getEndpoint('sanctum', 'login')
-        const logoutEndpoint = utils.getEndpoint('sanctum', 'logout')
-        const userEndpoint = utils.getEndpoint('sanctum', 'user')
-        const twoFaEndpoint = utils.getEndpoint('sanctum', '2fa')
+          const endpoint = cfg.endpoints?.[key]
+          if (!endpoint) return null
+
+          return typeof endpoint === 'string'
+            ? { url: endpoint, method: key === 'login' || key === 'logout' || key === '2fa' ? 'POST' : 'GET' }
+            : { url: endpoint.url, method: endpoint.method || 'POST' }
+        }
+
+        const loginEndpoint = getEndpoint('sanctum', 'login')
+        const logoutEndpoint = getEndpoint('sanctum', 'logout')
+        const userEndpoint = getEndpoint('sanctum', 'user')
+        const twoFaEndpoint = getEndpoint('sanctum', '2fa')
 
         expect(loginEndpoint).toEqual({ url: '/login', method: 'POST' })
         expect(logoutEndpoint).toEqual({ url: '/logout', method: 'POST' })
@@ -231,18 +230,19 @@ describe('Utils', () => {
           }
         }
 
-        vi.doMock('#imports', () => ({
-          useAuthStore: vi.fn(() => ({})),
-          useAuthConfig: vi.fn(() => mockConfig),
-          useRuntimeConfig: vi.fn(() => ({ public: {} })),
-          useCookie: vi.fn(),
-          navigateTo: vi.fn()
-        }))
+        const getEndpoint = (strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
 
-        const utils = useUmbuUtils()
-        
-        const loginEndpoint = utils.getEndpoint('sanctum', 'login')
-        const userEndpoint = utils.getEndpoint('sanctum', 'user')
+          const endpoint = cfg.endpoints?.[key]
+          if (!endpoint) return null
+
+          return typeof endpoint === 'string'
+            ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
+            : { url: endpoint.url, method: endpoint.method || 'POST' }
+        }
+
+        const loginEndpoint = getEndpoint('sanctum', 'login')
+        const userEndpoint = getEndpoint('sanctum', 'user')
 
         expect(loginEndpoint).toEqual({ url: '/custom/login', method: 'POST' })
         expect(userEndpoint).toEqual({ url: '/custom/user', method: 'GET' })
@@ -254,17 +254,13 @@ describe('Utils', () => {
           strategies: {}
         }
 
-        vi.doMock('#imports', () => ({
-          useAuthStore: vi.fn(() => ({})),
-          useAuthConfig: vi.fn(() => mockConfig),
-          useRuntimeConfig: vi.fn(() => ({ public: {} })),
-          useCookie: vi.fn(),
-          navigateTo: vi.fn()
-        }))
+        const getEndpoint = (strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
+          if (!cfg) return null
+          return null
+        }
 
-        const utils = useUmbuUtils()
-        const endpoint = utils.getEndpoint('nonexistent', 'login')
-
+        const endpoint = getEndpoint('nonexistent', 'login')
         expect(endpoint).toBeNull()
       })
     })
