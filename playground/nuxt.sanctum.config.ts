@@ -40,13 +40,14 @@ export default defineNuxtConfig({
                     logout: "/auth",
                     login: "/auth"
                 },
-                user: {
-                    property: "profile",
-                },
                 endpoints: {
                     login: {url: "/login", method: "post"},
-                    user: {url: "/api/profile", method: "get"},
-                    "2fa": {url: "/api/token-2fa", method: "post"},
+                    user: {
+                        url: "/api/profile",
+                        method: "get",
+                        property: "profile",
+                    },
+                    twoFactor: {url: "/api/token-2fa", method: "post"},
                     logout: {url: "/api/logout", method: "post"}
                 },
             }
