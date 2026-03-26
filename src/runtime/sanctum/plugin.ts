@@ -1,399 +1,200 @@
 import {
-  defineNuxtPlugin,
-  useRequestEvent,
-  navigateTo,
-  useAuthStore,
-  useAuthConfig,
-  useRuntimeConfig,
-  useCookie,
-  createError,
-  $autx,
+    defineNuxtPlugin,
+    useRequestEvent,
+    useCookie,
+    useUmbuUtils,
+    createError,
+    $autx,
 } from '#imports';
-import { parseCookies, setCookie } from 'h3';
+import { parseCookies } from 'h3';
 import { $fetch } from 'ofetch';
 
-import type { AuthState, ProfileResponse, AuthResponse, AuthInstance } from '../types';
+import type { ProfileResponse, AuthResponse } from '#auth-types';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
-  const store = useAuthStore();
-  const config = useRuntimeConfig();
+    const {
+        store,
+        config,
+        publicConfig,
+        getEndpoint,
+        extractUser,
+        clearAuthData,
+        handleRedirect,
+        getRedirect
+    } = useUmbuUtils();
 
-  class Auth implements AuthInstance {
-    public $headers: Headers;
-    private _state: AuthState = { user: null, loggedIn: false, strategy: '' };
-    private _prefix: string;
-    private readonly options: Record<string, any>;
+    const prefix = config.cookie.prefix;
+    const $headers = new Headers();
 
-    constructor(options: Record<string, any>) {
-      this.$headers = new Headers();
-      this._prefix = options.cookie.prefix;
-      this.options = options;
-    }
+    /**
+     * Inicializa a proteção CSRF do Sanctum
+     */
+    const csrfToken = async (): Promise<boolean> => {
+        if (import.meta.server) return false;
 
-    get state(): AuthState {
-      return this._state;
-    }
+        const csrfEndpoint = config.csrf;
+        if (!csrfEndpoint) return false;
 
-    get user(): any | null {
-      return this._state.user;
-    }
+        try {
+            await $fetch(csrfEndpoint, {
+                baseURL: publicConfig.baseURL,
+                credentials: 'include',
+            });
 
-    get strategy(): string | null {
-      return this._state.strategy;
-    }
+            const xsrf = useCookie<string | null>('XSRF-TOKEN').value;
+            if (!xsrf) throw new Error('Invalid CSRF response: Missing token.');
 
-    get loggedIn(): boolean {
-      return this._state.loggedIn;
-    }
+            $headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
+            $headers.set('Accept', 'application/json');
 
-    get headers(): Headers {
-      return this.$headers;
-    }
-
-    get prefix(): string | null {
-      return this._prefix;
-    }
-
-    set headers(headers: Headers) {
-      this.$headers = headers;
-    }
-
-    set state(val: AuthState) {
-      this._state = val;
-    }
-
-    public getRedirect(strategyName: string): Record<string, string> | null {
-      return this.options.strategies?.[strategyName]?.redirect ?? null;
-    }
-
-    private getUserProperty(strategyName: string): string | null {
-      return this.options.strategies?.[strategyName]?.user?.property ?? null;
-    }
-
-    private getHandler(strategyName: string, key: string): { url: string; method: string } | null {
-      return this.options.strategies?.[strategyName]?.endpoints?.[key] ?? null;
-    }
-
-    protected hasValidProperty<T extends Record<string, any>, K extends keyof T>(
-      obj: T | null | undefined,
-      key: K | null | undefined
-    ): obj is T & Record<K, NonNullable<T[K]>> {
-      if (!obj || !key) return false;
-
-      const value = obj[key];
-      return value !== null && value !== undefined;
-    }
-
-    async initialize(): Promise<void> {
-      try {
-        let strategy: string | null = null;
-        let xsrf: string | null = null;
-
-        if (import.meta.server) {
-          const event = useRequestEvent();
-
-          if (!event) {
-            console.warn('No request event available. Skipping initialization.');
-            return;
-          }
-
-          const cookies = parseCookies(event as any);
-          strategy = cookies[this._prefix + `strategy`] ?? null;
-          xsrf = cookies[`XSRF-TOKEN`] ?? null;
-        } else {
-          strategy = useCookie<string | null>(this._prefix + `strategy`).value;
-          xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+            return true;
+        } catch (error) {
+            console.error('[Umbu-Sanctum] CSRF Error:', error instanceof Error ? error.message : error);
+            return false;
         }
+    };
 
-        const csrf = await this.csrfToken();
+    /**
+     * Busca o perfil do usuário (Sanctum usa cookies/sessão)
+     */
+    const fetchProfile = async (strategyName: string): Promise<ProfileResponse | null> => {
+        if (import.meta.server) return null;
 
-        if (!csrf) {
-          console.warn('Could not initialize CSRF protection.');
+        const endpoint = getEndpoint(strategyName, 'user');
+        if (!endpoint?.url) return null;
+
+        try {
+            const data = await $autx<ProfileResponse>(endpoint.url, {
+                method: endpoint.method,
+            });
+
+            store.value = {
+                user: extractUser(data, strategyName),
+                strategy: strategyName,
+                loggedIn: true,
+            };
+
+            return data;
+        } catch (error: any) {
+            throw createError({
+                statusCode: error.statusCode || 401,
+                statusMessage: 'Access denied',
+            });
         }
+    };
 
-        if (!strategy || !xsrf) {
-          console.warn('No valid session found. Skipping profile fetch.');
-          return;
-        }
-        this._state.strategy = strategy ?? null;
-        this.$headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
-
-        const data = await this._setProfile(strategy);
-
-        if (!data) {
-          console.warn('Failed to load user profile.');
-        }
-      } catch (error) {
-        console.error('Failed to initialize auth:', error);
-      }
-    }
-
-    async loginWith(strategyName: string, value: any): Promise<any> {
-      try {
-        const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+    /**
+     * Login Sanctum: Primeiro garante o CSRF, depois autentica
+     */
+    const loginWith = async (strategyName: string, value: any) => {
+        const xsrf = useCookie<string | null>('XSRF-TOKEN').value;
 
         if (!xsrf) {
-          const csrf = await this.csrfToken();
-
-          if (!csrf) {
-            throw new Error('Could not initialize CSRF protection.');
-          }
+            const ok = await csrfToken();
+            if (!ok) throw new Error('Could not initialize CSRF protection.');
         }
 
-        const endpoint = this.getHandler(strategyName, 'login');
-        if (!endpoint?.url || !endpoint?.method) {
-          throw new Error(`Login endpoint missing for strategy: ${strategyName}`);
-        }
-
-        // const headers =
-        //   this.$headers instanceof Headers
-        //     ? Object.fromEntries(this.$headers.entries())
-        //     : this.$headers;
-        //
-        // await $fetch<AuthResponse>(endpoint.url, {
-        //   baseURL: config.public.baseURL,
-        //   credentials: 'include',
-        //   method: endpoint.method || 'POST',
-        //   body: value,
-        //   headers,
-        // });
+        const endpoint = getEndpoint(strategyName, 'login');
+        if (!endpoint?.url) throw new Error(`Login endpoint missing: ${strategyName}`);
 
         await $autx<AuthResponse>(endpoint.url, {
-          method: endpoint.method || 'POST',
-          body: value,
+            method: endpoint.method || 'POST',
+            body: value,
         });
 
-        useCookie(this._prefix + `strategy`).value = strategyName;
+        useCookie(`${prefix}strategy`).value = strategyName;
+        const user = await fetchProfile(strategyName);
 
-        this._state.strategy = strategyName ?? null;
+        await handleRedirect(strategyName, 'login');
+        return { success: true, user };
+    };
 
-        const data = await this._setProfile(strategyName);
+    /**
+     * Logout Sanctum
+     */
+    const logout = async (strategyName: string) => {
+        const endpoint = getEndpoint(strategyName, 'logout');
 
-        if (!data) {
-          throw new Error('Failed to load user profile.');
+        try {
+            if (endpoint?.url) {
+                await $fetch(endpoint.url, {
+                    baseURL: publicConfig.baseURL,
+                    credentials: 'include',
+                    method: endpoint.method || 'POST',
+                    headers: Object.fromEntries($headers.entries()),
+                    body: { strategyName },
+                });
+            }
+        } catch (error) {
+            console.error('[Umbu-Sanctum] Logout failed:', error);
+        } finally {
+            clearAuthData(prefix);
+            await handleRedirect(strategyName, 'logout');
         }
+    };
 
-        const redirectUrl = this.getRedirect(strategyName)?.login;
+    /**
+     * Segundo fator de autenticação para Sanctum
+     */
+    const twoFactor = async (strategyName: string, code: string) => {
+        const endpoint = getEndpoint(strategyName, '2fa');
+        if (!endpoint?.url) throw new Error('2FA endpoint not found');
 
-        if (redirectUrl) {
-          await navigateTo(redirectUrl);
-        }
-
-        return { success: true, user: this._state.user };
-      } catch (error) {
-        console.error('Login failed:', error);
-        return Promise.reject(error);
-      }
-    }
-
-    async logout(strategyName: string): Promise<void> {
-      try {
-        const endpoint = this.getHandler(strategyName, 'logout');
-        if (!endpoint?.url || !endpoint?.method) {
-          throw new Error('Logout endpoint not found');
-        }
-
-        const headers =
-          this.$headers instanceof Headers
-            ? Object.fromEntries(this.$headers.entries())
-            : this.$headers;
-
-        const response = await $fetch<{ logout?: string }>(endpoint?.url, {
-          baseURL: config.public.baseURL,
-          credentials: 'include',
-          method: endpoint?.method || 'POST',
-          body: { strategyName },
-          headers,
-        });
-      } catch (error) {
-        console.error('Logout failed:', error);
-      } finally {
-        this._state = {
-          user: null,
-          loggedIn: false,
-          strategy: '',
-        };
-        store.value = this._state;
-
-        useCookie(this._prefix + 'strategy').value = undefined;
-        useCookie('XSRF-TOKEN').value = undefined;
-
-        Object.keys(localStorage)
-          .filter((key) => key.startsWith(this._prefix))
-          .forEach((key) => localStorage.removeItem(key));
-
-        const redirectUrl = this.getRedirect(strategyName)?.logout ?? '/';
-        await navigateTo(redirectUrl);
-      }
-    }
-
-    async _2fa(strategyName: string, code: string): Promise<{ success: boolean }> {
-      try {
-        if (!code) {
-          throw new Error('2FA code is required');
-        }
-
-        const endpoint = this.getHandler(strategyName, '2fa');
-        if (!endpoint?.url || !endpoint?.method) {
-          throw new Error('2FA endpoint not found');
-        }
-
-        // const headers =
-        //   this.$headers instanceof Headers
-        //     ? Object.fromEntries(this.$headers.entries())
-        //     : this.$headers;
-        //
-        // const response = await $fetch<{ access_token?: string; expires_in?: string }>(
-        //   endpoint?.url,
-        //   {
-        //     baseURL: config.public.baseURL,
-        //     credentials: 'include',
-        //     method: endpoint?.method || 'POST',
-        //     body: { strategyName, code },
-        //     headers,
-        //   }
-        // );
-
-        const response = await $autx<{ access_token?: string; expires_in?: string }>(
-          endpoint?.url,
-          {
-            method: endpoint?.method || 'POST',
+        const response = await $autx<{ access_token?: string }>(endpoint.url, {
+            method: endpoint.method || 'POST',
             body: { strategyName, code },
-          }
-        );
-
-        if (!response?.access_token || !response?.expires_in) {
-          throw new Error('Invalid 2FA response');
-        }
-
-        localStorage.setItem(this._prefix + '_2fa.' + strategyName, response.access_token);
-
-        return { success: true };
-      } catch (error) {
-        console.error('2FA failed:', error);
-        return Promise.reject(error);
-      }
-    }
-
-    async csrfToken(): Promise<boolean> {
-      try {
-        if (import.meta.server) return false;
-
-        const csrfEndpoint = this.options?.csrf;
-
-        if (!csrfEndpoint) {
-          return false;
-        }
-
-        await $fetch(csrfEndpoint, {
-          baseURL: config.public.baseURL,
-          credentials: 'include',
         });
 
-        const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
-
-        if (!xsrf) {
-          throw new Error('Invalid CSRF response: Missing token.');
+        if (response?.access_token && import.meta.client) {
+            localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.access_token);
         }
 
-        this.$headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
-        this.$headers.set('Accept', 'application/json');
+        return { success: !!response?.access_token };
+    };
 
-        return true;
-      } catch (error) {
-        console.error('Error fetching CSRF token:', error instanceof Error ? error.message : error);
-        return false;
-      }
+    // --- Inicialização da Sessão ---
+    let strategy: string | null = null;
+    let xsrf: string | null = null;
+
+    if (import.meta.server) {
+        const event = useRequestEvent();
+        if (event) {
+            const cookies = parseCookies(event as any);
+            strategy = cookies[`${prefix}strategy`] ?? null;
+            xsrf = cookies['XSRF-TOKEN'] ?? null;
+        }
+    } else {
+        strategy = useCookie<string | null>(`${prefix}strategy`).value;
+        xsrf = useCookie<string | null>('XSRF-TOKEN').value;
     }
 
-    private async _setProfile(strategyName: string): Promise<ProfileResponse | false> {
-      try {
-        if (import.meta.server) return false;
+    if (xsrf) {
+        $headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
+    }
 
-        const endpoint = this.getHandler(strategyName, 'user');
-
-        if (!endpoint?.url || !endpoint?.method) throw new Error('User endpoint not found');
-
-        // const headers =
-        //     this.$headers instanceof Headers
-        //         ? Object.fromEntries(this.$headers.entries())
-        //         : this.$headers;
-        //
-        // const data = await $fetch<ProfileResponse>(endpoint.url, {
-        //     baseURL: config.public.baseURL,
-        //     credentials: 'include',
-        //     method: endpoint.method,
-        //     headers,
-        // });
-
-        const data = await $autx<ProfileResponse>(endpoint.url, {
-          method: endpoint.method,
+    if (strategy && xsrf) {
+        await fetchProfile(strategy).catch(() => {
+            console.warn('[Umbu-Sanctum] Session invalid on init.');
         });
-
-        if (!data) return false;
-
-        const property = this.getUserProperty(this._state.strategy);
-        const user = this.hasValidProperty(data, property as keyof ProfileResponse)
-          ? data[property as keyof ProfileResponse]
-          : (data ?? null);
-
-        store.value = {
-          user,
-          strategy: this._state.strategy ?? null,
-          loggedIn: true,
-        };
-
-        this._state = store.value;
-
-        return data;
-      } catch (error: any) {
-        throw createError({
-          statusCode: error.statusCode,
-          statusMessage: 'Access denied',
-        });
-      }
+    } else {
+        // Tenta obter o token CSRF preventivamente se estiver no cliente
+        await csrfToken().catch(() => {});
     }
-  }
 
-  const $auth = new Auth(useAuthConfig());
-  await $auth.initialize();
+    // Interface Reativa
+    const auth = {
+        get user() { return store.value.user },
+        get loggedIn() { return store.value.loggedIn },
+        get strategy() { return store.value.strategy },
+        get headers() { return $headers },
+        get prefix() { return prefix },
+        getRedirect,
+        loginWith,
+        logout,
+        twoFactor,
+        csrfToken,
+        fetchProfile
+    };
 
-  const exposed = Object.defineProperties(
-    {},
-    {
-      state: { get: () => $auth.state },
-      user: { get: () => $auth.user },
-      strategy: { get: () => $auth.strategy },
-      loggedIn: { get: () => $auth.loggedIn },
-      headers: {
-        get: () => $auth.headers,
-        set: (headers: Headers) => {
-          $auth.headers = headers;
-        },
-      },
-      prefix: { get: () => $auth.prefix },
-    }
-  );
-
-  exposed.getRedirect = (strategyName: string) => {
-    return $auth.getRedirect?.(strategyName) ?? null;
-  };
-
-  exposed.loginWith = async (strategyName: string, value: any) => {
-    return await $auth.loginWith(strategyName, value);
-  };
-
-  exposed.logout = async (strategyName: string) => {
-    return await $auth.logout(strategyName);
-  };
-
-  exposed._2fa = async (strategyName: string, code: string) => {
-    return await $auth._2fa(strategyName, code);
-  };
-
-  exposed.csrfToken = async () => {
-    return await $auth.csrfToken();
-  };
-
-  nuxtApp.provide('auth', exposed);
+    nuxtApp.provide('auth', auth);
 });

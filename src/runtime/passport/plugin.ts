@@ -1,368 +1,185 @@
 import {
-  defineNuxtPlugin,
-  useRequestEvent,
-  navigateTo,
-  useAuthStore,
-  useAuthConfig,
-  useRuntimeConfig,
-  createError,
+    defineNuxtPlugin,
+    useRequestEvent,
+    useUmbuUtils,
+    createError,
 } from '#imports';
-import { parseCookies, setCookie } from 'h3';
-import { $fetch } from 'ofetch';
+import {parseCookies} from 'h3';
+import {$fetch} from 'ofetch';
 
-import type { AuthState, ProfileResponse, AuthResponse, AuthInstance } from '../types';
+import type {ProfileResponse, AuthResponse} from '#auth-types';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
-  const store = useAuthStore();
+    const {
+        store,
+        config,
+        getRedirect,
+        publicConfig,
+        getEndpoint,
+        extractUser,
+        clearAuthData,
+        handleRedirect
+    } = useUmbuUtils();
 
-  class Auth implements AuthInstance {
-    public $headers: Headers;
-    private _state: AuthState = { user: null, loggedIn: false, strategy: '' };
-    private _prefix: string;
-    private readonly options: Record<string, any>;
+    const prefix = config.cookie.prefix;
+    const $headers = new Headers();
 
-    constructor(options: Record<string, any>) {
-      this.$headers = new Headers();
-      this._prefix = options.cookie.prefix;
-      this.options = options;
-    }
+    /**
+     * Busca o perfil do usuário e atualiza o estado global
+     */
+    const fetchProfile = async (strategyName: string, token?: string): Promise<ProfileResponse | null> => {
+        const endpoint = getEndpoint(strategyName, 'user');
 
-    get state(): AuthState {
-      return this._state;
-    }
+        if (!endpoint?.url) return null;
 
-    get user(): any | null {
-      return this._state.user;
-    }
-
-    get strategy(): string | null {
-      return this._state.strategy;
-    }
-
-    get loggedIn(): boolean {
-      return this._state.loggedIn;
-    }
-
-    get headers(): Headers {
-      return this.$headers;
-    }
-
-    get prefix(): string | null {
-      return this._prefix;
-    }
-
-    set headers(headers: Headers) {
-      this.$headers = headers;
-    }
-
-    set state(val: AuthState) {
-      this._state = val;
-    }
-
-    public getRedirect(strategyName: string): Record<string, string> | null {
-      return this.options.strategies?.[strategyName]?.redirect ?? null;
-    }
-
-    private getUserProperty(strategyName: string): string | null {
-      return this.options.strategies?.[strategyName]?.user?.property ?? null;
-    }
-
-    private getEndpointsUser(strategyName: string): { url: string; method: string } | null {
-      return this.options.strategies?.[strategyName]?.endpoints.user ?? null;
-    }
-
-    private getHandler(strategyName: string, key: string): string | null {
-      return (
-        this.options.strategies?.[strategyName]?.handler?.find((value: any) => value[key])?.[key] ??
-        null
-      );
-    }
-
-    protected hasValidProperty<T extends Record<string, any>, K extends keyof T>(
-      obj: T | null | undefined,
-      key: K | null | undefined
-    ): obj is T & Record<K, NonNullable<T[K]>> {
-      if (!obj || !key) return false;
-
-      const value = obj[key];
-      return value !== null && value !== undefined;
-    }
-
-    async initialize(): Promise<void> {
-      try {
-        let strategy: string | null = null;
-        let token: string | null = null;
-
-        if (import.meta.server) {
-          const event = useRequestEvent();
-          if (!event) {
-            console.warn('No request event available. Skipping initialization.');
-            return;
-          }
-
-          const cookies = parseCookies(event);
-          strategy = cookies[this._prefix + `strategy`];
-          token = strategy ? cookies[this._prefix + `_token.` + strategy] : null;
-        } else {
-          strategy = localStorage.getItem(this._prefix + `strategy`);
-          token = strategy ? localStorage.getItem(this._prefix + `_token.` + strategy) : null;
+        if (token) {
+            $headers.set('Authorization', token);
         }
 
-        if (!strategy || !token) {
-          console.warn('No valid session found. Skipping profile fetch.');
-          return;
+        try {
+            const data = await $fetch<ProfileResponse>(endpoint.url, {
+                baseURL: publicConfig.baseURL,
+                method: endpoint.method || 'GET',
+                headers: {
+                    ...Object.fromEntries($headers.entries()),
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            store.value = {
+                user: extractUser(data, strategyName),
+                strategy: strategyName,
+                loggedIn: true,
+            };
+
+            return data;
+        } catch (error: any) {
+            clearAuthData(prefix);
+            throw createError({
+                statusCode: error.statusCode || 401,
+                statusMessage: 'Access denied',
+            });
         }
+    };
 
-        this._state.strategy = strategy ?? null;
-        this.$headers.set('Authorization', token);
+    /**
+     * Realiza o login via Passport (OAuth2 Grant)
+     */
+    const loginWith = async (strategyName: string, credentials: any) => {
+        const endpoint = getEndpoint(strategyName, 'login');
+        if (!endpoint?.url) throw new Error(`Login endpoint missing for: ${strategyName}`);
 
-        const data = await this._setProfile();
-        if (data) {
-          const property = this.getUserProperty(this._state.strategy);
-          const user = this.hasValidProperty(data, property as keyof ProfileResponse)
-            ? data[property as keyof ProfileResponse]
-            : (data ?? null);
-
-          this._state = {
-            user,
-            loggedIn: true,
-            strategy: strategy ?? null,
-          };
-        }
-      } catch (error) {
-        console.error('Failed to initialize auth:', error);
-      }
-    }
-
-    async loginWith(strategyName: string, value: any): Promise<any> {
-      try {
-        const loginUrl = this.getHandler(strategyName, 'login');
-        if (!loginUrl) throw new Error('Login endpoint not found');
-
-        const response = await $fetch<AuthResponse>(loginUrl, {
-          method: 'POST',
-          body: { strategyName, value },
+        const response = await $fetch<AuthResponse>(endpoint.url, {
+            method: endpoint.method || 'POST',
+            body: {strategyName, value: credentials},
         });
 
         if (!response.token) throw new Error('Token is missing in the response');
 
-        localStorage.setItem(this._prefix + `_token.` + strategyName, response.token);
-        localStorage.setItem(this._prefix + `strategy`, strategyName);
-        localStorage.setItem(this._prefix + `_token_expiration.` + strategyName, response.expires);
-
-        this._state.strategy = strategyName ?? null;
-        this.$headers.set('Authorization', response.token);
-
-        const data = await this._setProfile();
-
-        if (!data) {
-          throw new Error('Failed to load user profile.');
+        if (import.meta.client) {
+            localStorage.setItem(`${prefix}_token.${strategyName}`, response.token);
+            localStorage.setItem(`${prefix}strategy`, strategyName);
+            if (response.expires) {
+                localStorage.setItem(`${prefix}_token_expiration.${strategyName}`, response.expires);
+            }
         }
 
-        const redirectUrl = this.getRedirect(strategyName)?.login;
+        await fetchProfile(strategyName, response.token);
+        await handleRedirect(strategyName, 'login');
 
-        if (redirectUrl) {
-          await navigateTo(redirectUrl);
+
+        return response;
+    };
+
+    /**
+     * Encerra a sessão e limpa os dados locais
+     */
+    const logout = async (strategyName: string) => {
+        const endpoint = getEndpoint(strategyName, 'logout');
+
+        if (endpoint?.url) {
+            await $fetch(endpoint.url, {
+                method: endpoint.method || 'POST',
+                body: {strategyName}
+            }).catch(() => {
+            });
         }
 
-        return response ?? Promise.reject('No data returned');
-      } catch (error) {
-        console.error('Login failed:', error);
-        return Promise.reject(error);
-      }
-    }
+        clearAuthData(prefix);
+        await handleRedirect(strategyName, 'logout');
+    };
 
-    async logout(strategyName: string): Promise<void> {
-      try {
-        const logoutUrl = this.getHandler(strategyName, 'logout');
-        if (!logoutUrl) throw new Error('Logout endpoint not found');
+    /**
+     * Fluxo de Segundo Fator de Autenticação
+     */
+    const twoFactor = async (strategyName: string, code: string) => {
+        const endpoint = getEndpoint(strategyName, 'twoFactor');
+        if (!endpoint?.url) throw new Error('Two Factor Auth endpoint not found');
 
-        const response = await $fetch<{ logout?: string }>(logoutUrl, {
-          method: 'POST',
-          body: { strategyName },
-        });
-
-        this._state = {
-          user: null,
-          loggedIn: false,
-          strategy: '',
-        };
-        store.value = this._state;
-
-        Object.keys(localStorage)
-          .filter((key) => key.startsWith(this._prefix))
-          .forEach((key) => localStorage.removeItem(key));
-
-        const redirectUrl = this.getRedirect(strategyName)?.logout ?? '/';
-        await navigateTo(redirectUrl);
-      } catch (error) {
-        console.error('Logout failed:', error);
-      }
-    }
-
-    async _2fa(strategyName: string, code: string): Promise<{ success: boolean }> {
-      try {
-        if (!code) {
-          throw new Error('2FA code is required');
-        }
-
-        const twoFaUrl = this.getHandler(strategyName, '2fa');
-        if (!twoFaUrl) {
-          throw new Error('2FA endpoint not found');
-        }
-
-        const response = await $fetch<{ token?: string; expires?: string }>(twoFaUrl, {
-          method: 'POST',
-          body: { strategyName, code },
+        const response = await $fetch<{ token?: string, expires?: string }>(endpoint.url, {
+            method: endpoint.method || 'POST',
+            body: {strategyName, code},
         });
 
         if (!response?.token || !response?.expires) {
-          throw new Error('Invalid 2FA response');
+            throw new Error('Invalid Two Factor Auth response');
         }
 
+        $headers.set('2fa', response.token);
         if (import.meta.client) {
-          localStorage.setItem(this._prefix + '_2fa.' + strategyName, response.token);
-          localStorage.setItem(this._prefix + '_2fa_expiration.' + strategyName, response.expires);
+            localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.token);
+            localStorage.setItem(`${prefix}_2fa_expiration.${strategyName}`, response.expires);
         }
 
-        this.$headers.set('2fa', response.token);
+        return {success: !!response?.token};
+    };
 
-        return { success: true };
-      } catch (error) {
-        console.error('2FA failed:', error);
-        return Promise.reject(error);
-      }
+    // --- Inicialização Automática ---
+    let strategy: string | null = null;
+    let token: string | null = null;
+
+    if (import.meta.server) {
+        const event = useRequestEvent();
+        if (event) {
+            const cookies = parseCookies(event);
+            strategy = cookies[`${prefix}strategy`];
+            token = strategy ? cookies[`${prefix}_token.${strategy}`] : null;
+        }
+    } else {
+        strategy = localStorage.getItem(`${prefix}strategy`);
+        token = strategy ? localStorage.getItem(`${prefix}_token.${strategy}`) : null;
     }
 
-    async refreshToken(strategyName: string): Promise<any> {
-      return new Promise((resolve, reject) => {});
-    }
-
-    async csrfToken(event?: any): Promise<boolean> {
-      try {
-        const baseURL = useRuntimeConfig().public.baseURL;
-        const csrfEndpoint = this.options?.csrf;
-
-        if (!csrfEndpoint) {
-          return false;
-        }
-
-        const data = await $fetch<{ csrf_token?: string }>(csrfEndpoint, { baseURL });
-
-        if (!data?.csrf_token) {
-          throw new Error('Invalid CSRF response: Missing token.');
-        }
-
-        this.$headers.set('X-CSRF-TOKEN', data.csrf_token);
-
-        if (import.meta.server && event) {
-          const cookies = parseCookies(event);
-          const csrfCookie = cookies['X-CSRF-TOKEN'];
-
-          if (!csrfCookie) {
-            setCookie(
-              event,
-              'X-CSRF-TOKEN',
-              data.csrf_token,
-              this.options.cookie.options || {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                path: '/',
-              }
-            );
-          }
-        }
-
-        return true;
-      } catch (error) {
-        console.error('Error fetching CSRF token:', error instanceof Error ? error.message : error);
-        return false;
-      }
-    }
-
-    private async _setProfile(): Promise<ProfileResponse | false> {
-      try {
-        const baseURL = useRuntimeConfig().public.baseURL;
-
-        const endpoint = this.getEndpointsUser(this._state.strategy!);
-        if (!endpoint?.url || !endpoint?.method) return false;
-
-        const headers =
-          this.$headers instanceof Headers
-            ? Object.fromEntries(this.$headers.entries())
-            : this.$headers;
-
-        const data = await $fetch<ProfileResponse>(endpoint.url, {
-          baseURL,
-          method: endpoint.method,
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-          },
+    if (strategy && token) {
+        await fetchProfile(strategy, token).catch(() => {
+            console.warn('[Umbu-Passport] Session expired or invalid.');
         });
-
-        if (!data) return false;
-
-        const property = this.getUserProperty(this._state.strategy);
-        const user = this.hasValidProperty(data, property as keyof ProfileResponse)
-          ? data[property as keyof ProfileResponse]
-          : (data ?? null);
-
-        store.value = {
-          user,
-          strategy: this._state.strategy ?? null,
-          loggedIn: true,
-        };
-
-        this._state = store.value;
-        return data;
-      } catch (error: any) {
-        throw createError({
-          statusCode: error.statusCode,
-          statusMessage: 'Access denied',
-        });
-      }
     }
-  }
 
-  const $auth = new Auth(useAuthConfig());
-  const event = import.meta.server ? useRequestEvent() : undefined;
-  await $auth.csrfToken(event);
-  await $auth.initialize();
-
-  const exposed = Object.defineProperties(
-    {},
-    {
-      state: { get: () => $auth.state },
-      user: { get: () => $auth.user },
-      strategy: { get: () => $auth.strategy },
-      loggedIn: { get: () => $auth.loggedIn },
-      headers: {
-        get: () => $auth.headers,
-        set: (headers: Headers) => {
-          $auth.headers = headers;
+    // Interface Reativa Exposta
+    const auth = {
+        get user() {
+            return store.value.user
         },
-      },
-      prefix: { get: () => $auth.prefix },
-    }
-  );
+        get loggedIn() {
+            return store.value.loggedIn
+        },
+        get strategy() {
+            return store.value.strategy
+        },
+        get headers() {
+            return $headers
+        },
+        get prefix() {
+            return prefix
+        },
 
-  exposed.getRedirect = (strategyName: string) => {
-    return $auth.getRedirect?.(strategyName) ?? null;
-  };
+        getRedirect,
+        loginWith,
+        logout,
+        twoFactor,
+        fetchProfile
+    };
 
-  exposed.loginWith = async (strategyName: string, value: any) => {
-    return await $auth.loginWith(strategyName, value);
-  };
-
-  exposed.logout = async (strategyName: string) => {
-    return await $auth.logout(strategyName);
-  };
-
-  exposed._2fa = async (strategyName: string, code: string) => {
-    return await $auth._2fa(strategyName, code);
-  };
-
-  nuxtApp.provide('auth', exposed);
+    nuxtApp.provide('auth', auth);
 });

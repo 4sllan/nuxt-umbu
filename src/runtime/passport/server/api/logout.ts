@@ -1,7 +1,7 @@
 import { useRuntimeConfig } from '#imports';
 import { deleteCookie, defineEventHandler, readBody } from 'h3';
 import protectedMiddleware from '../middleware/protected';
-import type { PassportModuleOptions } from '../../../types';
+import type { PassportModuleOptions } from '#auth-types';
 
 export default defineEventHandler(async (event) => {
   try {

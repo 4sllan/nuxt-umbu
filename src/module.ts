@@ -1,187 +1,226 @@
 import {
-  useLogger,
-  createResolver,
-  defineNuxtModule,
-  addServerHandler,
-  addPluginTemplate,
-  addRouteMiddleware,
-  addTypeTemplate,
-  addImportsDir,
+    useLogger,
+    createResolver,
+    defineNuxtModule,
+    addServerHandler,
+    addPluginTemplate,
+    addRouteMiddleware,
+    addTypeTemplate,
+    addImportsDir,
 } from '@nuxt/kit';
-import { defu } from 'defu';
+import {defu} from 'defu';
 import kebabCase from 'lodash.kebabcase';
-import fs from 'fs';
+
+import * as templates from './templates' // Importa tudo da pasta de templates
 
 import type {
-  ModuleOptions,
-  AuthSecretConfig,
-  PassportStrategiesOptions,
-  PassportFetchOption,
+    ModuleOptions,
+    AuthSecretConfig,
+    PassportStrategiesOptions,
+    PassportFetchOption,
 } from './runtime/types';
 
 interface RuntimeConfig {
-  secret: {
-    [key: string]: AuthSecretConfig;
-  };
+    secret: {
+        [key: string]: AuthSecretConfig;
+    };
 }
 
 const PACKAGE_NAME: string = 'nuxt-umbu';
 export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
-  meta: {
-    name: PACKAGE_NAME,
-    configKey: 'auth',
-  },
+    meta: {
+        name: PACKAGE_NAME,
+        configKey: 'auth',
+    },
 
-  async setup(options, nuxt) {
-    const logger = useLogger(PACKAGE_NAME);
-    const { resolve } = createResolver(import.meta.url);
-    const isDev = nuxt.options.dev;
-    const provider = options.provider || 'sanctum';
+    async setup(options, nuxt) {
+        const logger = useLogger(PACKAGE_NAME);
+        const {resolve} = createResolver(import.meta.url);
+        const isDev = nuxt.options.dev;
+        const provider = options.provider || 'sanctum';
 
-    options = defu(options, {
-      cookie: {
-        options: {
-          httpOnly: false,
-          secure: false,
-          sameSite: 'Lax',
-          priority: 'high',
-        },
-        prefix: 'auth.',
-      },
-      twoFactorAuth: false,
-    }) as ModuleOptions & { twoFactorAuth: boolean };
+        options = defu(options, {
+            cookie: {
+                options: {
+                    httpOnly: false,
+                    secure: false,
+                    sameSite: 'Lax',
+                    priority: 'high',
+                },
+                prefix: 'auth.',
+            },
+            twoFactorAuth: false,
+        }) as ModuleOptions & { twoFactorAuth: boolean };
 
-    options.cookie = options.cookie ?? { prefix: 'auth.', options: {} };
-    options.cookie.options = options.cookie.options ?? {
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-      priority: 'high',
-    };
+        options.cookie = options.cookie ?? {prefix: 'auth.', options: {}};
+        options.cookie.options = options.cookie.options ?? {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'Lax',
+            priority: 'high',
+        };
 
-    if (isDev) {
-      options.cookie.prefix = 'auth.';
-      options.cookie.options.secure = false;
-    }
-
-    addImportsDir(resolve('./runtime/composables'));
-
-    // Add middleware template
-    addRouteMiddleware({
-      name: 'auth',
-      path: resolve('./runtime/' + provider + '/middleware/auth'),
-    });
-
-    if (provider === 'passport') {
-      const runtimeConfig = nuxt.options.runtimeConfig as unknown as RuntimeConfig;
-
-      if (
-        !runtimeConfig.secret ||
-        typeof runtimeConfig.secret !== 'object' ||
-        Object.keys(runtimeConfig.secret).length === 0
-      ) {
-        logger.error(`Missing "runtimeConfig.secret" in nuxt.config.ts`);
-        return;
-      }
-
-      Object.entries(runtimeConfig.secret).forEach(([key, config]) => {
-        if (!options.strategies[key]) {
-          logger.error(
-            `[${PACKAGE_NAME}] Strategy "${key}" found in "runtimeConfig.secret" but not in "options.strategies". Skipping validation.`
-          );
-          return;
+        if (isDev) {
+            options.cookie.prefix = 'auth.';
+            options.cookie.options.secure = false;
         }
-        if (!config.client_id || !config.client_secret || !config.grant_type) {
-          logger.error(
-            `[${PACKAGE_NAME}] Invalid "secret.${key}" configuration. Required keys: client_id, client_secret, grant_type.`
-          );
-          return;
-        }
-      });
 
-      Object.entries(options.strategies).forEach(
-        ([strategyName, strategy]: [
-          string,
-          PassportStrategiesOptions & {
-            handler?: Record<string, string>[];
-          },
-        ]) => {
-          strategy.handler = strategy.handler ?? [];
-          strategy.endpoints = strategy.endpoints || {};
-          strategy.endpoints = defu(strategy.endpoints, {
-            logout: { alias: 'logout' },
-          });
-          Object.entries(strategy.endpoints)
-            .filter(
-              ([key, endpoint]) =>
-                key !== 'user' &&
-                (key === 'logout' ||
-                  ((endpoint as PassportFetchOption).url &&
-                    (endpoint as PassportFetchOption).method))
-            )
-            .forEach(([key, endpoint]) => {
-              const typedEndpoint = endpoint as PassportFetchOption;
-              const route = `/api/${kebabCase(typedEndpoint.alias) || typedEndpoint.url.replace(/^\/(api|oauth)\//, '')}`;
-              const handlerFile = resolve(`./runtime/passport/server/api/${key}`);
+        addImportsDir(resolve('./runtime/composables'));
+        addImportsDir(resolve('./runtime/utils'))
 
-              strategy.handler!.push({ [key]: route });
+        // Add middleware template
+        addRouteMiddleware({
+            name: 'umbu:auth',
+            path: resolve('./runtime/' + provider + '/middleware/auth'),
+        });
 
-              addServerHandler({
-                route,
-                handler: handlerFile,
-              });
+        if (provider === 'passport') {
+            const runtimeConfig = nuxt.options.runtimeConfig as unknown as RuntimeConfig;
+
+            if (
+                !runtimeConfig.secret ||
+                typeof runtimeConfig.secret !== 'object' ||
+                Object.keys(runtimeConfig.secret).length === 0
+            ) {
+                logger.error(`Missing "runtimeConfig.secret" in nuxt.config.ts`);
+                return;
+            }
+
+            Object.entries(runtimeConfig.secret).forEach(([key, config]) => {
+                if (!options.strategies[key]) {
+                    logger.error(
+                        `[${PACKAGE_NAME}] Strategy "${key}" found in "runtimeConfig.secret" but not in "options.strategies". Skipping validation.`
+                    );
+                    return;
+                }
+                if (!config.client_id || !config.client_secret || !config.grant_type) {
+                    logger.error(
+                        `[${PACKAGE_NAME}] Invalid "secret.${key}" configuration. Required keys: client_id, client_secret, grant_type.`
+                    );
+                    return;
+                }
             });
+
+            Object.entries(options.strategies).forEach(
+                ([strategyName, strategy]: [
+                    string,
+                        PassportStrategiesOptions & {
+                        handler?: Record<string, string>[];
+                    },
+                ]) => {
+                    strategy.handler = strategy.handler ?? [];
+                    strategy.endpoints = strategy.endpoints || {};
+                    strategy.endpoints = defu(strategy.endpoints, {
+                        logout: {alias: 'logout'},
+                    });
+                    Object.entries(strategy.endpoints)
+                        .filter(
+                            ([key, endpoint]) =>
+                                key !== 'user' &&
+                                (key === 'logout' ||
+                                    ((endpoint as PassportFetchOption).url &&
+                                        (endpoint as PassportFetchOption).method))
+                        )
+                        .forEach(([key, endpoint]) => {
+                            const typedEndpoint = endpoint as PassportFetchOption;
+                            const route = `/api/${kebabCase(typedEndpoint.alias) || typedEndpoint.url.replace(/^\/(api|oauth)\//, '')}`;
+                            const handlerFile = resolve(`./runtime/passport/server/api/${key}`);
+
+                            strategy.handler!.push({[key]: route});
+
+                            addServerHandler({
+                                route,
+                                handler: handlerFile,
+                            });
+                        });
+                }
+            );
         }
-      );
-    }
 
-    const has2FA = Object.values(options.strategies).some(
-      (strategy) => strategy.endpoints?.['2fa']?.url && strategy.endpoints?.['2fa']?.method
-    );
+        const has2FA = Object.values(options.strategies).some(
+            (strategy) => strategy.endpoints?.['twoFactor']?.url && strategy.endpoints?.['twoFactor']?.method
+        );
 
-    if (has2FA) {
-      options.twoFactorAuth = true;
+        if (has2FA) {
+            options.twoFactorAuth = true;
 
-      addRouteMiddleware({
-        name: '_2fa',
-        path: resolve('./runtime/' + provider + '/middleware/2fa'),
-      });
-      logger.success('Middleware `_2fa` enabled');
-    }
+            addRouteMiddleware({
+                name: 'umbu:two-factor',
+                path: resolve('./runtime/' + provider + '/middleware/twoFactor'),
+            });
+            logger.success('Middleware `two-factor` enabled');
+        }
 
-    nuxt.options.runtimeConfig.public[PACKAGE_NAME] = options;
+        nuxt.options.runtimeConfig.public[PACKAGE_NAME] = options;
 
-    const hasTsPlugin = fs.existsSync(resolve(`./runtime/${provider}/plugin.ts`));
+        // Caminhos resolvidos para os arquivos reais no runtime
+        const runtimeTypesPath = resolve('./runtime/types/index')
+        const runtimeUtilsPath = resolve(`./runtime/${provider}/utils/index`)
 
-    // Add plugin template
-    addPluginTemplate({
-      src: resolve(`./runtime/${provider}/plugin.${hasTsPlugin ? 'ts' : 'js'}`),
-      filename: `plugin.${hasTsPlugin ? 'ts' : 'js'}`,
-      mode: 'all',
-    });
+        // 1. Criar o arquivo de tipos principal em .nuxt/types/umbu.d.ts
+        const umbuTypes = addTypeTemplate({
+            filename: 'types/umbu.d.ts',
+            getContents: () => templates.authTypesTemplate(runtimeTypesPath, runtimeUtilsPath)
+        })
 
-    // Add type template for auth declarations
-    addTypeTemplate({
-      src: resolve('./auth.d.ts'),
-      filename: 'auth.d.ts',
-    });
 
-    nuxt.options.alias['#auth-utils'] = resolve('./runtime/' + provider + '/utils');
+        // 2. Configurar Alias de Execução (Vite/Nitro)
+        // Isso faz o import { ... } from '#auth-utils' funcionar no código JS
+        nuxt.options.alias['#auth-utils'] = runtimeUtilsPath
+        nuxt.options.alias['#auth-types'] = runtimeTypesPath
 
-    logger.success('`nuxt-umbu` setup done');
-  },
+
+        // 3. Plugins Dinâmicos (Sem depender de arquivos físicos no dist)
+
+        // No setup do module.ts
+        const pluginPath = provider === 'passport'
+            ? './runtime/passport/plugin.ts'
+            : './runtime/sanctum/plugin.ts'
+
+        addPluginTemplate({
+            src: resolve(pluginPath),
+            filename: 'umbu-plugin.ts',
+            write: true, // Isso ajuda a debugar vendo o arquivo em .nuxt/
+            options
+        })
+
+        // addPluginTemplate({
+        //     filename: 'umbu-plugin.ts',
+        //     getContents: () => {
+        //         return provider === 'passport'
+        //             ? templates.passportTemplate()
+        //             : templates.sanctumTemplate()
+        //     },
+        //     mode: 'all'
+        // })
+
+        // 4. Hook para o TypeScript (VS Code)
+        nuxt.hook('prepare:types', ({ references, tsConfig }) => {
+            // Faz o TS ler o arquivo umbu.d.ts gerado
+            references.push({ path: umbuTypes.dst })
+
+            // Mapeia os aliases no tsconfig.json para os tipos corretos
+            tsConfig.compilerOptions = tsConfig.compilerOptions || {}
+            tsConfig.compilerOptions.paths = tsConfig.compilerOptions.paths || {}
+
+            tsConfig.compilerOptions.paths['#auth-utils'] = [runtimeUtilsPath]
+            tsConfig.compilerOptions.paths['#auth-types'] = [runtimeTypesPath]
+        })
+
+        logger.success('`nuxt-umbu` setup done');
+    },
 });
 
 declare module 'nuxt/schema' {
-  interface RuntimeConfig {
-    secret?: Record<string, AuthSecretConfig>;
-  }
+    interface RuntimeConfig {
+        secret?: Record<string, AuthSecretConfig>;
+    }
 
-  interface PublicRuntimeConfig {
-    baseURL: string;
-  }
+    interface PublicRuntimeConfig {
+        baseURL: string;
+    }
 
-  interface NuxtConfig {
-    auth?: ModuleOptions;
-  }
+    interface NuxtConfig {
+        auth?: ModuleOptions;
+    }
 }

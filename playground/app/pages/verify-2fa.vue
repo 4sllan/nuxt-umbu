@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
+  middleware: ['umbu:auth'],
 })
 
 const route = useRoute()
@@ -60,7 +60,7 @@ const handleVerify = async () => {
   successMessage.value = ''
 
   $auth
-      ._2fa('admin', code)
+      .twoFactor('admin', code)
       .then((response) => {
         loading.value = false;
         successMessage.value = 'Verification successful! Redirecting...'
@@ -101,8 +101,9 @@ const handleResend = async () => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   codeInputs.value[0]?.focus()
+  await handleResend()
 })
 </script>
 <template>

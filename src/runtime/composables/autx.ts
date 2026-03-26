@@ -26,7 +26,7 @@ export async function $autx<T = any>(request: string, options: AutxOptions<T> = 
     await useEnsureCsrf($auth);
   }
 
-  const authHeaders =
+  const $headers =
     $auth.headers instanceof Headers ? Object.fromEntries($auth.headers.entries()) : $auth.headers;
 
   const runtimeBaseURL = typeof baseURL === 'string' ? baseURL : undefined;
@@ -36,7 +36,7 @@ export async function $autx<T = any>(request: string, options: AutxOptions<T> = 
     baseURL: options.baseURL ?? runtimeBaseURL,
     credentials: options.credentials ?? (provider === 'sanctum' ? 'include' : undefined),
     headers: {
-      ...authHeaders,
+      ...$headers,
       ...options.headers,
     },
   };

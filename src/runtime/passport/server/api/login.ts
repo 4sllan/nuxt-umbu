@@ -6,7 +6,7 @@ import type {
   PassportModuleOptions,
   PassportStrategiesOptions,
   AuthSecretConfig,
-} from '../../../types';
+} from '#auth-types';
 
 interface AuthRequestBody {
   strategyName: string;

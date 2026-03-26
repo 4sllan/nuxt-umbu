@@ -1,17 +1,15 @@
 {
   "name": "nuxt-umbu",
-  "version": "1.0.1",
+  "version": "0.0.3",
   "description": "Authentication module simple for Nuxt.js",
   "repository": "https://github.com/4sllan/nuxt-umbu",
   "author": "Aslan Gama <@4slan>",
   "keywords": [
-    "Nuxt 3 authentication",
-    "Nuxt 4 authentication",
+    "Nuxt authentication",
     "Laravel Passport integration",
     "Nuxt authentication module",
     "Server-side authentication Nuxt",
-    "Nuxt 3 2FA support",
-    "Nuxt 4 2FA support",
+    "Nuxt 2FA support",
     "Secure cookies authentication",
     "Nuxt httpOnly cookies",
     "OAuth authentication Nuxt"
@@ -44,8 +42,9 @@
     "dev:passport": "nuxi dev playground -c nuxt.passport.config.ts",
     "dev:sanctum": "nuxi dev playground -c nuxt.sanctum.config.ts",
     "dev:prepare": "nuxt-module-build --stub",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
+    "test": "vitest run --reporter=verbose --silent=false",
+    "test:watch": "vitest watch --reporter=verbose --silent=false",
+    "test:debug": "vitest --inspect-brk --reporter=verbose --silent=false",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

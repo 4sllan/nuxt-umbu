@@ -1,4 +1,4 @@
-import type { ModuleOptions } from '../types';
+import type { ModuleOptions } from '#auth-types';
 import { useRuntimeConfig } from '#imports';
 
 export const useAuthConfig = (): ModuleOptions & { twoFactorAuth: boolean } => {
