@@ -148,7 +148,7 @@ describe('Utils', () => {
           if (Array.isArray(cfg.handler)) {
             if (key === 'user') {
               const userEndpoint = cfg.endpoints?.user
-              if (!userEndpoint) return null
+              if (!userEndpoint) {return null}
 
               return typeof userEndpoint === 'string'
                 ? { url: userEndpoint, method: 'GET' }
@@ -160,7 +160,7 @@ describe('Utils', () => {
           }
 
           const endpoint = cfg.endpoints?.[key]
-          if (!endpoint) return null
+          if (!endpoint) {return null}
 
           return typeof endpoint === 'string'
             ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
@@ -199,7 +199,7 @@ describe('Utils', () => {
           const cfg = mockConfig.strategies?.[strategyName]
 
           const endpoint = cfg.endpoints?.[key]
-          if (!endpoint) return null
+          if (!endpoint) {return null}
 
           return typeof endpoint === 'string'
             ? { url: endpoint, method: key === 'login' || key === 'logout' || key === '2fa' ? 'POST' : 'GET' }
@@ -234,7 +234,7 @@ describe('Utils', () => {
           const cfg = mockConfig.strategies?.[strategyName]
 
           const endpoint = cfg.endpoints?.[key]
-          if (!endpoint) return null
+          if (!endpoint) {return null}
 
           return typeof endpoint === 'string'
             ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
@@ -256,7 +256,7 @@ describe('Utils', () => {
 
         const getEndpoint = (strategyName: string, key: string) => {
           const cfg = mockConfig.strategies?.[strategyName]
-          if (!cfg) return null
+          if (!cfg) {return null}
           return null
         }
 
