@@ -1,8 +1,10 @@
 import {
     defineNuxtPlugin,
     useRequestEvent,
+    useCookie,
     useUmbuUtils,
     createError,
+    $autx,
 } from '#imports';
 import { parseCookies } from 'h3';
 import { $fetch } from 'ofetch';
@@ -17,31 +19,53 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         getEndpoint,
         extractUser,
         clearAuthData,
-        handleRedirect
+        handleRedirect,
+        getRedirect
     } = useUmbuUtils();
 
     const prefix = config.cookie.prefix;
-    const authHeaders = new Headers();
+    const $headers = new Headers();
 
     /**
-     * Busca o perfil do usuário e atualiza o estado global
+     * Inicializa a proteção CSRF do Sanctum
      */
-    const fetchProfile = async (strategyName: string, token?: string): Promise<ProfileResponse | null> => {
+    const csrfToken = async (): Promise<boolean> => {
+        if (import.meta.server) return false;
+
+        const csrfEndpoint = config.csrf;
+        if (!csrfEndpoint) return false;
+
+        try {
+            await $fetch(csrfEndpoint, {
+                baseURL: publicConfig.baseURL,
+                credentials: 'include',
+            });
+
+            const xsrf = useCookie<string | null>('XSRF-TOKEN').value;
+            if (!xsrf) throw new Error('Invalid CSRF response: Missing token.');
+
+            $headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
+            $headers.set('Accept', 'application/json');
+
+            return true;
+        } catch (error) {
+            console.error('[Umbu-Sanctum] CSRF Error:', error instanceof Error ? error.message : error);
+            return false;
+        }
+    };
+
+    /**
+     * Busca o perfil do usuário (Sanctum usa cookies/sessão)
+     */
+    const fetchProfile = async (strategyName: string): Promise<ProfileResponse | null> => {
+        if (import.meta.server) return null;
+
         const endpoint = getEndpoint(strategyName, 'user');
         if (!endpoint?.url) return null;
 
-        if (token) {
-            authHeaders.set('Authorization', token);
-        }
-
         try {
-            const data = await $fetch<ProfileResponse>(endpoint.url, {
-                baseURL: publicConfig.baseURL,
-                method: endpoint.method || 'GET',
-                headers: {
-                    ...Object.fromEntries(authHeaders.entries()),
-                    'Content-Type': 'application/json',
-                },
+            const data = await $autx<ProfileResponse>(endpoint.url, {
+                method: endpoint.method,
             });
 
             store.value = {
@@ -52,7 +76,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
             return data;
         } catch (error: any) {
-            clearAuthData(prefix);
             throw createError({
                 statusCode: error.statusCode || 401,
                 statusMessage: 'Access denied',
@@ -61,104 +84,115 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     };
 
     /**
-     * Realiza o login via Passport (OAuth2 Grant)
+     * Login Sanctum: Primeiro garante o CSRF, depois autentica
      */
-    const loginWith = async (strategyName: string, credentials: any) => {
-        const endpoint = getEndpoint(strategyName, 'login');
-        if (!endpoint?.url) throw new Error(`Login endpoint missing for: ${strategyName}`);
+    const loginWith = async (strategyName: string, value: any) => {
+        const xsrf = useCookie<string | null>('XSRF-TOKEN').value;
 
-        const response = await $fetch<AuthResponse>(endpoint.url, {
-            method: endpoint.method || 'POST',
-            body: { strategyName, value: credentials },
-        });
-
-        if (!response.token) throw new Error('Token is missing in the response');
-
-        if (import.meta.client) {
-            localStorage.setItem(`${prefix}_token.${strategyName}`, response.token);
-            localStorage.setItem(`${prefix}strategy`, strategyName);
-            if (response.expires) {
-                localStorage.setItem(`${prefix}_token_expiration.${strategyName}`, response.expires);
-            }
+        if (!xsrf) {
+            const ok = await csrfToken();
+            if (!ok) throw new Error('Could not initialize CSRF protection.');
         }
 
-        await fetchProfile(strategyName, response.token);
-        await handleRedirect(strategyName, 'login');
+        const endpoint = getEndpoint(strategyName, 'login');
+        if (!endpoint?.url) throw new Error(`Login endpoint missing: ${strategyName}`);
 
-        return response;
+        await $autx<AuthResponse>(endpoint.url, {
+            method: endpoint.method || 'POST',
+            body: value,
+        });
+
+        useCookie(`${prefix}strategy`).value = strategyName;
+        const user = await fetchProfile(strategyName);
+
+        await handleRedirect(strategyName, 'login');
+        return { success: true, user };
     };
 
     /**
-     * Encerra a sessão e limpa os dados locais
+     * Logout Sanctum
      */
     const logout = async (strategyName: string) => {
         const endpoint = getEndpoint(strategyName, 'logout');
 
-        if (endpoint?.url) {
-            await $fetch(endpoint.url, {
-                method: endpoint.method || 'POST',
-                body: { strategyName }
-            }).catch(() => {});
+        try {
+            if (endpoint?.url) {
+                await $fetch(endpoint.url, {
+                    baseURL: publicConfig.baseURL,
+                    credentials: 'include',
+                    method: endpoint.method || 'POST',
+                    headers: Object.fromEntries($headers.entries()),
+                    body: { strategyName },
+                });
+            }
+        } catch (error) {
+            console.error('[Umbu-Sanctum] Logout failed:', error);
+        } finally {
+            clearAuthData(prefix);
+            await handleRedirect(strategyName, 'logout');
         }
-
-        clearAuthData(prefix);
-        await handleRedirect(strategyName, 'logout');
     };
 
     /**
-     * Fluxo de Segundo Fator de Autenticação
+     * Segundo fator de autenticação para Sanctum
      */
-    const _2fa = async (strategyName: string, code: string) => {
+    const twoFactor = async (strategyName: string, code: string) => {
         const endpoint = getEndpoint(strategyName, '2fa');
         if (!endpoint?.url) throw new Error('2FA endpoint not found');
 
-        const response = await $fetch<{ token?: string }>(endpoint.url, {
+        const response = await $autx<{ access_token?: string }>(endpoint.url, {
             method: endpoint.method || 'POST',
             body: { strategyName, code },
         });
 
-        if (response?.token) {
-            authHeaders.set('2fa', response.token);
-            if (import.meta.client) {
-                localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.token);
-            }
+        if (response?.access_token && import.meta.client) {
+            localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.access_token);
         }
 
-        return { success: !!response?.token };
+        return { success: !!response?.access_token };
     };
 
-    // --- Inicialização Automática ---
+    // --- Inicialização da Sessão ---
     let strategy: string | null = null;
-    let token: string | null = null;
+    let xsrf: string | null = null;
 
     if (import.meta.server) {
         const event = useRequestEvent();
         if (event) {
-            const cookies = parseCookies(event);
-            strategy = cookies[`${prefix}strategy`];
-            token = strategy ? cookies[`${prefix}_token.${strategy}`] : null;
+            const cookies = parseCookies(event as any);
+            strategy = cookies[`${prefix}strategy`] ?? null;
+            xsrf = cookies['XSRF-TOKEN'] ?? null;
         }
     } else {
-        strategy = localStorage.getItem(`${prefix}strategy`);
-        token = strategy ? localStorage.getItem(`${prefix}_token.${strategy}`) : null;
+        strategy = useCookie<string | null>(`${prefix}strategy`).value;
+        xsrf = useCookie<string | null>('XSRF-TOKEN').value;
     }
 
-    if (strategy && token) {
-        await fetchProfile(strategy, token).catch(() => {
-            console.warn('[Umbu-Passport] Session expired or invalid.');
+    if (xsrf) {
+        $headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
+    }
+
+    if (strategy && xsrf) {
+        await fetchProfile(strategy).catch(() => {
+            console.warn('[Umbu-Sanctum] Session invalid on init.');
         });
+    } else {
+        // Tenta obter o token CSRF preventivamente se estiver no cliente
+        await csrfToken().catch(() => {});
     }
 
-    // Interface Reativa Exposta
+    // Interface Reativa
     const auth = {
         get user() { return store.value.user },
         get loggedIn() { return store.value.loggedIn },
         get strategy() { return store.value.strategy },
-        get headers() { return authHeaders },
+        get headers() { return $headers },
         get prefix() { return prefix },
+        getRedirect,
         loginWith,
         logout,
-        _2fa,
+        twoFactor,
+        csrfToken,
         fetchProfile
     };
 
