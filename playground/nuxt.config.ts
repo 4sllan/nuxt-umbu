@@ -77,7 +77,10 @@ export default defineNuxtConfig({
                         method: "get",
                         property: "profile"
                     },
-                    twoFactor: {url: "/api/send-token-2fa", method: "post"},
+                    twoFactor: {
+                        url: "/api/send-token-2fa",
+                        method: "post"
+                    },
                     logout: {alias: 'logout client'}
                 },
             }
