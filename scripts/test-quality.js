@@ -13,7 +13,7 @@ function analyzeTestQuality() {
   
   if (!existsSync(testDir)) {
     console.log('❌ Test directory not found')
-    return
+    process.exit(1)
   }
 
   try {
@@ -76,6 +76,13 @@ function analyzeTestQuality() {
       }
     })
 
+    const allChecksPassed = checks.every(check => check.passed)
+
+    if (!allChecksPassed) {
+      console.log('\\n❌ Some quality checks failed. Exiting with error code.')
+      process.exit(1)
+    }
+
     // Recommendations
     console.log('\\n💡 Recommendations:')
     
@@ -106,6 +113,7 @@ function analyzeTestQuality() {
 
   } catch (error) {
     console.error('❌ Error analyzing test quality:', error)
+    process.exit(1)
   }
 }
 

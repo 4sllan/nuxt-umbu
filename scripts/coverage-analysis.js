@@ -14,7 +14,7 @@ function analyzeCoverage() {
   if (!existsSync(coveragePath)) {
     console.log('❌ Coverage report not found. Run tests with coverage first:')
     console.log('   npm run test:coverage')
-    return
+    process.exit(1)
   }
 
   try {
@@ -112,6 +112,8 @@ function analyzeCoverage() {
       console.log('   - Test edge cases and error conditions')
       console.log('   - Add integration tests for complex workflows')
       console.log('   - Test middleware and helper functions')
+      console.log('\\n❌ Coverage thresholds not met. Exiting with error code.')
+      process.exit(1)
     }
 
     console.log('\\n📁 Detailed reports available at:')
@@ -120,6 +122,7 @@ function analyzeCoverage() {
     console.log('   - JSON: ./coverage/coverage-summary.json')
   } catch (error) {
     console.error('❌ Error analyzing coverage:', error)
+    process.exit(1)
   }
 }
 
