@@ -50,7 +50,6 @@
     "format:check": "prettier --check .",
     "test:coverage": "vitest run --coverage --reporter=verbose",
     "test:coverage:stable": "vitest run --coverage --reporter=verbose test/module.test.ts test/composables.test.ts",
-    "test:ui": "vitest --ui",
     "test:quality": "node scripts/test-quality.js",
     "test:analyze": "node scripts/coverage-analysis.js",
     "test:full": "pnpm test:coverage && pnpm test:analyze",
