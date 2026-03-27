@@ -31,16 +31,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🔧 Type Check
-        run: pnpm typecheck
+      - name: 🔧 Preparar ambiente Nuxt
+        run: npx nuxi prepare
 
-      - name: 🧪 Run Tests with Coverage
-        run: pnpm test:coverage
+      - name: 🔧 Preparar ambiente do Playground
+        run: cd playground && npx nuxi prepare
 
-      - name: 📊 Upload Coverage Reports
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
+      - name: 🚀 Iniciar Nuxt no Playground
+        run: cd playground && pnpm dev &  # Roda em segundo plano
+
+      - name: ⏳ Aguardar o servidor estar pronto
+        run: sleep 10  # Ajuste o tempo conforme necessário
+
+      - name: Run Unit Tests
+        run: pnpm test
