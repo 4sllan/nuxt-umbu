@@ -34,10 +34,6 @@ export default defineNuxtRouteMiddleware(async () => {
     if (!validateSession(strategyName, token, expires)) {
       return await handleLogout(strategyName, getRedirectPath(strategyName), 'auth');
     }
-
-    if (token) {
-      $auth.headers.set('Authorization', token);
-    }
   }
 
   if (import.meta.client) {
@@ -55,12 +51,5 @@ export default defineNuxtRouteMiddleware(async () => {
       return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
     }
 
-    if (token) {
-      $auth.headers.set('Authorization', token);
-    }
-
     if (!$auth.user || !$auth.loggedIn || !store.value.user || !store.value.loggedIn) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
-    }
-  }
-});
+      return await handleLogout(strategy, getRedirectPath(strategy), 'auth
