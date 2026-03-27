@@ -6,6 +6,7 @@ import {
 } from '#imports';
 import {parseCookies} from 'h3';
 import {$fetch} from 'ofetch';
+import {syncHeaders} from '#auth-utils';
 
 import type {ProfileResponse, AuthResponse} from '#auth-types';
 
@@ -15,6 +16,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         config,
         getRedirect,
         publicConfig,
+        getStrategyConfig,
         getEndpoint,
         extractUser,
         clearAuthData,
@@ -27,14 +29,13 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     /**
      * Busca o perfil do usuário e atualiza o estado global
      */
-    const fetchProfile = async (strategyName: string, token?: string): Promise<ProfileResponse | null> => {
+    const fetchProfile = async (strategyName: string, token?: string, t2fa?: string): Promise<ProfileResponse | null> => {
         const endpoint = getEndpoint(strategyName, 'user');
 
         if (!endpoint?.url) return null;
 
-        if (token) {
-            $headers.set('Authorization', token);
-        }
+        // Sincroniza os headers antes da chamada
+        syncHeaders($headers, token, t2fa, config, getStrategyConfig(strategyName));
 
         try {
             const data = await $fetch<ProfileResponse>(endpoint.url, {
@@ -125,7 +126,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             throw new Error('Invalid Two Factor Auth response');
         }
 
-        $headers.set('2fa', response.token);
+        syncHeaders($headers, null, response.token, config, getStrategyConfig(strategyName));
         if (import.meta.client) {
             localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.token);
             localStorage.setItem(`${prefix}_2fa_expiration.${strategyName}`, response.expires);
@@ -137,21 +138,24 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     // --- Inicialização Automática ---
     let strategy: string | null = null;
     let token: string | null = null;
+    let t2fa: string | null = null;
 
     if (import.meta.server) {
         const event = useRequestEvent();
         if (event) {
             const cookies = parseCookies(event);
-            strategy = cookies[`${prefix}strategy`];
-            token = strategy ? cookies[`${prefix}_token.${strategy}`] : null;
+            strategy = cookies[`${prefix}strategy`] || null;
+            token = strategy ? (cookies[`${prefix}_token.${strategy}`] ?? null) : null;
+            t2fa = strategy ? (cookies[`${prefix}_2fa.${strategy}`] ?? null) : null;
         }
     } else {
         strategy = localStorage.getItem(`${prefix}strategy`);
         token = strategy ? localStorage.getItem(`${prefix}_token.${strategy}`) : null;
+        t2fa = strategy ? localStorage.getItem(`${prefix}_2fa.${strategy}`) : null;
     }
 
     if (strategy && token) {
-        await fetchProfile(strategy, token).catch(() => {
+        await fetchProfile(strategy, token, t2fa).catch(() => {
             console.warn('[Umbu-Passport] Session expired or invalid.');
         });
     }

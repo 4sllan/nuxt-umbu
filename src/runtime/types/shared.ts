@@ -21,6 +21,7 @@ export type AuthOptionsCookie = {
 export type RedirectOptions = {
   login?: string; // URL to redirect after login (optional)
   logout: string; // URL to redirect after logout (required)
+  twoFactor?: string; // URL to redirect after two-factor authentication (optional)
   callback?: string; // URL for callback after external authentication (optional)
   home?: string; // URL to redirect after successful login (optional)
 };
