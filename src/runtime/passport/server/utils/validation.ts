@@ -11,11 +11,17 @@ export interface TokenResponse {
 /**
  * Validates token response structure.
  * @param response The response object to validate.
+ * @param isRefresh Whether this is a refresh token flow (refresh_token is optional).
  * @throws An error if the response is invalid.
  */
-export function validateTokenResponse(response: any): void {
-  if (!response?.access_token || !response?.refresh_token || !response?.expires_in) {
+export function validateTokenResponse(response: any, isRefresh: boolean = false): void {
+  if (!response?.access_token || !response?.expires_in) {
     throw createError({ statusCode: 502, statusMessage: 'Invalid token response' });
+  }
+  
+  // refresh_token is optional for refresh flows (many OAuth providers don't return it)
+  if (!isRefresh && !response?.refresh_token) {
+    throw createError({ statusCode: 502, statusMessage: 'Invalid token response: missing refresh_token' });
   }
 }
 
@@ -67,7 +73,11 @@ export function formatTokenResponse(response: any): TokenResponse {
   const token = 'Bearer ' + response.access_token;
   const expires = Date.now() + response.expires_in * 1000;
 
-  return { token, refresh_token: response.refresh_token, expires };
+  return { 
+    token, 
+    refresh_token: response.refresh_token || '', // optional for refresh flows
+    expires 
+  };
 }
 
 /**

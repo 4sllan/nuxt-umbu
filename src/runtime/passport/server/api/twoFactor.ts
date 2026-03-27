@@ -19,10 +19,11 @@ export default defineEventHandler(async (event) => {
   try {
     await protectedMiddleware(event);
     const body = await readBody<RequestBody>(event);
-    if (!body?.strategyName || !body?.code) {
+    if (!body?.strategyName || !body?.code || 
+        typeof body.strategyName !== 'string' || typeof body.code !== 'string') {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required parameters: strategyName or code',
+        statusMessage: 'Missing or invalid parameters: strategyName and code must be strings',
       });
     }
 
@@ -36,8 +37,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const token = getCookie(event, authConfig.prefix + '_token.' + body.strategyName) || '';
-
+    const token = getCookie(event, authConfig.prefix + '_token.' + body.strategyName);
+    if (!token) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Authentication token missing',
+      });
+    }
     const response: Get2FAResponse = await makeAuthRequest<Get2FAResponse>(
       strategy.endpoints.twoFactor.url,
       authConfig.baseURL,
@@ -47,9 +53,8 @@ export default defineEventHandler(async (event) => {
         headers: {
           Authorization: token,
         },
-        onRequest({ options }) {
-          options.headers = options.headers || {};
-          setHeader(event, 'Authorization', token);
+        onRequest() {
+          // no-op: avoid leaking Authorization to response headers
         },
       }
     );
