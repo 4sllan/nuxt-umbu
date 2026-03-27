@@ -106,6 +106,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             });
         }
 
+        // Clear authentication headers
+        $headers.delete('Authorization');
+        const headerNameT2fa = getStrategyConfig(strategyName)?.endpoints?.twoFactor?.headerName || '2fa';
+        $headers.delete(headerNameT2fa);
+
         clearAuthData(prefix);
         await handleRedirect(strategyName, 'logout');
     };
