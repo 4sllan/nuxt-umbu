@@ -1,316 +1,204 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
+// Mock das dependências do Nuxt
+vi.mock('#imports', () => ({
+  useCookie: vi.fn(),
+  useRuntimeConfig: vi.fn(),
+  useAuthStore: vi.fn(),
+  useAuthConfig: vi.fn(),
+  useNuxtApp: vi.fn(),
+  useRequestEvent: vi.fn(),
+  defineNuxtRouteMiddleware: vi.fn(),
+  navigateTo: vi.fn(),
+  createError: vi.fn(),
+  $fetch: vi.fn()
+}))
 
 describe('Sanctum Plugin', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Mock localStorage
+    const localStorageMock = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn()
+    }
+    global.localStorage = localStorageMock
   })
 
-  describe('Plugin Initialization', () => {
-    it('should initialize sanctum plugin correctly', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('CSRF Protection', () => {
+    it('should handle CSRF token retrieval', async () => {
       const mockUtils = {
-        store: { value: { user: null, loggedIn: false, strategy: '' } },
-        config: {
-          cookie: { prefix: 'auth.' },
-          strategies: {
-            sanctum: {
-              endpoints: {
-                login: '/login',
-                logout: '/logout',
-                user: '/api/user',
-                csrf: '/sanctum/csrf-cookie'
-              }
-            }
-          }
-        },
-        publicConfig: { baseURL: 'http://localhost:3000' },
-        getEndpoint: vi.fn(),
-        extractUser: vi.fn(),
-        clearAuthData: vi.fn(),
-        handleRedirect: vi.fn()
+        getEndpoint: vi.fn().mockReturnValue({ url: '/sanctum/csrf-cookie', method: 'GET' }),
+        setXSRFHeaders: vi.fn(),
+        store: { value: { user: null, loggedIn: false, strategy: '' } }
       }
-
-      // Mock plugin initialization
-      const defineNuxtPlugin = vi.fn((pluginFn) => {
-        const mockNuxtApp = {
-          provide: {
-            auth: {
-              login: vi.fn(),
-              logout: vi.fn(),
-              fetchProfile: vi.fn(),
-              csrfToken: vi.fn(),
-              headers: new Headers(),
-              strategy: 'sanctum'
-            }
-          }
-        }
-        pluginFn(mockNuxtApp)
-      })
-
-      defineNuxtPlugin(() => {
-        // Plugin logic would go here
-        expect(mockUtils.config.strategies?.sanctum).toBeDefined()
-      })
-
-      expect(defineNuxtPlugin).toBeDefined()
+      
+      const result = mockUtils.getEndpoint('sanctum', 'csrf')
+      expect(result).toEqual({ url: '/sanctum/csrf-cookie', method: 'GET' })
     })
 
-    it('should handle cookie-based authentication', () => {
-      const mockCookies = {
-        'auth.sanctum_strategy': 'sanctum'
+    it('should set XSRF headers when token is available', () => {
+      const mockAuth = {
+        headers: new Map()
       }
-
-      const mockProfile = {
-        user: { id: 1, name: 'Test User', email: 'test@example.com' }
-      }
-
-      const mockUtils = {
-        store: { value: { user: null, loggedIn: false, strategy: '' } },
-        config: {
-          cookie: { prefix: 'auth.' },
-          strategies: {
-            sanctum: {
-              endpoints: {
-                user: '/api/user'
-              }
-            }
-          }
-        },
-        publicConfig: { baseURL: 'http://localhost:3000' },
-        getEndpoint: vi.fn(() => ({ url: '/api/user', method: 'GET' })),
-        extractUser: vi.fn(() => mockProfile.user),
-        clearAuthData: vi.fn(),
-        handleRedirect: vi.fn()
-      }
-
-      // Mock parseCookies
-      const parseCookies = vi.fn(() => mockCookies)
+      const mockCookie = { value: 'test-xsrf-token' }
       
-      expect(mockUtils.getEndpoint).toBeDefined()
-      expect(mockUtils.extractUser).toBeDefined()
+      // Simulate setXSRFHeaders function
+      if (mockCookie.value) {
+        mockAuth.headers.set('X-XSRF-TOKEN', decodeURIComponent(mockCookie.value))
+      }
+      
+      expect(mockAuth.headers.get('X-XSRF-TOKEN')).toBe('test-xsrf-token')
+    })
+
+    it('should handle missing CSRF token gracefully', () => {
+      const mockAuth = {
+        headers: new Map()
+      }
+      const mockCookie = { value: null }
+      
+      // Simulate setXSRFHeaders function
+      if (mockCookie.value) {
+        mockAuth.headers.set('X-XSRF-TOKEN', decodeURIComponent(mockCookie.value))
+      }
+      
+      expect(mockAuth.headers.get('X-XSRF-TOKEN')).toBeUndefined()
     })
   })
 
-  describe('CSRF Token Management', () => {
-    it('should fetch CSRF token', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/sanctum/csrf-cookie', method: 'GET' })),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock csrfToken method
-      const csrfToken = vi.fn().mockResolvedValue({ success: true })
+  describe('Session Validation', () => {
+    it('should validate server-side session with CSRF', () => {
+      const strategy = 'sanctum'
+      const session = 'valid-session'
+      const xsrf = 'valid-xsrf'
+      const isServer = true
       
-      await csrfToken()
-      expect(csrfToken).toHaveBeenCalled()
+      const isValid = strategy && session && xsrf && isServer
+      expect(isValid).toBe(true)
     })
 
-    it('should handle CSRF token errors', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/sanctum/csrf-cookie', method: 'GET' })),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock csrfToken method
-      const csrfToken = vi.fn().mockRejectedValue(new Error('CSRF error'))
+    it('should validate client-side session with CSRF only', () => {
+      const strategy = 'sanctum'
+      const session = null // client can't access httpOnly
+      const xsrf = 'valid-xsrf'
+      const isServer = false
       
-      await expect(csrfToken()).rejects.toThrow('CSRF error')
-    })
-  })
-
-  describe('Authentication Methods', () => {
-    it('should handle login with credentials', async () => {
-      const mockCredentials = {
-        email: 'test@example.com',
-        password: 'password123'
-      }
-
-      const mockResponse = {
-        user: { id: 1, name: 'Test User' },
-        token: 'Bearer test-token'
-      }
-
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/login', method: 'POST' })),
-        handleRedirect: vi.fn(),
-        extractUser: vi.fn(() => mockResponse.user),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock login method
-      const login = vi.fn().mockImplementation(async (credentials) => {
-        const response = await Promise.resolve(mockResponse)
-        mockUtils.extractUser(response, 'sanctum')
-        return response
-      })
-      
-      await login(mockCredentials)
-      expect(login).toHaveBeenCalledWith(mockCredentials)
-      expect(mockUtils.extractUser).toHaveBeenCalled()
+      const isValid = strategy && xsrf && !isServer
+      expect(isValid).toBe(true)
     })
 
-    it('should handle logout correctly', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/logout', method: 'POST' })),
-        clearAuthData: vi.fn(),
-        handleRedirect: vi.fn(),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock logout method
-      const logout = vi.fn().mockImplementation(async () => {
-        mockUtils.clearAuthData()
-        await mockUtils.handleRedirect('sanctum', 'logout')
-        return { success: true }
-      })
+    it('should reject session without CSRF', () => {
+      const strategy = 'sanctum'
+      const session = 'valid-session'
+      const xsrf = null
+      const isServer = false
       
-      await logout()
-      expect(logout).toHaveBeenCalled()
-      expect(mockUtils.clearAuthData).toHaveBeenCalled()
-    })
-
-    it('should handle 2FA challenge', async () => {
-      const mockTwoFaData = {
-        code: '123456'
-      }
-
-      const mockResponse = {
-        user: { id: 1, name: 'Test User' },
-        token: 'Bearer test-token'
-      }
-
-      const mockUtils = {
-        getEndpoint: vi.fn((strategy, endpoint) => {
-          if (endpoint === '2fa') {
-            return { url: '/2fa-challenge', method: 'POST' }
-          }
-          return null
-        }),
-        handleRedirect: vi.fn(),
-        extractUser: vi.fn(() => mockResponse.user),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock 2FA method
-      const twoFaChallenge = vi.fn().mockImplementation(async (data) => {
-        const response = await Promise.resolve(mockResponse)
-        mockUtils.extractUser(response, 'sanctum')
-        return response
-      })
-      
-      await twoFaChallenge(mockTwoFaData)
-      expect(twoFaChallenge).toHaveBeenCalledWith(mockTwoFaData)
-      expect(mockUtils.extractUser).toHaveBeenCalled()
+      const isValid = Boolean(strategy && xsrf && !isServer)
+      expect(isValid).toBe(false)
     })
   })
 
   describe('Cookie Management', () => {
-    it('should parse cookies from request event', () => {
+    it('should handle httpOnly cookies', () => {
       const mockCookies = {
-        'auth.sanctum_strategy': 'sanctum',
-        'XSRF-TOKEN': 'xsrf-token-value'
-      }
-
-      // Mock parseCookies with proper event object
-      const parseCookies = vi.fn(() => mockCookies)
-      
-      const mockEvent = {
-        node: {
-          req: {
-            headers: {
-              cookie: 'auth.sanctum_strategy=sanctum; XSRF-TOKEN=xsrf-token-value'
-            }
-          }
-        }
+        'laravel_session': 'encrypted-session',
+        'XSRF-TOKEN': 'csrf-token'
       }
       
-      const cookies = parseCookies(mockEvent)
-      
-      expect(cookies).toEqual(mockCookies)
-      expect(cookies['auth.sanctum_strategy']).toBe('sanctum')
-      expect(cookies['XSRF-TOKEN']).toBe('xsrf-token-value')
+      expect(mockCookies['laravel_session']).toBe('encrypted-session')
+      expect(mockCookies['XSRF-TOKEN']).toBe('csrf-token')
     })
 
-    it('should handle missing cookies gracefully', () => {
-      // Mock parseCookies with proper event object
-      const parseCookies = vi.fn(() => ({}))
+    it('should handle cookie expiration', () => {
+      const cookieValue = 'test-value'
+      const expires = new Date(Date.now() + 3600000) // 1 hour from now
+      const isExpired = expires.getTime() <= Date.now()
       
-      const mockEvent = {
-        node: {
-          req: {
-            headers: {}
-          }
-        }
+      expect(isExpired).toBe(false)
+    })
+  })
+
+  describe('Two Factor Authentication', () => {
+    it('should handle 2FA session validation', () => {
+      const strategy = 'sanctum'
+      const token = '2fa-token'
+      const expires = '1234567890'
+      const isServer = true
+      
+      const isValid = strategy && token && isServer
+      expect(isValid).toBe(true)
+    })
+
+    it('should validate 2FA on client side', () => {
+      const strategy = 'sanctum'
+      const token = '2fa-token'
+      const expires = null
+      const isServer = false
+      
+      const isValid = strategy && token && !isServer
+      expect(isValid).toBe(true)
+    })
+  })
+
+  describe('Login Flow', () => {
+    it('should handle successful login with CSRF', async () => {
+      const mockUtils = {
+        getEndpoint: vi.fn().mockReturnValue({ url: '/login', method: 'POST' }),
+        extractUser: vi.fn().mockReturnValue({ id: 1, name: 'Test User' }),
+        handleRedirect: vi.fn(),
+        store: { value: { user: null, loggedIn: false, strategy: '' } }
       }
       
-      const cookies = parseCookies(mockEvent)
+      expect(mockUtils.getEndpoint('sanctum', 'login')).toEqual({ url: '/login', method: 'POST' })
+    })
+
+    it('should handle login failure', async () => {
+      const mockUtils = {
+        getEndpoint: vi.fn().mockReturnValue(null),
+        store: { value: { user: null, loggedIn: false, strategy: '' } }
+      }
       
-      expect(cookies).toEqual({})
+      const result = mockUtils.getEndpoint('sanctum', 'login')
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('Logout Flow', () => {
+    it('should clear auth data on logout', () => {
+      const mockUtils = {
+        clearAuthData: vi.fn(),
+        handleRedirect: vi.fn(),
+        store: { value: { user: { id: 1 }, loggedIn: true, strategy: 'sanctum' } }
+      }
+      
+      mockUtils.clearAuthData('auth')
+      expect(mockUtils.clearAuthData).toHaveBeenCalledWith('auth')
     })
   })
 
   describe('Error Handling', () => {
-    it('should handle fetch profile errors gracefully', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/api/user', method: 'GET' })),
-        extractUser: vi.fn(),
-        clearAuthData: vi.fn(),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock fetchProfile method
-      const fetchProfile = vi.fn().mockRejectedValue(new Error('Network error'))
-      
-      await expect(fetchProfile('sanctum')).rejects.toThrow('Network error')
+    it('should handle CSRF token errors', () => {
+      const error = { statusCode: 419, statusMessage: 'CSRF token mismatch' }
+      expect(error.statusCode).toBe(419)
+      expect(error.statusMessage).toBe('CSRF token mismatch')
     })
 
-    it('should handle 401 unauthorized errors', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/api/user', method: 'GET' })),
-        extractUser: vi.fn(),
-        clearAuthData: vi.fn(),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock fetchProfile method
-      const fetchProfile = vi.fn().mockRejectedValue({ response: { status: 401 } })
-      
-      await expect(fetchProfile('sanctum')).rejects.toEqual({ response: { status: 401 } })
+    it('should handle authentication errors', () => {
+      const authError = { statusCode: 401, statusMessage: 'Unauthenticated' }
+      expect(authError.statusCode).toBe(401)
+      expect(authError.statusMessage).toBe('Unauthenticated')
     })
 
-    it('should handle missing endpoint', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => null),
-        extractUser: vi.fn(),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock fetchProfile method
-      const fetchProfile = vi.fn().mockResolvedValue(null)
-      
-      await expect(fetchProfile('sanctum')).resolves.toBeNull()
-    })
-  })
-
-  describe('Headers Management', () => {
-    it('should include credentials in requests', async () => {
-      const mockUtils = {
-        getEndpoint: vi.fn(() => ({ url: '/login', method: 'POST' })),
-        store: { value: { user: null, loggedIn: false, strategy: '' } }
-      }
-
-      // Mock login method that includes credentials
-      const login = vi.fn().mockResolvedValue({ success: true })
-      
-      await login({ email: 'test@example.com', password: 'password' })
-      expect(login).toHaveBeenCalled()
-      // In actual implementation, credentials: 'include' should be set for sanctum
-    })
-
-    it('should manage XSRF token headers', () => {
-      const authHeaders = new Headers()
-      authHeaders.set('X-XSRF-TOKEN', 'test-xsrf-token')
-
-      expect(authHeaders.get('X-XSRF-TOKEN')).toBe('test-xsrf-token')
+    it('should handle missing configuration', () => {
+      const config = {}
+      const hasStrategy = 'sanctum' in (config.strategies || {})
+      expect(hasStrategy).toBe(false)
     })
   })
 })

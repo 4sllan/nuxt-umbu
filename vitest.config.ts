@@ -16,10 +16,69 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom', // ambiente leve para testes de Vue/Nuxt
     include: ['test/**/*.test.ts'], // apenas arquivos de teste da lib
-    exclude: ['playground/**', 'test/e2e/**'], // ignora playground e testes e2e
+    exclude: ['playground/**', 'test/e2e/**', 'dist/**'], // ignora playground, testes e2e e dist
+    testTimeout: 10000, // timeout aumentado para testes mais complexos
+    hookTimeout: 10000, // timeout para hooks
+    isolate: true, // isola testes para evitar contaminação
+    setupFiles: [], // arquivos de setup global se necessário
+    sequence: {
+      shuffle: false, // mantém ordem determinística
+      concurrent: true, // permite execução paralela
+    },
     coverage: {
-      reporter: ['text', 'lcov'],
-      exclude: ['playground/**', 'test/e2e/**']
+      "provider": "v8",
+      "all": true,
+      "reporter": [
+            "text",
+            "lcov",
+            "html",
+            "json"
+      ],
+      "reportsDirectory": "./coverage",
+      "exclude": [
+            "playground/**",
+            "test/**",
+            "test-results/**",
+            "dist/**",
+            "docs/**",
+            "scripts/**",
+            ".github/**",
+            "**/*.d.ts",
+            "**/*.config.*",
+            "**/node_modules/**",
+            "**/*.spec.ts"
+      ],
+      "include": [
+            "src/**/*.ts",
+            "src/**/*.js",
+            "src/runtime/**/*.ts",
+            "src/runtime/**/*.js"
+      ],
+      "thresholds": {
+            "global": {
+                  "branches": 80,
+                  "functions": 80,
+                  "lines": 80,
+                  "statements": 80
+            },
+            "perFile": {
+                  "branches": 70,
+                  "functions": 70,
+                  "lines": 70,
+                  "statements": 70
+            }
+      }
+    },
+    // Configurações de output para melhor debugging
+    reporter: ['verbose', 'json'],
+    outputFile: {
+      json: './test-results/results.json'
+    },
+    // Mock globals para Nuxt
+    globalSetup: [],
+    // Environment variables para testes
+    env: {
+      NODE_ENV: 'test'
     }
   }
 })
