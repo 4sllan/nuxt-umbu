@@ -7,9 +7,11 @@ export default defineConfig({
   resolve: {
     alias: {
       // Resolve imports de Nuxt 4 dentro da lib
-      '#imports': join(__dirname, 'src'),
+      '#imports': join(__dirname, 'test/mocks/imports.ts'),
       '#runtime': join(__dirname, 'src/runtime'),
-      '#modules': join(__dirname, 'src/module.ts')
+      '#modules': join(__dirname, 'src/module.ts'),
+      '#auth-utils': join(__dirname, 'test/mocks/auth-utils.ts'),
+      '#auth-types': join(__dirname, 'src/templates/auth-types.ts')
     }
   },
   test: {
@@ -26,7 +28,7 @@ export default defineConfig({
       concurrent: true, // permite execução paralela
     },
     coverage: {
-      "provider": "v8",
+      "provider": "istanbul",
       "all": true,
       "reporter": [
             "text",
@@ -43,16 +45,15 @@ export default defineConfig({
             "docs/**",
             "scripts/**",
             ".github/**",
+            "src/runtime/types/**",
+            "src/templates/**",
             "**/*.d.ts",
             "**/*.config.*",
             "**/node_modules/**",
             "**/*.spec.ts"
       ],
       "include": [
-            "src/**/*.ts",
-            "src/**/*.js",
-            "src/runtime/**/*.ts",
-            "src/runtime/**/*.js"
+            "src/**"
       ],
       "thresholds": {
             "lines": 80,
