@@ -24,6 +24,11 @@ export default defineEventHandler(async (event) => {
       typeof body?.strategyName !== 'string' ||
       body.strategyName.trim() === '' ||
       typeof body?.code !== 'string' ||
+    const body = await readBody<RequestBody>(event);
+    if (
+      typeof body?.strategyName !== 'string' ||
+      body.strategyName.trim() === '' ||
+      typeof body?.code !== 'string' ||
       body.code.trim() === ''
     ) {
       throw createError({
