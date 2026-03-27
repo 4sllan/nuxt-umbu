@@ -46,7 +46,8 @@ export default defineNuxtConfig({
             admin: {
                 redirect: {
                     logout: "/",
-                    login: "/"
+                    login: "/",
+                    twoFactor: "/"
                 },
                 endpoints: {
                     login: {url: "/oauth/token", method: "post", alias: "auth token"},
