@@ -36,8 +36,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const token = getCookie(event, authConfig.prefix + '_token.' + body.strategyName) || '';
-
+    const token = getCookie(event, authConfig.prefix + '_token.' + body.strategyName);
+    if (!token) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Authentication token missing',
+      });
+    }
     const response: Get2FAResponse = await makeAuthRequest<Get2FAResponse>(
       strategy.endpoints.twoFactor.url,
       authConfig.baseURL,
@@ -47,9 +52,8 @@ export default defineEventHandler(async (event) => {
         headers: {
           Authorization: token,
         },
-        onRequest({ options }) {
-          options.headers = options.headers || {};
-          setHeader(event, 'Authorization', token);
+        onRequest() {
+          // no-op: avoid leaking Authorization to response headers
         },
       }
     );
