@@ -19,7 +19,7 @@ const DEFAULT_THRESHOLDS = {
 
 const DEFAULT_CONFIG = {
   provider: 'v8',
-  reporter: ['text', 'lcov', 'html', 'json'],
+  reporter: ['text', 'lcov', 'html', 'json-summary'],
   reportsDirectory: './coverage',
   exclude: [
     'playground/**',

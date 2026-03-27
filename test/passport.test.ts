@@ -8,7 +8,7 @@ vi.mock('#imports', () => ({
   useAuthConfig: vi.fn(),
   useNuxtApp: vi.fn(),
   useRequestEvent: vi.fn(),
-  defineNuxtRouteMiddleware: vi.fn(),
+  defineNuxtRouteMiddleware: vi.fn((fn) => fn),
   navigateTo: vi.fn(),
   createError: vi.fn(),
   $fetch: vi.fn()
