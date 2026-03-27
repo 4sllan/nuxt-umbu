@@ -19,11 +19,16 @@ export default defineEventHandler(async (event) => {
   try {
     await protectedMiddleware(event);
     const body = await readBody<RequestBody>(event);
-    if (!body?.strategyName || !body?.code || 
-        typeof body.strategyName !== 'string' || typeof body.code !== 'string') {
+    const body = await readBody<RequestBody>(event);
+    if (
+      typeof body?.strategyName !== 'string' ||
+      body.strategyName.trim() === '' ||
+      typeof body?.code !== 'string' ||
+      body.code.trim() === ''
+    ) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing or invalid parameters: strategyName and code must be strings',
+        statusMessage: 'Invalid required parameters: strategyName and code must be non-empty strings',
       });
     }
 
