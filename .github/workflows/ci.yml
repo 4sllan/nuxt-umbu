@@ -44,4 +44,4 @@ jobs:
         run: sleep 10  # Ajuste o tempo conforme necessário
 
       - name: Run Unit Tests
-        run: pnpm test
+        run: pnpm test:coverage
