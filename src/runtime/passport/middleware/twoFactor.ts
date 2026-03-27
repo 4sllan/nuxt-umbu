@@ -1,57 +1,45 @@
 import {
-  useNuxtApp,
-  useCookie,
   useAuthStore,
-  createError,
   useRequestEvent,
   defineNuxtRouteMiddleware,
 } from '#imports';
-import { handleLogout, validateSession, getRedirectPath } from '#auth-utils';
+import {
+  handleLogout,
+  validateSession,
+  getRedirectPath,
+  validateAuthPlugin,
+  extractServerAuthData,
+  extractClientAuthData,
+  validateUserAuthState,
+  validateStrategyConsistency
+} from '#auth-utils';
 
 export default defineNuxtRouteMiddleware(async () => {
-  const { $auth } = useNuxtApp();
+  const { $auth } = validateAuthPlugin();
   const store = useAuthStore();
-
-  if (!$auth) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Auth plugin is not initialized',
-    });
-  }
 
   if (import.meta.server) {
     const event = useRequestEvent();
     if (!event) return;
 
-    const strategyName = useCookie<string | null>($auth.prefix + `strategy`).value;
-    const token = strategyName
-      ? useCookie<string | null>($auth.prefix + `_2fa.` + strategyName).value
-      : null;
-    const expires = strategyName
-      ? useCookie<string | null>($auth.prefix + `_2fa_expiration.` + strategyName).value
-      : null;
+    const { strategy, token, expires } = extractServerAuthData($auth, '2fa');
 
-    if (!validateSession(strategyName, token, expires)) {
-      return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');
+    if (!validateSession(strategy, token, expires)) {
+      return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
     }
   }
 
   if (import.meta.client) {
-    const strategy = localStorage.getItem($auth.prefix + `strategy`);
-    const token = strategy ? localStorage.getItem($auth.prefix + `_2fa.` + strategy) : null;
-    const expires = strategy
-      ? localStorage.getItem($auth.prefix + `_2fa_expiration.` + strategy)
-      : null;
-    //
+    const { strategy, token, expires } = extractClientAuthData($auth, '2fa');
+    
     if (
       !validateSession(strategy, token, expires) ||
-      $auth.strategy !== strategy ||
-      $auth.strategy !== store.value.strategy
+      !validateStrategyConsistency($auth, store, strategy || '')
     ) {
       return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
     }
 
-    if (!$auth.user || !$auth.loggedIn || !store.value.user || !store.value.loggedIn) {
+    if (!validateUserAuthState($auth, store)) {
       return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
     }
   }
