@@ -52,9 +52,8 @@ export default defineEventHandler(async (event) => {
         headers: {
           Authorization: token,
         },
-        onRequest({ options }) {
-          options.headers = options.headers || {};
-          setHeader(event, 'Authorization', token);
+        onRequest() {
+          // no-op: avoid leaking Authorization to response headers
         },
       }
     );
