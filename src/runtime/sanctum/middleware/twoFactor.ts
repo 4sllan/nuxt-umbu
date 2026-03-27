@@ -24,9 +24,14 @@ export default defineNuxtRouteMiddleware(async () => {
 
   if (import.meta.server) {
     const event = getRequestEvent();
-    if (!event) return;
+    if (!event) {
+      // Fail closed - if we can't get the request event, treat as unauthorized
+      return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');
+    }
 
-    const token = useCookie<string | null>(`token_2fa`).value;
+    const token = strategyName
+      ? useCookie<string | null>($auth.prefix + `_2fa.` + strategyName).value
+      : null;
 
     if (!validateSessionHas2FA(strategyName, token, null, true)) {
       return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');

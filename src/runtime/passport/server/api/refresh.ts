@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
       }
     );
 
-    validateTokenResponse(response);
+    validateTokenResponse(response, true); // refresh flow - refresh_token is optional
     const tokenResponse = formatTokenResponse(response);
 
     setAuthCookies(

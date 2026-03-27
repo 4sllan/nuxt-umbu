@@ -19,10 +19,11 @@ export default defineEventHandler(async (event) => {
   try {
     await protectedMiddleware(event);
     const body = await readBody<RequestBody>(event);
-    if (!body?.strategyName || !body?.code) {
+    if (!body?.strategyName || !body?.code || 
+        typeof body.strategyName !== 'string' || typeof body.code !== 'string') {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required parameters: strategyName or code',
+        statusMessage: 'Missing or invalid parameters: strategyName and code must be strings',
       });
     }
 
