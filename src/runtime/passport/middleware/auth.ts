@@ -52,4 +52,7 @@ export default defineNuxtRouteMiddleware(async () => {
     }
 
     if (!$auth.user || !$auth.loggedIn || !store.value.user || !store.value.loggedIn) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'auth
+      return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
+    }
+  }
+});
