@@ -92,9 +92,11 @@ describe('Passport Plugin', () => {
 
   describe('Cookie Management', () => {
     it('should parse cookies from request event', () => {
+      const prefix = 'auth.'
+      const strategyName = 'passport'
       const mockCookies = {
-        'auth.passport_token': 'test-token',
-        'auth.passport_strategy': 'passport'
+        [prefix + '_token.' + strategyName]: 'test-token',
+        [prefix + 'strategy']: strategyName
       }
 
       // Mock parseCookies with proper event object
@@ -104,7 +106,7 @@ describe('Passport Plugin', () => {
         node: {
           req: {
             headers: {
-              cookie: 'auth.passport_token=test-token; auth.passport_strategy=passport'
+              cookie: `${prefix + '_token.' + strategyName}=test-token; ${prefix + 'strategy'}=${strategyName}`
             }
           }
         }
@@ -113,8 +115,8 @@ describe('Passport Plugin', () => {
       const cookies = parseCookies(mockEvent)
       
       expect(cookies).toEqual(mockCookies)
-      expect(cookies['auth.passport_token']).toBe('test-token')
-      expect(cookies['auth.passport_strategy']).toBe('passport')
+      expect(cookies[prefix + '_token.' + strategyName]).toBe('test-token')
+      expect(cookies[prefix + 'strategy']).toBe(strategyName)
     })
 
     it('should handle missing cookies gracefully', () => {
