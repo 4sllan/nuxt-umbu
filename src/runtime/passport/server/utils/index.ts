@@ -1,6 +1,12 @@
-import { useRuntimeConfig } from '#imports';
-import { getCookie, createError, H3Event } from 'h3';
-import type { PassportModuleOptions } from '#auth-types';
+import { getCookie, H3Event } from 'h3';
+import { getAuthConfig } from './config';
+
+// Re-export all functions from specialized modules
+export * from './config';
+export * from './cookies';
+export * from './requests';
+export * from './validation';
+export * from './errors';
 
 interface AuthSession {
   token?: string;
@@ -15,20 +21,13 @@ interface AuthSession {
  * @throws An error if the authentication configuration is missing.
  */
 export function getAuthSession(event: H3Event): AuthSession {
-  const runtimeConfig = useRuntimeConfig();
-  const config = runtimeConfig.public['nuxt-umbu'] as PassportModuleOptions;
-
-  if (!config?.cookie) {
-    throw createError({ statusCode: 500, statusMessage: 'Authentication module not configured' });
-  }
-
-  const prefix: string = config.cookie.prefix || 'auth.';
-  const strategyName: string | undefined = getCookie(event, prefix + 'strategy') || undefined;
+  const config = getAuthConfig();
+  const strategyName: string | undefined = getCookie(event, config.prefix + 'strategy') || undefined;
   const token: string | undefined = strategyName
-    ? getCookie(event, prefix + '_token.' + strategyName) || undefined
+    ? getCookie(event, config.prefix + '_token.' + strategyName) || undefined
     : undefined;
   const expires: string | undefined = strategyName
-    ? getCookie(event, prefix + '_token_expiration.' + strategyName) || undefined
+    ? getCookie(event, config.prefix + '_token_expiration.' + strategyName) || undefined
     : undefined;
 
   return { token, expires, strategyName };

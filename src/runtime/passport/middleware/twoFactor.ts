@@ -34,10 +34,6 @@ export default defineNuxtRouteMiddleware(async () => {
     if (!validateSession(strategyName, token, expires)) {
       return await handleLogout(strategyName, getRedirectPath(strategyName), 'has2FA');
     }
-
-    if (token) {
-      $auth.headers.set('2fa', token);
-    }
   }
 
   if (import.meta.client) {
@@ -53,10 +49,6 @@ export default defineNuxtRouteMiddleware(async () => {
       $auth.strategy !== store.value.strategy
     ) {
       return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
-    }
-
-    if (token) {
-      $auth.headers.set('2fa', token);
     }
 
     if (!$auth.user || !$auth.loggedIn || !store.value.user || !store.value.loggedIn) {
