@@ -5,7 +5,7 @@ import type { TwoFactorFetchOption } from '#auth-types';
 export interface TokenResponse {
   token: string;
   refresh_token: string;
-  expires: number;
+  expires: string;
 }
 
 /**
@@ -71,7 +71,7 @@ export function validateRequestBody(body: any, requiredFields: string[]): void {
  */
 export function formatTokenResponse(response: any): TokenResponse {
   const token = 'Bearer ' + response.access_token;
-  const expires = Date.now() + response.expires_in * 1000;
+  const expires = String(Date.now() + response.expires_in * 1000);
 
   return { 
     token, 
@@ -86,11 +86,11 @@ export function formatTokenResponse(response: any): TokenResponse {
  * @param configT2fa The passport strategies configuration containing twoFactor endpoint settings.
  * @returns Formatted 2FA response.
  */
-export function formatTwoFactorResponse(response: any, configT2fa: TwoFactorFetchOption): { token: string; expires: number } {
+export function formatTwoFactorResponse(response: any, configT2fa: TwoFactorFetchOption): { token: string; expires: string } {
   const property = configT2fa?.property || 'access_token';
   const expires = configT2fa?.expires || 'expires_in';
 
 
-  const expiresTime = Date.now() + response[expires] * 1000;
+  const expiresTime = String(Date.now() + response[expires] * 1000);
   return { token: response[property], expires: expiresTime };
 }
