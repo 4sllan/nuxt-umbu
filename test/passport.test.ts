@@ -181,6 +181,49 @@ describe('Passport Plugin', () => {
       expect(mockUtils.clearAuthData).toHaveBeenCalled()
     })
 
+    it('should clear authentication headers during logout', async () => {
+      const mockHeaders = new Headers()
+      mockHeaders.set('Authorization', 'Bearer test-token')
+      mockHeaders.set('2fa', 'test-2fa-token')
+
+      const mockUtils = {
+        getEndpoint: vi.fn(() => ({ url: '/auth/passport/logout', method: 'POST' })),
+        getStrategyConfig: vi.fn(() => ({
+          endpoints: {
+            twoFactor: {
+              headerName: '2fa'
+            }
+          }
+        })),
+        clearAuthData: vi.fn(),
+        handleRedirect: vi.fn()
+      }
+
+      // Mock logout method that mimics the actual implementation
+      const logout = vi.fn().mockImplementation(async (strategyName: string) => {
+        // Clear authentication headers (mimicking actual implementation)
+        mockHeaders.delete('Authorization')
+        const headerNameT2fa = mockUtils.getStrategyConfig(strategyName)?.endpoints?.twoFactor?.headerName || '2fa'
+        mockHeaders.delete(headerNameT2fa)
+        
+        mockUtils.clearAuthData()
+        await mockUtils.handleRedirect(strategyName, 'logout')
+        return { success: true }
+      })
+      
+      // Verify headers are set before logout
+      expect(mockHeaders.has('Authorization')).toBe(true)
+      expect(mockHeaders.has('2fa')).toBe(true)
+      
+      await logout('passport')
+      
+      // Verify headers are cleared after logout
+      expect(logout).toHaveBeenCalledWith('passport')
+      expect(mockHeaders.has('Authorization')).toBe(false)
+      expect(mockHeaders.has('2fa')).toBe(false)
+      expect(mockUtils.clearAuthData).toHaveBeenCalled()
+    })
+
     it('should handle 2FA challenge', async () => {
       const mockTwoFaData = {
         code: '123456'

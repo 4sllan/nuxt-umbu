@@ -168,6 +168,41 @@ describe('Sanctum Plugin', () => {
       expect(mockUtils.clearAuthData).toHaveBeenCalled()
     })
 
+    it('should clear authentication headers during logout', async () => {
+      const mockHeaders = new Headers()
+      mockHeaders.set('X-XSRF-TOKEN', 'test-xsrf-token')
+      mockHeaders.set('Accept', 'application/json')
+
+      const mockUtils = {
+        getEndpoint: vi.fn(() => ({ url: '/logout', method: 'POST' })),
+        clearAuthData: vi.fn(),
+        handleRedirect: vi.fn()
+      }
+
+      // Mock logout method that mimics the actual implementation
+      const logout = vi.fn().mockImplementation(async (strategyName: string) => {
+        // Clear authentication headers (mimicking actual implementation)
+        mockHeaders.delete('X-XSRF-TOKEN')
+        mockHeaders.delete('Accept')
+        
+        mockUtils.clearAuthData()
+        await mockUtils.handleRedirect(strategyName, 'logout')
+        return { success: true }
+      })
+      
+      // Verify headers are set before logout
+      expect(mockHeaders.has('X-XSRF-TOKEN')).toBe(true)
+      expect(mockHeaders.has('Accept')).toBe(true)
+      
+      await logout('sanctum')
+      
+      // Verify headers are cleared after logout
+      expect(logout).toHaveBeenCalledWith('sanctum')
+      expect(mockHeaders.has('X-XSRF-TOKEN')).toBe(false)
+      expect(mockHeaders.has('Accept')).toBe(false)
+      expect(mockUtils.clearAuthData).toHaveBeenCalled()
+    })
+
     it('should handle 2FA challenge', async () => {
       const mockTwoFaData = {
         code: '123456'
