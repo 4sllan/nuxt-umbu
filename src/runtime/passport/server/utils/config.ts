@@ -28,6 +28,9 @@ export function getAuthConfig(): AuthConfig {
   if (!config) {
     throw createError({ statusCode: 500, statusMessage: 'Authentication module not configured' });
   }
+  if (!baseURL || typeof baseURL !== 'string') {
+    throw createError({ statusCode: 500, statusMessage: 'Authentication baseURL not configured' });
+  }
 
   const { cookie } = config;
   const prefix = cookie?.prefix || 'auth.';
