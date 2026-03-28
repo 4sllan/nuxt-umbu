@@ -128,6 +128,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         } catch (error) {
             console.error('[Umbu-Sanctum] Logout failed:', error);
         } finally {
+            // Clear authentication headers
+            $headers.delete('X-XSRF-TOKEN');
+            $headers.delete('Accept');
+            
             clearAuthData(prefix);
             await handleRedirect(strategyName, 'logout');
         }
