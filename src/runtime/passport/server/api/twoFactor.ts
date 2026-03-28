@@ -15,15 +15,13 @@ interface RequestBody {
   code: string;
 }
 
+interface Get2FAResponse {
+  [key: string]: any;
+}
+
 export default defineEventHandler(async (event) => {
   try {
     await protectedMiddleware(event);
-    const body = await readBody<RequestBody>(event);
-    const body = await readBody<RequestBody>(event);
-    if (
-      typeof body?.strategyName !== 'string' ||
-      body.strategyName.trim() === '' ||
-      typeof body?.code !== 'string' ||
     const body = await readBody<RequestBody>(event);
     if (
       typeof body?.strategyName !== 'string' ||
