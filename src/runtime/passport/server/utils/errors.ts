@@ -6,13 +6,13 @@ import { createError } from 'h3';
  * @param context The context where the error occurred.
  * @throws A formatted error.
  */
-export function handleAuthError(error: any, context: string): never {
+export function handleAuthError(error: unknown, context: string): never {
   console.error(`[${context} Error]`, {
-    statusCode: error?.statusCode ?? 500,
-    statusMessage: error?.statusMessage ?? 'Authentication failed',
+    statusCode: (error && typeof error === 'object' && 'statusCode' in error) ? Number(error.statusCode) : 500,
+    statusMessage: (error && typeof error === 'object' && 'statusMessage' in error) ? String(error.statusMessage) : 'Authentication failed',
   });
   throw createError({
-    statusCode: error.statusCode || 500,
+    statusCode: (error && typeof error === 'object' && 'statusCode' in error) ? Number(error.statusCode) : 500,
     statusMessage: 'Authentication failed',
   });
 }
@@ -22,10 +22,10 @@ export function handleAuthError(error: any, context: string): never {
  * @param error The error to handle.
  * @returns Error response object for logout.
  */
-export function handleLogoutError(error: any): { success: false; error: string } {
+export function handleLogoutError(error: unknown): { success: false; error: string } {
   console.error('Error in logout handler:', {
-    statusCode: error?.statusCode ?? 500,
-    statusMessage: error?.statusMessage ?? 'Logout failed',
+    statusCode: (error && typeof error === 'object' && 'statusCode' in error) ? Number(error.statusCode) : 500,
+    statusMessage: (error && typeof error === 'object' && 'statusMessage' in error) ? String(error.statusMessage) : 'Logout failed',
   });
   return { success: false, error: 'Logout failed' };
 }
