@@ -30,7 +30,7 @@ export type PassportFetchOption = {
 
 export type TwoFactorFetchOption = PassportFetchOption & {
     property?: string; // onde vem o token (default: access_token)
-    expires?: string | number; // onde vem o tempo (default: expires_in)
+    expires?: string; // onde vem o tempo (default: expires_in)
     headerName?: string; // nome do header (default: '2fa')
 };
 
