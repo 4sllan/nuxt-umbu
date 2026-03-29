@@ -1,34 +1,23 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./.nuxt/tsconfig.app.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.server.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.shared.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.node.json"
-    }
-  ],
+  // 1. Estenda a configuração que o Nuxt gera para o playground
+  "extends": "./.nuxt/tsconfig.json",
+
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "..", // Referência à raiz a partir da pasta playground
+    "skipLibCheck": true,
     "paths": {
-      "#auth-utils": ["./src/runtime/sanctum/utils", "./src/runtime/passport/utils"],
-      "#auth-types": ["./src/runtime/types"]
+      // Use os aliases que o Nuxt espera ou os seus customizados
+      "#auth-utils/*": ["../src/runtime/sanctum/utils/*", "../src/runtime/passport/utils/*"],
+      "#auth-types": ["../src/runtime/types/index.ts"]
     }
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    ".nuxt/types/umbu.d.ts"
+    "./**/*",             // Inclui os arquivos do playground
+    "../src/**/*",        // Inclui o código do seu módulo
+    "../.nuxt/nuxt.d.ts"  // Garante que o TS veja os tipos globais do Nuxt
   ],
   "exclude": [
-    "dist",
-    "node_modules",
-    "playground"
+    "../dist",
+    "../node_modules"
   ]
 }
