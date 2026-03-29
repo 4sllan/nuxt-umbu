@@ -1,4 +1,142 @@
 
+## v0.0.4
+
+[compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.3...v0.0.4)
+
+### 🚀 Enhancements
+
+- **passport:** Add syncHeaders utility to manage tokens ([a8d7d75](https://github.com/4sllan/nuxt-umbu/commit/a8d7d75))
+- **server:** Add core utilities for authentication ([56c0c85](https://github.com/4sllan/nuxt-umbu/commit/56c0c85))
+- **passport:** Add authentication helper functions ([a656dc0](https://github.com/4sllan/nuxt-umbu/commit/a656dc0))
+- **devops:** Add test quality and coverage analysis scripts ([b0276e0](https://github.com/4sllan/nuxt-umbu/commit/b0276e0))
+
+### 🩹 Fixes
+
+- **deps:** Update auth types import in refresh.ts ([d01853c](https://github.com/4sllan/nuxt-umbu/commit/d01853c))
+- **passport:** Update PassportModuleOptions import path ([ccd3189](https://github.com/4sllan/nuxt-umbu/commit/ccd3189))
+- **config:** Enable SSR in nuxt.config.ts ([8705108](https://github.com/4sllan/nuxt-umbu/commit/8705108))
+- **2fa:** Trigger resend code on mounted ([548c238](https://github.com/4sllan/nuxt-umbu/commit/548c238))
+- **auth:** Improve 2FA handling and storage ([e046120](https://github.com/4sllan/nuxt-umbu/commit/e046120))
+- **welcome:** Update middleware names ([4cc212a](https://github.com/4sllan/nuxt-umbu/commit/4cc212a))
+- **verify-2fa:** Update 2FA middleware and method ([dade6d9](https://github.com/4sllan/nuxt-umbu/commit/dade6d9))
+- **config:** Update nuxt.config.ts formatting ([1ef77be](https://github.com/4sllan/nuxt-umbu/commit/1ef77be))
+- **common:** Update user property path in strategy config ([f4f8d7e](https://github.com/4sllan/nuxt-umbu/commit/f4f8d7e))
+- **types:** Update sanctum user fetch options ([84c500f](https://github.com/4sllan/nuxt-umbu/commit/84c500f))
+- **passport:** Update import path for PassportModuleOptions ([1c65cbd](https://github.com/4sllan/nuxt-umbu/commit/1c65cbd))
+- **shared:** Update authentication redirect URLs ([b268418](https://github.com/4sllan/nuxt-umbu/commit/b268418))
+- **plugin:** Sync headers for profile and 2FA requests ([492bcd8](https://github.com/4sllan/nuxt-umbu/commit/492bcd8))
+- **passport:** Fix missing quotes in middleware logout calls ([782bcab](https://github.com/4sllan/nuxt-umbu/commit/782bcab))
+- **config:** Add twoFactor redirect for admin client ([aa10939](https://github.com/4sllan/nuxt-umbu/commit/aa10939))
+- **passport:** Improve logout header clearing and 2FA flow ([24ee0e0](https://github.com/4sllan/nuxt-umbu/commit/24ee0e0))
+- **passport:** Improve logout header clearing and 2FA flow ([1f76200](https://github.com/4sllan/nuxt-umbu/commit/1f76200))
+- **passport:** Improve logout header clearing and 2FA flow ([e9f5b19](https://github.com/4sllan/nuxt-umbu/commit/e9f5b19))
+- **sanctum:** Clear headers on logout and reorder code ([c32a013](https://github.com/4sllan/nuxt-umbu/commit/c32a013))
+- **passport:** Change expiry to string in validation ([a615883](https://github.com/4sllan/nuxt-umbu/commit/a615883))
+- **passport:** Change expiry to string in validation ([f7120ac](https://github.com/4sllan/nuxt-umbu/commit/f7120ac))
+- **passport:** Change expiry to string in validation ([b24b327](https://github.com/4sllan/nuxt-umbu/commit/b24b327))
+- **passport:** Allow string or number for token expiration ([7485748](https://github.com/4sllan/nuxt-umbu/commit/7485748))
+- **types:** Update passport expires type to string ([b71eb3f](https://github.com/4sllan/nuxt-umbu/commit/b71eb3f))
+- **sanctum:** Improve type safety in plugin.ts ([3ee0789](https://github.com/4sllan/nuxt-umbu/commit/3ee0789))
+- **passport:** Improve type safety and error handling ([1521606](https://github.com/4sllan/nuxt-umbu/commit/1521606))
+- **types:** Update Passport profile type to Record<string, unknown> ([60dfd01](https://github.com/4sllan/nuxt-umbu/commit/60dfd01))
+- **types:** Refine AuthInstance types and imports ([63a1ed5](https://github.com/4sllan/nuxt-umbu/commit/63a1ed5))
+- **types:** Refine auth-types for improved type safety ([562c98a](https://github.com/4sllan/nuxt-umbu/commit/562c98a))
+
+### 💅 Refactors
+
+- **core:** Adjust UmbuUtils imports and exposed methods ([8eda46f](https://github.com/4sllan/nuxt-umbu/commit/8eda46f))
+- **auth:** Update import path in login.ts ([e68ad44](https://github.com/4sllan/nuxt-umbu/commit/e68ad44))
+- **common:** Add getRedirect and clean up common utils ([f07a097](https://github.com/4sllan/nuxt-umbu/commit/f07a097))
+- **common:** Add getRedirect and clean up common utils ([d02fc0a](https://github.com/4sllan/nuxt-umbu/commit/d02fc0a))
+- **types:** Update 2fa.ts type import path ([da1a032](https://github.com/4sllan/nuxt-umbu/commit/da1a032))
+- **auth:** Simplify auth middleware logic ([c30dfdc](https://github.com/4sllan/nuxt-umbu/commit/c30dfdc))
+- **autx:** Rename authHeaders to $headers ([72c0155](https://github.com/4sllan/nuxt-umbu/commit/72c0155))
+- **common:** Improve getEndpoint for Passport and Sanctum ([18e3338](https://github.com/4sllan/nuxt-umbu/commit/18e3338))
+- **passport:** Rename authHeaders to $headers in plugin ([0378fec](https://github.com/4sllan/nuxt-umbu/commit/0378fec))
+- **auth:** Update auth middleware session validation ([ebcd6e3](https://github.com/4sllan/nuxt-umbu/commit/ebcd6e3))
+- **config:** Update nuxt.config.ts auth endpoints ([e5efe8f](https://github.com/4sllan/nuxt-umbu/commit/e5efe8f))
+- **passport:** Refactor 2FA and user endpoint types ([1a70973](https://github.com/4sllan/nuxt-umbu/commit/1a70973))
+- **passport:** Rename 2fa to twoFactor endpoint access ([c671171](https://github.com/4sllan/nuxt-umbu/commit/c671171))
+- **passport:** Rename 2fa.ts to twoFactor.ts ([cbf55dc](https://github.com/4sllan/nuxt-umbu/commit/cbf55dc))
+- **passport:** Rename 2FA function and endpoint ([e3052af](https://github.com/4sllan/nuxt-umbu/commit/e3052af))
+- **types:** Format passport type definitions ([2c68475](https://github.com/4sllan/nuxt-umbu/commit/2c68475))
+- **module:** Rename 2FA references to twoFactor ([7e3b02a](https://github.com/4sllan/nuxt-umbu/commit/7e3b02a))
+- **auth:** Rename _2fa method to twoFactor ([0787826](https://github.com/4sllan/nuxt-umbu/commit/0787826))
+- **sanctum:** Rename FetchOption to SanctumFetchOption ([aefa125](https://github.com/4sllan/nuxt-umbu/commit/aefa125))
+- **passport:** Clean up types in passport.ts ([54b5db0](https://github.com/4sllan/nuxt-umbu/commit/54b5db0))
+- **passport:** Refine PassportModuleOptions interface ([7341aba](https://github.com/4sllan/nuxt-umbu/commit/7341aba))
+- **config:** Update nuxt.config.ts endpoint structure ([46c8355](https://github.com/4sllan/nuxt-umbu/commit/46c8355))
+- **types:** Rename two-factor authentication method ([fd8387d](https://github.com/4sllan/nuxt-umbu/commit/fd8387d))
+- **sanctum:** Adapta plugin para autenticação via cookie ([0fbb784](https://github.com/4sllan/nuxt-umbu/commit/0fbb784))
+- **config:** Refatorar configurações de autenticação ([698724a](https://github.com/4sllan/nuxt-umbu/commit/698724a))
+- **config:** Formata configurações do nuxt.config.ts ([59f440a](https://github.com/4sllan/nuxt-umbu/commit/59f440a))
+- **sanctum:** Rename 2fa middleware to twoFactor ([145ed95](https://github.com/4sllan/nuxt-umbu/commit/145ed95))
+- **passport:** Export syncHeaders utility ([494bc5b](https://github.com/4sllan/nuxt-umbu/commit/494bc5b))
+- **api:** Consolidate 2FA logic into shared utils ([3447001](https://github.com/4sllan/nuxt-umbu/commit/3447001))
+- **auth:** Simplify refresh token logic ([3c4a330](https://github.com/4sllan/nuxt-umbu/commit/3c4a330))
+- **core:** Simplify `getAuthSession` and re-export utils ([a699e6d](https://github.com/4sllan/nuxt-umbu/commit/a699e6d))
+- **passport:** Extract logout logic to utils ([8c73f4f](https://github.com/4sllan/nuxt-umbu/commit/8c73f4f))
+- **auth:** Simplify login handler with new utils ([beb4cc4](https://github.com/4sllan/nuxt-umbu/commit/beb4cc4))
+- **auth:** Remove dead code from auth and twoFactor middleware ([850aafd](https://github.com/4sllan/nuxt-umbu/commit/850aafd))
+- **passport:** Remove unused middleware utilities ([29093f3](https://github.com/4sllan/nuxt-umbu/commit/29093f3))
+- **auth:** Simplify 2FA middleware logic ([a1453ae](https://github.com/4sllan/nuxt-umbu/commit/a1453ae))
+- **sanctum:** Update re-exports in utils index ([fd4bb86](https://github.com/4sllan/nuxt-umbu/commit/fd4bb86))
+- **passport:** Rename middleware export to helpers ([1803aaa](https://github.com/4sllan/nuxt-umbu/commit/1803aaa))
+- **auth:** Simplify auth middleware logic ([758e613](https://github.com/4sllan/nuxt-umbu/commit/758e613))
+- **sanctum:** Move helpers.ts to utils ([75e4ade](https://github.com/4sllan/nuxt-umbu/commit/75e4ade))
+- **middleware:** Streamline twoFactor middleware imports ([547a4c6](https://github.com/4sllan/nuxt-umbu/commit/547a4c6))
+- **sanctum:** Extract auth-related helper functions ([dac8d1e](https://github.com/4sllan/nuxt-umbu/commit/dac8d1e))
+- **auth:** Simplify auth middleware for better readability ([99c7dd7](https://github.com/4sllan/nuxt-umbu/commit/99c7dd7))
+- **templates:** Add JSDoc and reorganize index exports ([48d00a2](https://github.com/4sllan/nuxt-umbu/commit/48d00a2))
+- **passport:** Improve token and 2FA response validation ([600d24c](https://github.com/4sllan/nuxt-umbu/commit/600d24c))
+- **auth:** Improve server-side session handling for fetchProfile ([f4abaf9](https://github.com/4sllan/nuxt-umbu/commit/f4abaf9))
+- **errors:** Improve error handling and logging ([84a09c7](https://github.com/4sllan/nuxt-umbu/commit/84a09c7))
+- **core:** Improve secret validation and type safety ([bafd584](https://github.com/4sllan/nuxt-umbu/commit/bafd584))
+- **passport:** Update error type to unknown in API routes ([560a51d](https://github.com/4sllan/nuxt-umbu/commit/560a51d))
+- **utils:** Add type imports to helpers.ts ([e60e471](https://github.com/4sllan/nuxt-umbu/commit/e60e471))
+- **passport:** Add type imports to helpers.ts ([dab1431](https://github.com/4sllan/nuxt-umbu/commit/dab1431))
+- **errors:** Improve error handling type safety ([feaaae1](https://github.com/4sllan/nuxt-umbu/commit/feaaae1))
+- **utils:** Update useUmbuUtils with JSDoc and types ([66ea267](https://github.com/4sllan/nuxt-umbu/commit/66ea267))
+- **autx:** Improve $autx composable type safety ([5b4b9c2](https://github.com/4sllan/nuxt-umbu/commit/5b4b9c2))
+- **config:** Update tsconfig for playground environment ([aae6ce1](https://github.com/4sllan/nuxt-umbu/commit/aae6ce1))
+
+### 📖 Documentation
+
+- **core:** Remove cookie and proxy documentation ([e5fe795](https://github.com/4sllan/nuxt-umbu/commit/e5fe795))
+- **passport:** Add comment to syncHeaders export ([9ce1dbb](https://github.com/4sllan/nuxt-umbu/commit/9ce1dbb))
+
+### 🏡 Chore
+
+- **util:** Add common utility module ([cee433d](https://github.com/4sllan/nuxt-umbu/commit/cee433d))
+- **util:** Add common utility module ([6985888](https://github.com/4sllan/nuxt-umbu/commit/6985888))
+- **config:** Ajusta scripts de teste para Vitest ([b689e16](https://github.com/4sllan/nuxt-umbu/commit/b689e16))
+- **ci:** Update typecheck and test scripts ([ee53165](https://github.com/4sllan/nuxt-umbu/commit/ee53165))
+- **ci:** Update typecheck and test scripts ([748f7d9](https://github.com/4sllan/nuxt-umbu/commit/748f7d9))
+- **ci:** Update typecheck and test scripts ([2a699cb](https://github.com/4sllan/nuxt-umbu/commit/2a699cb))
+- **ci:** Update typecheck and test scripts ([2e4d116](https://github.com/4sllan/nuxt-umbu/commit/2e4d116))
+- **ci:** Update typecheck and test scripts ([d16304b](https://github.com/4sllan/nuxt-umbu/commit/d16304b))
+
+### ✅ Tests
+
+- **autenticacao:** Adiciona suíte de testes completa ([bb6d332](https://github.com/4sllan/nuxt-umbu/commit/bb6d332))
+- **mocks:** Ajusta mocks e refatora testes de composables e plugins ([d29c2b8](https://github.com/4sllan/nuxt-umbu/commit/d29c2b8))
+- **utils:** Delete utils.test.ts ([278dd7d](https://github.com/4sllan/nuxt-umbu/commit/278dd7d))
+- **utils:** Delete utils.test.ts ([3646014](https://github.com/4sllan/nuxt-umbu/commit/3646014))
+- **utils:** Delete utils.test.ts ([a572074](https://github.com/4sllan/nuxt-umbu/commit/a572074))
+- **utils:** Delete utils.test.ts ([24afc5b](https://github.com/4sllan/nuxt-umbu/commit/24afc5b))
+- **utils:** Delete utils.test.ts ([65f640b](https://github.com/4sllan/nuxt-umbu/commit/65f640b))
+- **mocks:** Add mock utilities for Nuxt imports and auth ([eb2d611](https://github.com/4sllan/nuxt-umbu/commit/eb2d611))
+- **passport:** Update cookie handling in tests ([2d0a9d9](https://github.com/4sllan/nuxt-umbu/commit/2d0a9d9))
+- **auth:** Update logout and 2FA tests ([a762537](https://github.com/4sllan/nuxt-umbu/commit/a762537))
+- **sanctum:** Update 2FA endpoint key to 'twoFactor' ([79c5608](https://github.com/4sllan/nuxt-umbu/commit/79c5608))
+- **utils:** Refactor useUmbuUtils test mocks ([844a009](https://github.com/4sllan/nuxt-umbu/commit/844a009))
+- **utils:** Refactor useUmbuUtils test mocks ([88db9b6](https://github.com/4sllan/nuxt-umbu/commit/88db9b6))
+- **utils:** Refactor useUmbuUtils test mocks ([b06fcba](https://github.com/4sllan/nuxt-umbu/commit/b06fcba))
+
+### ❤️ Contributors
+
+- Aslan.gama <aslan.gama@sixchains.com.br>
+
 ## v0.0.3
 
 
