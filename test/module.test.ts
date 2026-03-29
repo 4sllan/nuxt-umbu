@@ -87,14 +87,14 @@ describe('Module Configuration', () => {
         sanctum: {
           endpoints: {
             login: '/login',
-            '2fa': '/2fa-challenge'
+            twoFactor: '/2fa-challenge'
           }
         }
       }
     }
 
     expect(configWith2FA.twoFactorAuth).toBe(true)
-    expect(configWith2FA.strategies?.sanctum?.endpoints?.['2fa']).toBe('/2fa-challenge')
+    expect(configWith2FA.strategies?.sanctum?.endpoints?.twoFactor).toBe('/2fa-challenge')
   })
 
   it('should have default cookie configuration', () => {
