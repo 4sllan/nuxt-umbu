@@ -1,5 +1,10 @@
 import { useCookie, navigateTo, useRuntimeConfig, useAuthStore, useAuthConfig } from '#imports'
 
+/**
+ * Main utility composable for authentication management.
+ * Provides access to authentication store, configuration, and helper functions.
+ * @returns Object containing authentication utilities and state management functions
+ */
 export const useUmbuUtils = () => {
     const store = useAuthStore()
     const config = useAuthConfig() // Pega a configuração injetada no module.ts
@@ -7,19 +12,27 @@ export const useUmbuUtils = () => {
 
 
     /**
-     * Retorna a configuração de uma estratégia específica
+     * Returns the configuration for a specific authentication strategy.
+     * @param name - The name of the authentication strategy
+     * @returns Strategy configuration object or empty object if not found
      */
-    const getStrategyConfig = (name: string) => config.strategies?.[name] || {}
+    const getStrategyConfig = (name: string): Record<string, unknown> => config.strategies?.[name] || {}
 
     /**
-     * Retorna os redirecionamentos de uma estratégia específica
+     * Returns the redirect URLs for a specific authentication strategy.
+     * @param strategyName - The name of the authentication strategy
+     * @returns Object containing redirect URLs or null if strategy not found
      */
     const getRedirect = (strategyName: string): Record<string, string> | null => {
         return config.strategies?.[strategyName]?.redirect ?? null
     }
 
     /**
-     * Resolve a URL e o Método de um endpoint (Passport vs Sanctum)
+     * Resolves the URL and HTTP method for a specific authentication endpoint.
+     * Handles both Passport (proxy/direct) and Sanctum (direct only) strategies.
+     * @param strategyName - The name of the authentication strategy
+     * @param key - The endpoint key (e.g., 'login', 'user', 'logout')
+     * @returns Endpoint configuration with URL and method, or null if not found
      */
     const getEndpoint = (strategyName: string, key: string): { url: string; method: string } | null => {
         const cfg = getStrategyConfig(strategyName);
@@ -28,7 +41,7 @@ export const useUmbuUtils = () => {
         if (Array.isArray(cfg.handler)) {
             // Se a chave for 'user', ignoramos o proxy e pegamos direto de 'endpoints.user'
             if (key === 'user') {
-                const userEndpoint = cfg.endpoints?.user;
+                const userEndpoint = cfg.endpoints?.user as { url?: string; method?: string; property?: string } | undefined;
                 if (!userEndpoint) return null;
 
                 return typeof userEndpoint === 'string'
@@ -37,7 +50,7 @@ export const useUmbuUtils = () => {
             }
 
             // Para login, logout, 2fa, etc., buscamos no array de handlers (Proxy)
-            const route = cfg.handler.find((h: any) => h[key])?.[key];
+            const route = cfg.handler.find((h: Record<string, string>) => h[key])?.[key];
             return route ? { url: route, method: 'POST' } : null;
         }
 
@@ -51,10 +64,13 @@ export const useUmbuUtils = () => {
     };
 
     /**
-     * Extrai o objeto do usuário baseado na propriedade configurada (ex: data.user)
+     * Extracts user object from response data based on configured property.
+     * @param data - The response data containing user information
+     * @param strategyName - The name of the authentication strategy
+     * @returns User object or raw data if no property is configured
      */
-    const extractUser = (data: any, strategyName: string) => {
-        const property = getStrategyConfig(strategyName).endpoints?.user?.property
+    const extractUser = (data: unknown, strategyName: string): unknown => {
+        const property = (getStrategyConfig(strategyName).endpoints?.user as { url?: string; method?: string; property?: string } | undefined)?.property
         if (property && data && typeof data === 'object' && property in data) {
             return data[property]
         }
@@ -62,9 +78,11 @@ export const useUmbuUtils = () => {
     }
 
     /**
-     * Limpa cookies e localStorage relacionados ao prefixo do módulo
+     * Clears authentication data including cookies and localStorage.
+     * Resets the auth store and removes all auth-related storage entries.
+     * @param prefix - The prefix used for authentication cookies and storage keys
      */
-    const clearAuthData = (prefix: string) => {
+    const clearAuthData = (prefix: string): void => {
         store.value = { user: null, loggedIn: false, strategy: '' }
 
         // Limpa cookies do Nuxt
@@ -82,9 +100,11 @@ export const useUmbuUtils = () => {
     }
 
     /**
-     * Gerencia o redirecionamento após ações de auth
+     * Manages redirection after authentication actions.
+     * @param strategyName - The name of the authentication strategy
+     * @param type - The type of action ('login' or 'logout')
      */
-    const handleRedirect = async (strategyName: string, type: 'login' | 'logout') => {
+    const handleRedirect = async (strategyName: string, type: 'login' | 'logout'): Promise<void> => {
         const redirects = getRedirect(strategyName)
         const url = redirects?.[type] || (type === 'logout' ? '/' : null)
         if (url) await navigateTo(url)
