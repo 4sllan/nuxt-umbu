@@ -62,7 +62,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         if (!endpoint?.url) return null;
 
         try {
-            let fetchOptions: any = {
+            const fetchOptions: any = {
                 method: endpoint.method,
             };
 
