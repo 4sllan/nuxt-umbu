@@ -3,13 +3,15 @@ import { useNuxtApp, useRuntimeConfig, reloadNuxtApp, useAuthConfig, createError
 import type { AuthInstance } from '../types';
 import { useEnsureCsrf } from '../composables/useEnsureCsrf';
 
-export type AutxOptions<T = any> = FetchOptions<'json', T>;
+export type AutxOptions<T = unknown> = FetchOptions<'json', T>;
 
 const CSRF_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
-export async function $autx<T = any>(request: string, options: AutxOptions<T> = {}): Promise<T> {
-  const { $auth } = useNuxtApp() as unknown as { $auth: AuthInstance };
-  const baseURL = useRuntimeConfig().public.baseURL as string | undefined;
+export async function $autx<T = unknown>(request: string, options: AutxOptions<T> = {}): Promise<T> {
+  const nuxtApp = useNuxtApp();
+  const $auth = ('$auth' in nuxtApp) ? nuxtApp.$auth as AuthInstance : null;
+  const runtimeConfig = useRuntimeConfig();
+  const baseURL = typeof runtimeConfig.public.baseURL === 'string' ? runtimeConfig.public.baseURL : undefined;
   const { provider } = useAuthConfig();
 
   if (!$auth || !$auth.headers) {
@@ -46,7 +48,7 @@ export async function $autx<T = any>(request: string, options: AutxOptions<T> = 
 
     async onResponseError(context: FetchContext<T, 'json'> & { response: FetchResponse<T> }) {
       const { request, response } = context;
-      let errorBody: any;
+      let errorBody: unknown;
       try {
         errorBody = response._data ?? (await response.text());
       } catch (e) {
