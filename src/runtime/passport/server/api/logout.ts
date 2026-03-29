@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     deleteAuthCookies(event, strategyName, authConfig, includeTwoFactor);
 
     return { success: true, redirect };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleLogoutError(error);
   }
 });

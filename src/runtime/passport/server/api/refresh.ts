@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
     );
 
     return tokenResponse;
-  } catch (error: any) {
+  } catch (error: unknown) {
     handleAuthError(error, 'Auth');
   }
 });
