@@ -1,7 +1,12 @@
-import { useRuntimeConfig } from '#imports';
-import { deleteCookie, defineEventHandler, readBody } from 'h3';
+import { defineEventHandler, readBody } from 'h3';
 import protectedMiddleware from '../middleware/protected';
-import type { PassportModuleOptions } from '../../../types';
+import {
+  getAuthConfig,
+  validateStrategy,
+  deleteAuthCookies,
+  handleLogoutError
+} from '../utils';
+import type { PassportModuleOptions } from '#auth-types';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,38 +18,20 @@ export default defineEventHandler(async (event) => {
       throw new Error('Strategy name is required.');
     }
 
-    const runtimeConfig = useRuntimeConfig();
-    const config = runtimeConfig.public['nuxt-umbu'] as PassportModuleOptions & {
+    const authConfig = getAuthConfig();
+    const strategy = validateStrategy(strategyName, authConfig.config);
+
+    const config = authConfig.config as PassportModuleOptions & {
       twoFactorAuth: boolean;
     };
 
-    if (!config) {
-      throw new Error('Auth configuration is missing.');
-    }
+    const { redirect } = strategy;
+    const includeTwoFactor = config.twoFactorAuth || false;
 
-    const { cookie, strategies, twoFactorAuth } = config;
-    const prefix = (cookie?.prefix && !import.meta.dev ? cookie.prefix : 'auth.') + '';
-    const strategyConfig = strategies[strategyName];
-
-    if (!strategyConfig) {
-      throw new Error('Strategy ' + strategyName + ' is not defined in the configuration.');
-    }
-
-    const { redirect } = strategyConfig;
-
-    const cookieOptions = cookie?.options ?? {};
-    deleteCookie(event, prefix + '_token.' + strategyName, cookieOptions);
-    deleteCookie(event, prefix + 'strategy', cookieOptions);
-    deleteCookie(event, prefix + '_token_expiration.' + strategyName, cookieOptions);
-
-    if (twoFactorAuth) {
-      deleteCookie(event, prefix + '_2fa.' + strategyName, cookieOptions);
-      deleteCookie(event, prefix + '_2fa_expiration.' + strategyName, cookieOptions);
-    }
+    deleteAuthCookies(event, strategyName, authConfig, includeTwoFactor);
 
     return { success: true, redirect };
-  } catch (error) {
-    console.error('Error in logout handler:', error);
-    return { success: false, error: (error as Error).message };
+  } catch (error: unknown) {
+    return handleLogoutError(error);
   }
 });

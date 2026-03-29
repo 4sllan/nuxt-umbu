@@ -4,7 +4,7 @@ import type { AuthState, ModuleOptions } from '${typesPath}'
 
 export interface NuxtAuth {
   /** Dados do usuário autenticado */
-  readonly user: any | null;
+  readonly user: Record<string, unknown> | null;
   /** Estratégia ativa no momento */
   readonly strategy: string | null;
   /** Status de autenticação */
@@ -15,9 +15,9 @@ export interface NuxtAuth {
   readonly prefix: string | null;
   
   getRedirect(strategyName: string): Record<string, string> | null;
-  loginWith(strategyName: string, value: any): Promise<any>;
+  loginWith(strategyName: string, value: Record<string, unknown>): Promise<Record<string, unknown>>;
   logout(strategyName: string): Promise<void>;
-  _2fa(strategyName: string, code: string): Promise<{ success: boolean }>;
+  twoFactor(strategyName: string, code: string): Promise<{ success: boolean }>;
 }
 
 // Declaração do Alias de Utilitários
@@ -57,7 +57,7 @@ declare module '#imports' {
   /**
    * Instância estendida de fetch/utilitário para requisições autenticadas.
    */
-  export const $autx: () =>  Promise<T>;
+  export const $autx: <T = unknown>(request: string, options?: Record<string, unknown>) => Promise<T>;
 }
 
 export {}

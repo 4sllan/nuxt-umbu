@@ -1,4 +1,6 @@
-import { createError, navigateTo, useNuxtApp } from '#imports';
+import { createError, navigateTo, useNuxtApp, useCookie, useRequestEvent } from '#imports';
+import type { Ref } from 'vue';
+import type { AuthInstance, AuthState } from '#auth-types';
 
 /**
  * Handles user logout by clearing session data and redirecting.
@@ -112,4 +114,60 @@ export const getRedirectPath = (strategy: string | null): string => {
 
   const { login, callback, home } = $auth.getRedirect(strategy) || {};
   return callback || home || login || '/';
+};
+
+/**
+ * Validates if the auth plugin is properly initialized.
+ * @param $auth - The auth plugin instance.
+ * @throws An error if the auth plugin is not initialized.
+ */
+export const validateAuthPlugin = ($auth: AuthInstance) => {
+  if (!$auth) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Auth plugin is not initialized',
+    });
+  }
+};
+
+/**
+ * Gets the current authentication strategy from cookies.
+ * @param $auth - The auth plugin instance.
+ * @returns The strategy name or null if not found.
+ */
+export const getCurrentStrategy = ($auth: AuthInstance): string | null => {
+  return useCookie<string | null>($auth.prefix + `strategy`).value;
+};
+
+/**
+ * Sets XSRF token in auth headers if available.
+ * @param $auth - The auth plugin instance.
+ */
+export const setXSRFHeaders = ($auth: AuthInstance) => {
+  const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
+  if (xsrf) {
+    $auth.headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
+  }
+};
+
+/**
+ * Validates the final auth state on client side.
+ * @param $auth - The auth plugin instance.
+ * @param store - The auth store instance.
+ * @returns True if auth state is valid, false otherwise.
+ */
+export const validateClientAuthState = ($auth: AuthInstance, store: Ref<AuthState>): boolean => {
+  return !!($auth.user && $auth.loggedIn && store.value.user && store.value.loggedIn);
+};
+
+/**
+ * Gets the request event for server-side processing.
+ * @returns The request event or null if not available.
+ */
+export const getRequestEvent = () => {
+  if (import.meta.server) {
+    const event = useRequestEvent();
+    return event || null;
+  }
+  return null;
 };

@@ -2,22 +2,22 @@ import myModule from '../src/module'
 
 export default defineNuxtConfig({
     devtools: {
-      enabled: true,
-
-      timeline: {
         enabled: true,
-      },
+
+        timeline: {
+            enabled: true,
+        },
     },
 
-    ssr: false,
+    ssr: true,
 
     app: {
         head: {
             title: 'Secure Login - 2FA Authentication',
             meta: [
-                { charset: 'utf-8' },
-                { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-                { name: 'description', content: 'Secure authentication with two-factor verification' }
+                {charset: 'utf-8'},
+                {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+                {name: 'description', content: 'Secure authentication with two-factor verification'}
             ]
         }
     },
@@ -46,29 +46,42 @@ export default defineNuxtConfig({
             admin: {
                 redirect: {
                     logout: "/",
-                    login: "/"
-                },
-                user: {
-                    property: "profile",
+                    login: "/",
+                    twoFactor: "/"
                 },
                 endpoints: {
                     login: {url: "/oauth/token", method: "post", alias: "auth token"},
-                    user: {url: "/api/admin/profile", method: "get"},
-                    "2fa": {url: '/api/admin/token_2fa', method: 'post'},
+                    user: {
+                        url: "/api/admin/profile",
+                        method: "get",
+                        property: "profile"
+                    },
+                    twoFactor: {
+                        url: '/api/admin/token_2fa',
+                        method: 'post',
+                        alias: "two factor auth",
+                        property: "access_token",
+                        expires: "expires_in",
+                        headerName: "2fa", // default
+                    },
                 },
             },
-            client:{
+            client: {
                 redirect: {
                     logout: "/auth",
                     login: "/auth"
                 },
-                user: {
-                    property: "profile",
-                },
                 endpoints: {
                     login: {url: "/oauth/token", method: "post"},
-                    user: {url: "/api/profile", method: "get"},
-                    "2fa": {url: "/api/send-token-2fa", method: "post"},
+                    user: {
+                        url: "/api/profile",
+                        method: "get",
+                        property: "profile"
+                    },
+                    twoFactor: {
+                        url: "/api/send-token-2fa",
+                        method: "post"
+                    },
                     logout: {alias: 'logout client'}
                 },
             }

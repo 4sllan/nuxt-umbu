@@ -66,22 +66,40 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
         }
 
         addImportsDir(resolve('./runtime/composables'));
+        addImportsDir(resolve('./runtime/utils'))
 
         // Add middleware template
         addRouteMiddleware({
-            name: 'auth',
+            name: 'umbu:auth',
             path: resolve('./runtime/' + provider + '/middleware/auth'),
         });
 
         if (provider === 'passport') {
-            const runtimeConfig = nuxt.options.runtimeConfig as unknown as RuntimeConfig;
-
+            const runtimeConfig = nuxt.options.runtimeConfig;
+            
             if (
                 !runtimeConfig.secret ||
                 typeof runtimeConfig.secret !== 'object' ||
                 Object.keys(runtimeConfig.secret).length === 0
             ) {
                 logger.error(`Missing "runtimeConfig.secret" in nuxt.config.ts`);
+                return;
+            }
+
+            // Type guard to ensure secret has correct structure
+            function isValidSecretConfig(secret: unknown): secret is Record<string, AuthSecretConfig> {
+                return typeof secret === 'object' && secret !== null && 
+                       Object.values(secret).every(config => 
+                           typeof config === 'object' && 
+                           config !== null &&
+                           'client_id' in config &&
+                           'client_secret' in config &&
+                           'grant_type' in config
+                       );
+            }
+
+            if (!isValidSecretConfig(runtimeConfig.secret)) {
+                logger.error(`Invalid "runtimeConfig.secret" structure in nuxt.config.ts`);
                 return;
             }
 
@@ -137,17 +155,17 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
         }
 
         const has2FA = Object.values(options.strategies).some(
-            (strategy) => strategy.endpoints?.['2fa']?.url && strategy.endpoints?.['2fa']?.method
+            (strategy) => strategy.endpoints?.['twoFactor']?.url && strategy.endpoints?.['twoFactor']?.method
         );
 
         if (has2FA) {
             options.twoFactorAuth = true;
 
             addRouteMiddleware({
-                name: '_2fa',
-                path: resolve('./runtime/' + provider + '/middleware/2fa'),
+                name: 'umbu:two-factor',
+                path: resolve('./runtime/' + provider + '/middleware/twoFactor'),
             });
-            logger.success('Middleware `_2fa` enabled');
+            logger.success('Middleware `two-factor` enabled');
         }
 
         nuxt.options.runtimeConfig.public[PACKAGE_NAME] = options;
@@ -170,15 +188,28 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
 
 
         // 3. Plugins Dinâmicos (Sem depender de arquivos físicos no dist)
+
+        // No setup do module.ts
+        const pluginPath = provider === 'passport'
+            ? './runtime/passport/plugin.ts'
+            : './runtime/sanctum/plugin.ts'
+
         addPluginTemplate({
+            src: resolve(pluginPath),
             filename: 'umbu-plugin.ts',
-            getContents: () => {
-                return provider === 'passport'
-                    ? templates.passportTemplate()
-                    : templates.sanctumTemplate()
-            },
-            mode: 'all'
+            write: true, // Isso ajuda a debugar vendo o arquivo em .nuxt/
+            options
         })
+
+        // addPluginTemplate({
+        //     filename: 'umbu-plugin.ts',
+        //     getContents: () => {
+        //         return provider === 'passport'
+        //             ? templates.passportTemplate()
+        //             : templates.sanctumTemplate()
+        //     },
+        //     mode: 'all'
+        // })
 
         // 4. Hook para o TypeScript (VS Code)
         nuxt.hook('prepare:types', ({ references, tsConfig }) => {

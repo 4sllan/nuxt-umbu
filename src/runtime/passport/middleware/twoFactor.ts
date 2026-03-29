@@ -22,25 +22,25 @@ export default defineNuxtRouteMiddleware(async () => {
     const event = useRequestEvent();
     if (!event) return;
 
-    const { strategy, token, expires } = extractServerAuthData($auth, 'token');
+    const { strategy, token, expires } = extractServerAuthData($auth, '2fa');
 
     if (!validateSession(strategy, token, expires)) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
+      return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
     }
   }
 
   if (import.meta.client) {
-    const { strategy, token, expires } = extractClientAuthData($auth, 'token');
+    const { strategy, token, expires } = extractClientAuthData($auth, '2fa');
     
     if (
       !validateSession(strategy, token, expires) ||
       !validateStrategyConsistency($auth, store, strategy || '')
     ) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
+      return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
     }
 
     if (!validateUserAuthState($auth, store)) {
-      return await handleLogout(strategy, getRedirectPath(strategy), 'auth');
+      return await handleLogout(strategy, getRedirectPath(strategy), 'has2FA');
     }
   }
 });

@@ -1,23 +1,26 @@
 import type { AuthOptionsCookie, RedirectOptions } from '../shared';
 
 // Type definition for fetch options
-type FetchOption = {
+type SanctumFetchOption = {
   url: string; // API endpoint URL
   method: string; // HTTP method (e.g., GET, POST, PUT, DELETE)
 };
 
+export type UserFetchOption = SanctumFetchOption & {
+  property?: string; // Name of the object containing user data (optional)
+}
+
 // Type definition for authentication-related API endpoints
 type EndpointsOptions = {
-  login: FetchOption; // Endpoint for user login
-  user: FetchOption; // Endpoint to fetch user data
-  '2fa'?: FetchOption; // Optional endpoint for two-factor authentication (2FA)
-  refresh?: FetchOption; // Optional endpoint to refresh authentication tokens
-  logout?: FetchOption; // Endpoint for user logout
+  login: SanctumFetchOption; // Endpoint for user login
+  user: UserFetchOption; // Endpoint to fetch user data
+  twoFactor?: SanctumFetchOption; // Optional endpoint for two-factor authentication (2FA)
+  refresh?: SanctumFetchOption; // Optional endpoint to refresh authentication tokens
+  logout?: SanctumFetchOption; // Endpoint for user logout
 };
 
 // Options for different authentication strategies
 export type SanctumStrategiesOptions = {
-  user?: { property?: string }; // Name of the object containing user data (optional)
   endpoints: EndpointsOptions; // Endpoints for the authentication strategy
   redirect: RedirectOptions; // Redirection configuration
 };
