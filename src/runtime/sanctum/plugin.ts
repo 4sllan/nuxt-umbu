@@ -62,7 +62,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         if (!endpoint?.url) return null;
 
         try {
-            const fetchOptions: any = {
+            const fetchOptions: Record<string, unknown> = {
                 method: endpoint.method,
             };
 
@@ -70,7 +70,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             if (import.meta.server) {
                 const event = useRequestEvent();
                 if (event) {
-                    const cookies = parseCookies(event as any);
+                    const cookies = parseCookies(event);
                     const cookieHeader = Object.entries(cookies)
                         .map(([key, value]) => `${key}=${value}`)
                         .join('; ');
@@ -89,9 +89,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             };
 
             return data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             throw createError({
-                statusCode: error.statusCode || 401,
+                statusCode: (error && typeof error === 'object' && 'statusCode' in error) ? Number(error.statusCode) : 401,
                 statusMessage: 'Access denied',
             });
         }
@@ -100,7 +100,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     /**
      * Login Sanctum: Primeiro garante o CSRF, depois autentica
      */
-    const loginWith = async (strategyName: string, value: any) => {
+    const loginWith = async (strategyName: string, value: Record<string, unknown>) => {
         const xsrf = useCookie<string | null>('XSRF-TOKEN').value;
 
         if (!xsrf) {
@@ -135,7 +135,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     baseURL: publicConfig.baseURL,
                     credentials: 'include',
                     method: endpoint.method || 'POST',
-                    headers: Object.fromEntries($headers.entries()),
+                    headers: Object.fromEntries($headers instanceof Headers ? $headers.entries() : Object.entries($headers)),
                     body: { strategyName },
                 });
             }
@@ -176,7 +176,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     if (import.meta.server) {
         const event = useRequestEvent();
         if (event) {
-            const cookies = parseCookies(event as any);
+            const cookies = parseCookies(event);
             strategy = cookies[`${prefix}strategy`] ?? null;
             xsrf = cookies['XSRF-TOKEN'] ?? null;
         }
