@@ -1,4 +1,6 @@
 import { createError, navigateTo, useNuxtApp, useCookie, useRequestEvent, useAuthStore } from '#imports';
+import type { Ref } from 'vue';
+import type { AuthInstance, AuthState } from '#auth-types';
 
 /**
  * Handles user logout by clearing session data and redirecting.
@@ -100,7 +102,7 @@ export const validateAuthPlugin = () => {
  * @param tokenSuffix - The token suffix (e.g., 'token', '2fa').
  * @returns Object containing strategy, token, and expiration.
  */
-export const extractServerAuthData = ($auth: any, tokenSuffix: string) => {
+export const extractServerAuthData = ($auth: AuthInstance, tokenSuffix: string) => {
   const strategyName = useCookie<string | null>($auth.prefix + `strategy`).value;
   const token = strategyName
     ? useCookie<string | null>($auth.prefix + `_${tokenSuffix}.` + strategyName).value
@@ -118,7 +120,7 @@ export const extractServerAuthData = ($auth: any, tokenSuffix: string) => {
  * @param tokenSuffix - The token suffix (e.g., 'token', '2fa').
  * @returns Object containing strategy, token, and expiration.
  */
-export const extractClientAuthData = ($auth: any, tokenSuffix: string) => {
+export const extractClientAuthData = ($auth: AuthInstance, tokenSuffix: string) => {
   const strategy = localStorage.getItem($auth.prefix + `strategy`);
   const token = strategy ? localStorage.getItem($auth.prefix + `_${tokenSuffix}.` + strategy) : null;
   const expires = strategy
@@ -134,7 +136,7 @@ export const extractClientAuthData = ($auth: any, tokenSuffix: string) => {
  * @param store - The auth store instance.
  * @returns True if user is authenticated, false otherwise.
  */
-export const validateUserAuthState = ($auth: any, store: any) => {
+export const validateUserAuthState = ($auth: AuthInstance, store: Ref<AuthState>) => {
   return !!(
     $auth.user &&
     $auth.loggedIn &&
@@ -150,6 +152,6 @@ export const validateUserAuthState = ($auth: any, store: any) => {
  * @param currentStrategy - The current strategy being validated.
  * @returns True if strategies are consistent, false otherwise.
  */
-export const validateStrategyConsistency = ($auth: any, store: any, currentStrategy: string) => {
+export const validateStrategyConsistency = ($auth: AuthInstance, store: Ref<AuthState>, currentStrategy: string) => {
   return $auth.strategy === currentStrategy && $auth.strategy === store.value.strategy;
 };
