@@ -58,15 +58,29 @@ export default defineNuxtPlugin(async (nuxtApp) => {
      * Busca o perfil do usuário (Sanctum usa cookies/sessão)
      */
     const fetchProfile = async (strategyName: string): Promise<ProfileResponse | null> => {
-        if (import.meta.server) return null;
-
         const endpoint = getEndpoint(strategyName, 'user');
         if (!endpoint?.url) return null;
 
         try {
-            const data = await $autx<ProfileResponse>(endpoint.url, {
+            let fetchOptions: any = {
                 method: endpoint.method,
-            });
+            };
+
+            // On server, forward incoming cookies to maintain session
+            if (import.meta.server) {
+                const event = useRequestEvent();
+                if (event) {
+                    const cookies = parseCookies(event as any);
+                    const cookieHeader = Object.entries(cookies)
+                        .map(([key, value]) => `${key}=${value}`)
+                        .join('; ');
+                    fetchOptions.headers = {
+                        'Cookie': cookieHeader,
+                    };
+                }
+            }
+
+            const data = await $autx<ProfileResponse>(endpoint.url, fetchOptions);
 
             store.value = {
                 user: extractUser(data, strategyName),
@@ -144,16 +158,15 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         const endpoint = getEndpoint(strategyName, '2fa');
         if (!endpoint?.url) throw new Error('2FA endpoint not found');
 
-        const response = await $autx<{ access_token?: string }>(endpoint.url, {
+        await $autx(endpoint.url, {
             method: endpoint.method || 'POST',
             body: { strategyName, code },
         });
 
-        if (response?.access_token && import.meta.client) {
-            localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.access_token);
-        }
-
-        return { success: !!response?.access_token };
+        useCookie(`${prefix}strategy`).value = strategyName;
+        const user = await fetchProfile(strategyName);
+        await handleRedirect(strategyName, 'login');
+        return { success: true, user };
     };
 
     // --- Inicialização da Sessão ---
