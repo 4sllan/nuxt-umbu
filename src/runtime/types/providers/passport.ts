@@ -17,7 +17,7 @@ export interface ProfileResponse {
 // Response format for authentication actions (e.g., login, token refresh)
 export interface AuthResponse {
     token: string; // Access token for authentication
-    expires: string; // Token expiration timestamp
+    expires: string | number; // Token expiration timestamp
     refresh_token: string; // Refresh token for renewing authentication
 }
 
@@ -30,7 +30,7 @@ export type PassportFetchOption = {
 
 export type TwoFactorFetchOption = PassportFetchOption & {
     property?: string; // onde vem o token (default: access_token)
-    expires?: string; // onde vem o tempo (default: expires_in)
+    expires?: string | number; // onde vem o tempo (default: expires_in)
     headerName?: string; // nome do header (default: '2fa')
 };
 

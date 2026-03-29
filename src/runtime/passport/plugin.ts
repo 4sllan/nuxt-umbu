@@ -122,7 +122,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         const endpoint = getEndpoint(strategyName, 'twoFactor');
         if (!endpoint?.url) throw new Error('Two Factor Auth endpoint not found');
 
-        const response = await $fetch<{ token?: string, expires?: number }>(endpoint.url, {
+        const response = await $fetch<{ token?: string, expires?: string }>(endpoint.url, {
             method: endpoint.method || 'POST',
             body: {strategyName, code},
         });
@@ -134,7 +134,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         syncHeaders($headers, null, response.token, config, getStrategyConfig(strategyName));
         if (import.meta.client) {
             localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.token);
-            localStorage.setItem(`${prefix}_2fa_expiration.${strategyName}`, response.expires.toString());
+            localStorage.setItem(`${prefix}_2fa_expiration.${strategyName}`, response.expires);
         }
 
         return {success: !!response?.token};
