@@ -104,7 +104,6 @@ const handleResend = async () => {
 onMounted(() => {
   codeInputs.value[0]?.focus()
 })
-})
 </script>
 <template>
   <div class="auth-page">
