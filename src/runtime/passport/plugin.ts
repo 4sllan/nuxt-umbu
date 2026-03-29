@@ -42,7 +42,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                 baseURL: publicConfig.baseURL,
                 method: endpoint.method || 'GET',
                 headers: {
-                    ...Object.fromEntries($headers.entries()),
+                    ...($headers instanceof Headers ? Object.fromEntries($headers.entries()) : $headers),
                     'Content-Type': 'application/json',
                 },
             });
@@ -54,10 +54,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             };
 
             return data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             clearAuthData(prefix);
             throw createError({
-                statusCode: error.statusCode || 401,
+                statusCode: (error && typeof error === 'object' && 'statusCode' in error) ? Number(error.statusCode) : 401,
                 statusMessage: 'Access denied',
             });
         }
@@ -66,7 +66,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     /**
      * Realiza o login via Passport (OAuth2 Grant)
      */
-    const loginWith = async (strategyName: string, credentials: any) => {
+    const loginWith = async (strategyName: string, credentials: Record<string, unknown>) => {
         const endpoint = getEndpoint(strategyName, 'login');
         if (!endpoint?.url) throw new Error(`Login endpoint missing for: ${strategyName}`);
 
