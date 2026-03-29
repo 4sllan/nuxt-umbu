@@ -101,9 +101,9 @@ const handleResend = async () => {
   })
 }
 
-onMounted(async () => {
+onMounted(() => {
   codeInputs.value[0]?.focus()
-  await handleResend()
+})
 })
 </script>
 <template>
