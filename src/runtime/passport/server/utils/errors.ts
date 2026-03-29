@@ -7,10 +7,13 @@ import { createError } from 'h3';
  * @throws A formatted error.
  */
 export function handleAuthError(error: any, context: string): never {
-  console.error(`[${context} Error]`, error);
+  console.error(`[${context} Error]`, {
+    statusCode: error?.statusCode ?? 500,
+    statusMessage: error?.statusMessage ?? 'Authentication failed',
+  });
   throw createError({
     statusCode: error.statusCode || 500,
-    statusMessage: error.statusMessage || 'Authentication failed',
+    statusMessage: 'Authentication failed',
   });
 }
 
@@ -20,8 +23,11 @@ export function handleAuthError(error: any, context: string): never {
  * @returns Error response object for logout.
  */
 export function handleLogoutError(error: any): { success: false; error: string } {
-  console.error('Error in logout handler:', error);
-  return { success: false, error: (error as Error).message };
+  console.error('Error in logout handler:', {
+    statusCode: error?.statusCode ?? 500,
+    statusMessage: error?.statusMessage ?? 'Logout failed',
+  });
+  return { success: false, error: 'Logout failed' };
 }
 
 /**

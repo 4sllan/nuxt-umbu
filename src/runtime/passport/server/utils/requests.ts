@@ -14,18 +14,17 @@ export async function makeAuthRequest<T = any>(
   baseURL: string,
   options: any = {}
 ): Promise<T> {
-  const defaultOptions = {
-    timeout: 10000,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    ...options,
+  const mergedHeaders = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...options.headers,
   };
 
   return await $fetch<T>(url, {
     baseURL,
-    ...defaultOptions,
+    timeout: options.timeout ?? 10000,
+    ...options,
+    headers: mergedHeaders,
   }).catch((error) => {
     console.error('[API Error]', error);
     throw createError({ 
