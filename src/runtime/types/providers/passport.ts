@@ -9,7 +9,7 @@ export interface AuthSecretConfig {
 
 // Response format for user profile retrieval
 export interface ProfileResponse {
-    profile: any; // User profile data (structure depends on the authentication strategy)
+    profile: Record<string, unknown>; // User profile data (structure depends on the authentication strategy)
     strategyName: string; // Name of the authentication strategy used
     token: string; // Authentication token
 }
