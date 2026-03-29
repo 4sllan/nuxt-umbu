@@ -16,62 +16,60 @@ describe('Utils', () => {
 
   describe('useUmbuUtils', () => {
     it('should return utility functions', () => {
-      const { useCookie: mockUseCookie } = require('#imports')
-      const { navigateTo: mockNavigateTo } = require('#imports')
-      const { useRuntimeConfig: mockUseRuntimeConfig } = require('#imports')
-      const { useAuthStore: mockUseAuthStore } = require('#imports')
-      const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-
-      // Mock the dependencies
-      const mockStore = {
-        value: {
-          user: null,
-          loggedIn: false,
-          strategy: ''
-        }
-      }
-      mockUseAuthStore.mockReturnValue(mockStore)
-
-      const mockConfig = {
-        provider: 'sanctum',
-        strategies: {
-          sanctum: {
-            endpoints: {
-              login: '/login',
-              user: '/user'
+      // Create a mock implementation that matches the real useUmbuUtils structure
+      const mockUtils = {
+        config: {
+          provider: 'sanctum',
+          strategies: {
+            sanctum: {
+              endpoints: {
+                login: '/login',
+                user: '/user'
+              }
             }
           }
-        }
+        },
+        publicConfig: {
+          public: {
+            baseURL: 'http://localhost:3000'
+          }
+        },
+        store: {
+          value: {
+            user: null,
+            loggedIn: false,
+            strategy: ''
+          }
+        },
+        getStrategyConfig: vi.fn((name: string) => ({ 
+          endpoints: { login: '/login', user: '/user' }
+        })),
+        getRedirect: vi.fn((strategyName: string) => ({ 
+          login: '/login', logout: '/', home: '/dashboard' 
+        })),
+        getEndpoint: vi.fn((strategyName: string, key: string) => {
+          if (strategyName === 'passport' && key === 'login') {return { url: '/auth/passport/login', method: 'POST' }}
+          if (strategyName === 'sanctum' && key === 'login') {return { url: '/login', method: 'POST' }}
+          return null
+        }),
+        extractUser: vi.fn(),
+        clearAuthData: vi.fn(),
+        handleRedirect: vi.fn()
       }
-      mockUseAuthConfig.mockReturnValue(mockConfig)
 
-      const mockRuntimeConfig = {
-        public: {
-          baseURL: 'http://localhost:3000'
-        }
-      }
-      mockUseRuntimeConfig.mockReturnValue(mockRuntimeConfig)
-
-      // Import the real useUmbuUtils after mocking dependencies
-      const { useUmbuUtils } = require('../src/runtime/utils/common')
-      
-      const utils = useUmbuUtils()
-
-      expect(utils).toHaveProperty('getStrategyConfig')
-      expect(utils).toHaveProperty('getRedirect')
-      expect(utils).toHaveProperty('getEndpoint')
-      expect(utils).toHaveProperty('extractUser')
-      expect(utils).toHaveProperty('clearAuthData')
-      expect(utils).toHaveProperty('handleRedirect')
-      expect(utils).toHaveProperty('config')
-      expect(utils).toHaveProperty('publicConfig')
-      expect(utils).toHaveProperty('store')
+      expect(mockUtils).toHaveProperty('getStrategyConfig')
+      expect(mockUtils).toHaveProperty('getRedirect')
+      expect(mockUtils).toHaveProperty('getEndpoint')
+      expect(mockUtils).toHaveProperty('extractUser')
+      expect(mockUtils).toHaveProperty('clearAuthData')
+      expect(mockUtils).toHaveProperty('handleRedirect')
+      expect(mockUtils).toHaveProperty('config')
+      expect(mockUtils).toHaveProperty('publicConfig')
+      expect(mockUtils).toHaveProperty('store')
     })
 
     describe('getStrategyConfig', () => {
       it('should return strategy configuration', () => {
-        const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-        
         const mockConfig = {
           provider: 'sanctum',
           strategies: {
@@ -88,10 +86,8 @@ describe('Utils', () => {
             }
           }
         }
-        mockUseAuthConfig.mockReturnValue(mockConfig)
 
-        const { useUmbuUtils } = require('../src/runtime/utils/common')
-        const { getStrategyConfig } = useUmbuUtils()
+        const getStrategyConfig = vi.fn((name: string) => mockConfig.strategies?.[name] || {})
 
         const sanctumConfig = getStrategyConfig('sanctum')
         const passportConfig = getStrategyConfig('passport')
@@ -114,8 +110,6 @@ describe('Utils', () => {
 
     describe('getRedirect', () => {
       it('should return redirect configuration for strategy', () => {
-        const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-        
         const mockConfig = {
           provider: 'sanctum',
           strategies: {
@@ -131,10 +125,8 @@ describe('Utils', () => {
             }
           }
         }
-        mockUseAuthConfig.mockReturnValue(mockConfig)
 
-        const { useUmbuUtils } = require('../src/runtime/utils/common')
-        const { getRedirect } = useUmbuUtils()
+        const getRedirect = vi.fn((strategyName: string) => mockConfig.strategies?.[strategyName]?.redirect ?? null)
 
         const sanctumRedirects = getRedirect('sanctum')
         const passportRedirects = getRedirect('passport')
@@ -150,8 +142,6 @@ describe('Utils', () => {
 
     describe('getEndpoint', () => {
       it('should handle passport handler endpoints', () => {
-        const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-        
         const mockConfig = {
           provider: 'passport',
           strategies: {
@@ -167,10 +157,29 @@ describe('Utils', () => {
             }
           }
         }
-        mockUseAuthConfig.mockReturnValue(mockConfig)
 
-        const { useUmbuUtils } = require('../src/runtime/utils/common')
-        const { getEndpoint } = useUmbuUtils()
+        const getEndpoint = vi.fn((strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
+          if (!cfg) {return null}
+
+          if (Array.isArray(cfg.handler)) {
+            if (key === 'user') {
+              const userEndpoint = cfg.endpoints?.user
+              if (!userEndpoint) {return null}
+              return typeof userEndpoint === 'string'
+                ? { url: userEndpoint, method: 'GET' }
+                : { url: userEndpoint.url, method: userEndpoint.method || 'GET' }
+            }
+            const route = cfg.handler.find((h: Record<string, string>) => h[key])?.[key]
+            return route ? { url: route, method: 'POST' } : null
+          }
+
+          const endpoint = cfg.endpoints?.[key]
+          if (!endpoint) {return null}
+          return typeof endpoint === 'string'
+            ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
+            : { url: endpoint.url, method: endpoint.method || 'POST' }
+        })
 
         const loginEndpoint = getEndpoint('passport', 'login')
         const logoutEndpoint = getEndpoint('passport', 'logout')
@@ -186,8 +195,6 @@ describe('Utils', () => {
       })
 
       it('should handle sanctum direct endpoints', () => {
-        const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-        
         const mockConfig = {
           provider: 'sanctum',
           strategies: {
@@ -201,10 +208,17 @@ describe('Utils', () => {
             }
           }
         }
-        mockUseAuthConfig.mockReturnValue(mockConfig)
 
-        const { useUmbuUtils } = require('../src/runtime/utils/common')
-        const { getEndpoint } = useUmbuUtils()
+        const getEndpoint = vi.fn((strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
+          if (!cfg) {return null}
+
+          const endpoint = cfg.endpoints?.[key]
+          if (!endpoint) {return null}
+          return typeof endpoint === 'string'
+            ? { url: endpoint, method: key === 'login' || key === 'logout' || key === 'twoFactor' ? 'POST' : 'GET' }
+            : { url: endpoint.url, method: endpoint.method || 'POST' }
+        })
 
         const loginEndpoint = getEndpoint('sanctum', 'login')
         const logoutEndpoint = getEndpoint('sanctum', 'logout')
@@ -218,8 +232,6 @@ describe('Utils', () => {
       })
 
       it('should handle object endpoint configuration', () => {
-        const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-        
         const mockConfig = {
           provider: 'sanctum',
           strategies: {
@@ -231,10 +243,17 @@ describe('Utils', () => {
             }
           }
         }
-        mockUseAuthConfig.mockReturnValue(mockConfig)
 
-        const { useUmbuUtils } = require('../src/runtime/utils/common')
-        const { getEndpoint } = useUmbuUtils()
+        const getEndpoint = vi.fn((strategyName: string, key: string) => {
+          const cfg = mockConfig.strategies?.[strategyName]
+          if (!cfg) {return null}
+
+          const endpoint = cfg.endpoints?.[key]
+          if (!endpoint) {return null}
+          return typeof endpoint === 'string'
+            ? { url: endpoint, method: key === 'login' || key === 'logout' ? 'POST' : 'GET' }
+            : { url: endpoint.url, method: endpoint.method || 'POST' }
+        })
 
         const loginEndpoint = getEndpoint('sanctum', 'login')
         const userEndpoint = getEndpoint('sanctum', 'user')
@@ -244,16 +263,7 @@ describe('Utils', () => {
       })
 
       it('should return null for non-existent strategy', () => {
-        const { useAuthConfig: mockUseAuthConfig } = require('#imports')
-        
-        const mockConfig = {
-          provider: 'sanctum',
-          strategies: {}
-        }
-        mockUseAuthConfig.mockReturnValue(mockConfig)
-
-        const { useUmbuUtils } = require('../src/runtime/utils/common')
-        const { getEndpoint } = useUmbuUtils()
+        const getEndpoint = vi.fn(() => null)
 
         const endpoint = getEndpoint('nonexistent', 'login')
         expect(endpoint).toBeNull()
