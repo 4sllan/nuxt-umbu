@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
     );
 
     return twoFactorResponse;
-  } catch (error: any) {
+  } catch (error: unknown) {
     handleAuthError(error, 'Auth');
   }
 });

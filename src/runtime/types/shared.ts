@@ -2,7 +2,7 @@
 export type CookieOption = {
   httpOnly?: boolean; // Ensures the cookie is only accessible via HTTP (not available to JavaScript in the browser)
   secure?: boolean; // Requires HTTPS for the cookie to be sent
-  sameSite?: 'lax' | 'strict' | 'none'; // Controls cross-site cookie sharing
+  sameSite?: 'Lax' | 'Strict' | 'None'; // Controls cross-site cookie sharing
   priority?: 'low' | 'medium' | 'high'; // Defines the cookie's priority in the browser
   maxAge?: number; // Cookie lifespan in seconds
   domain?: string; // The domain for which the cookie is valid

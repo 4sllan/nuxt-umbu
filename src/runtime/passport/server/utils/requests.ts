@@ -9,23 +9,23 @@ import { createError } from 'h3';
  * @returns The response data.
  * @throws An error if the request fails.
  */
-export async function makeAuthRequest<T = any>(
+export async function makeAuthRequest<T = unknown>(
   url: string,
   baseURL: string,
-  options: any = {}
+  options: Record<string, unknown> = {}
 ): Promise<T> {
   const mergedHeaders = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    ...options.headers,
+    ...(typeof options.headers === 'object' && options.headers !== null ? options.headers : {}),
   };
 
   return await $fetch<T>(url, {
     baseURL,
-    timeout: options.timeout ?? 10000,
+    timeout: (typeof options.timeout === 'number') ? options.timeout : 10000,
     ...options,
     headers: mergedHeaders,
-  }).catch((error) => {
+  }).catch((error: unknown) => {
     console.error('[API Error]', error);
     throw createError({ 
       statusCode: 502, 
@@ -43,16 +43,16 @@ export async function makeAuthRequest<T = any>(
  * @returns The response data.
  * @throws An error if the request fails.
  */
-export async function makeAuthenticatedRequest<T = any>(
+export async function makeAuthenticatedRequest<T = unknown>(
   url: string,
   baseURL: string,
   token: string,
-  options: any = {}
+  options: Record<string, unknown> = {}
 ): Promise<T> {
   const authOptions = {
     headers: {
       Authorization: token,
-      ...options.headers,
+      ...(typeof options.headers === 'object' && options.headers !== null ? options.headers : {}),
     },
     ...options,
   };

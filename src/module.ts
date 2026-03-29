@@ -75,14 +75,31 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
         });
 
         if (provider === 'passport') {
-            const runtimeConfig = nuxt.options.runtimeConfig as unknown as RuntimeConfig;
-
+            const runtimeConfig = nuxt.options.runtimeConfig;
+            
             if (
                 !runtimeConfig.secret ||
                 typeof runtimeConfig.secret !== 'object' ||
                 Object.keys(runtimeConfig.secret).length === 0
             ) {
                 logger.error(`Missing "runtimeConfig.secret" in nuxt.config.ts`);
+                return;
+            }
+
+            // Type guard to ensure secret has correct structure
+            function isValidSecretConfig(secret: unknown): secret is Record<string, AuthSecretConfig> {
+                return typeof secret === 'object' && secret !== null && 
+                       Object.values(secret).every(config => 
+                           typeof config === 'object' && 
+                           config !== null &&
+                           'client_id' in config &&
+                           'client_secret' in config &&
+                           'grant_type' in config
+                       );
+            }
+
+            if (!isValidSecretConfig(runtimeConfig.secret)) {
+                logger.error(`Invalid "runtimeConfig.secret" structure in nuxt.config.ts`);
                 return;
             }
 

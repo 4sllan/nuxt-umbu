@@ -2,7 +2,8 @@ import { useCookie, useNuxtApp } from '#imports';
 import type { AuthInstance } from '#auth-types';
 
 export async function useEnsureCsrf(auth?: AuthInstance): Promise<void> {
-  const { $auth } = useNuxtApp() as unknown as { $auth: AuthInstance };
+  const nuxtApp = useNuxtApp();
+  const $auth = auth ?? (('$auth' in nuxtApp) ? nuxtApp.$auth as AuthInstance : null);
 
   if (!$auth) return;
 
