@@ -17,7 +17,7 @@ export interface ProfileResponse {
 // Response format for authentication actions (e.g., login, token refresh)
 export interface AuthResponse {
     token: string; // Access token for authentication
-    expires: string | number; // Token expiration timestamp
+    expires: string; // Token expiration timestamp
     refresh_token: string; // Refresh token for renewing authentication
 }
 
