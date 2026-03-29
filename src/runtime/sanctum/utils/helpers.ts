@@ -1,4 +1,6 @@
 import { createError, navigateTo, useNuxtApp, useCookie, useRequestEvent } from '#imports';
+import type { Ref } from 'vue';
+import type { AuthInstance, AuthState } from '#auth-types';
 
 /**
  * Handles user logout by clearing session data and redirecting.
@@ -119,7 +121,7 @@ export const getRedirectPath = (strategy: string | null): string => {
  * @param $auth - The auth plugin instance.
  * @throws An error if the auth plugin is not initialized.
  */
-export const validateAuthPlugin = ($auth: any) => {
+export const validateAuthPlugin = ($auth: AuthInstance) => {
   if (!$auth) {
     throw createError({
       statusCode: 500,
@@ -133,7 +135,7 @@ export const validateAuthPlugin = ($auth: any) => {
  * @param $auth - The auth plugin instance.
  * @returns The strategy name or null if not found.
  */
-export const getCurrentStrategy = ($auth: any): string | null => {
+export const getCurrentStrategy = ($auth: AuthInstance): string | null => {
   return useCookie<string | null>($auth.prefix + `strategy`).value;
 };
 
@@ -141,7 +143,7 @@ export const getCurrentStrategy = ($auth: any): string | null => {
  * Sets XSRF token in auth headers if available.
  * @param $auth - The auth plugin instance.
  */
-export const setXSRFHeaders = ($auth: any) => {
+export const setXSRFHeaders = ($auth: AuthInstance) => {
   const xsrf = useCookie<string | null>(`XSRF-TOKEN`).value;
   if (xsrf) {
     $auth.headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrf));
@@ -154,7 +156,7 @@ export const setXSRFHeaders = ($auth: any) => {
  * @param store - The auth store instance.
  * @returns True if auth state is valid, false otherwise.
  */
-export const validateClientAuthState = ($auth: any, store: any): boolean => {
+export const validateClientAuthState = ($auth: AuthInstance, store: Ref<AuthState>): boolean => {
   return !!($auth.user && $auth.loggedIn && store.value.user && store.value.loggedIn);
 };
 
