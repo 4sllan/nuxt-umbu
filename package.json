@@ -38,6 +38,7 @@
     "build": "nuxi build",
     "lint": "eslint . --fix",
     "typecheck": "nuxi prepare playground && tsc --noEmit",
+    "postinstall": "nuxi prepare",
     "dev": "nuxi dev playground",
     "dev:passport": "nuxi dev playground -c nuxt.passport.config.ts",
     "dev:sanctum": "nuxi dev playground -c nuxt.sanctum.config.ts",
