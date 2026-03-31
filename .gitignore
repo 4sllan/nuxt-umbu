@@ -13,3 +13,4 @@ tsdoc-metadata.json
 yarn.lock
 yarn-error.log
 .output
+/test-results/
