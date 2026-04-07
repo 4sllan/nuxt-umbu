@@ -1,4 +1,30 @@
 
+## v0.0.5
+
+[compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.4...v0.0.5)
+
+### 🚀 Enhancements
+
+- **core:** Add Sanctum and Passport template exports ([fd1fe98](https://github.com/4sllan/nuxt-umbu/commit/fd1fe98))
+- **core:** Add Sanctum authentication template ([629e295](https://github.com/4sllan/nuxt-umbu/commit/629e295))
+- **core:** Add passport authentication template ([09d8915](https://github.com/4sllan/nuxt-umbu/commit/09d8915))
+
+### 🩹 Fixes
+
+- **docs:** Update docs workflow to check for changes ([35e353c](https://github.com/4sllan/nuxt-umbu/commit/35e353c))
+- **core:** Update umbu-plugin filename to .mjs ([d8fad59](https://github.com/4sllan/nuxt-umbu/commit/d8fad59))
+
+### 💅 Refactors
+
+- **config:** Update tsconfig for playground environment ([bd5c569](https://github.com/4sllan/nuxt-umbu/commit/bd5c569))
+- **core:** Remove old plugin-based authentication ([3a75058](https://github.com/4sllan/nuxt-umbu/commit/3a75058))
+- **core:** Simplify module setup and typings ([775cd6e](https://github.com/4sllan/nuxt-umbu/commit/775cd6e))
+- **core:** Adjust TS hooks and module options ([d6bc592](https://github.com/4sllan/nuxt-umbu/commit/d6bc592))
+
+### ❤️ Contributors
+
+- Aslan.gama <aslan.gama@sixchains.com.br>
+
 ## v0.0.4
 
 [compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.3...v0.0.4)

@@ -1,3 +1,4 @@
+export const sanctumTemplate = () => `
 import {
     defineNuxtPlugin,
     useRequestEvent,
@@ -72,7 +73,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                 if (event) {
                     const cookies = parseCookies(event);
                     const cookieHeader = Object.entries(cookies)
-                        .map(([key, value]) => `${key}=${value}`)
+                        .map(([key, value]) => \`\${key}=\${value}\`)
                         .join('; ');
                     fetchOptions.headers = {
                         'Cookie': cookieHeader,
@@ -109,14 +110,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         }
 
         const endpoint = getEndpoint(strategyName, 'login');
-        if (!endpoint?.url) throw new Error(`Login endpoint missing: ${strategyName}`);
+        if (!endpoint?.url) throw new Error(\`Login endpoint missing: \${strategyName}\`);
 
         await $autx<AuthResponse>(endpoint.url, {
             method: endpoint.method || 'POST',
             body: value,
         });
 
-        useCookie(`${prefix}strategy`).value = strategyName;
+        useCookie(\`\${prefix}strategy\`).value = strategyName;
         const user = await fetchProfile(strategyName);
 
         await handleRedirect(strategyName, 'login');
@@ -163,7 +164,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             body: { strategyName, code },
         });
 
-        useCookie(`${prefix}strategy`).value = strategyName;
+        useCookie(\`\${prefix}strategy\`).value = strategyName;
         const user = await fetchProfile(strategyName);
         await handleRedirect(strategyName, 'login');
         return { success: true, user };
@@ -177,11 +178,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         const event = useRequestEvent();
         if (event) {
             const cookies = parseCookies(event);
-            strategy = cookies[`${prefix}strategy`] ?? null;
+            strategy = cookies[\`\${prefix}strategy\`] ?? null;
             xsrf = cookies['XSRF-TOKEN'] ?? null;
         }
     } else {
-        strategy = useCookie<string | null>(`${prefix}strategy`).value;
+        strategy = useCookie<string | null>(\`\${prefix}strategy\`).value;
         xsrf = useCookie<string | null>('XSRF-TOKEN').value;
     }
 
@@ -215,3 +216,5 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     nuxtApp.provide('auth', auth);
 });
+
+`.trim();

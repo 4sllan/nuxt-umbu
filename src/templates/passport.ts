@@ -1,3 +1,4 @@
+export const passportTemplate = () => `
 import {
     defineNuxtPlugin,
     useRequestEvent,
@@ -68,7 +69,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
      */
     const loginWith = async (strategyName: string, credentials: Record<string, unknown>) => {
         const endpoint = getEndpoint(strategyName, 'login');
-        if (!endpoint?.url) throw new Error(`Login endpoint missing for: ${strategyName}`);
+        if (!endpoint?.url) throw new Error(\`Login endpoint missing for: \${strategyName}\`);
 
         const response = await $fetch<AuthResponse>(endpoint.url, {
             method: endpoint.method || 'POST',
@@ -78,10 +79,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         if (!response.token) throw new Error('Token is missing in the response');
 
         if (import.meta.client) {
-            localStorage.setItem(`${prefix}_token.${strategyName}`, response.token);
-            localStorage.setItem(`${prefix}strategy`, strategyName);
+            localStorage.setItem(\`\${prefix}_token.\${strategyName}\`, response.token);
+            localStorage.setItem(\`\${prefix}strategy\`, strategyName);
             if (response.expires) {
-                localStorage.setItem(`${prefix}_token_expiration.${strategyName}`, response.expires);
+                localStorage.setItem(\`\${prefix}_token_expiration.\${strategyName}\`, response.expires);
             }
         }
 
@@ -133,8 +134,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         syncHeaders($headers, null, response.token, config, getStrategyConfig(strategyName));
         if (import.meta.client) {
-            localStorage.setItem(`${prefix}_2fa.${strategyName}`, response.token);
-            localStorage.setItem(`${prefix}_2fa_expiration.${strategyName}`, response.expires);
+            localStorage.setItem(\`\${prefix}_2fa.\${strategyName}\`, response.token);
+            localStorage.setItem(\`\${prefix}_2fa_expiration.\${strategyName}\`, response.expires);
         }
 
         return {success: !!response?.token};
@@ -149,14 +150,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         const event = useRequestEvent();
         if (event) {
             const cookies = parseCookies(event);
-            strategy = cookies[`${prefix}strategy`] || null;
-            token = strategy ? (cookies[`${prefix}_token.${strategy}`] ?? null) : null;
-            t2fa = strategy ? (cookies[`${prefix}_2fa.${strategy}`] ?? null) : null;
+            strategy = cookies[\`\${prefix}strategy\`] || null;
+            token = strategy ? (cookies[\`\${prefix}_token.\${strategy}\`] ?? null) : null;
+            t2fa = strategy ? (cookies[\`\${prefix}_2fa.\${strategy}\`] ?? null) : null;
         }
     } else {
-        strategy = localStorage.getItem(`${prefix}strategy`);
-        token = strategy ? localStorage.getItem(`${prefix}_token.${strategy}`) : null;
-        t2fa = strategy ? localStorage.getItem(`${prefix}_2fa.${strategy}`) : null;
+        strategy = localStorage.getItem(\`\${prefix}strategy\`);
+        token = strategy ? localStorage.getItem(\`\${prefix}_token.\${strategy}\`) : null;
+        t2fa = strategy ? localStorage.getItem(\`\${prefix}_2fa.\${strategy}\`) : null;
     }
 
     if (strategy && token) {
@@ -192,3 +193,5 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     nuxtApp.provide('auth', auth);
 });
+
+`.trim();
