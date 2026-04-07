@@ -189,13 +189,12 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
 
         // 3. Plugins Dinâmicos (Sem depender de arquivos físicos no dist)
         addPluginTemplate({
-            filename: 'umbu-plugin.mjs',
+            filename: 'umbu-plugin.ts',
             getContents: () => {
                 return provider === 'passport'
                     ? templates.passportTemplate()
                     : templates.sanctumTemplate()
             },
-            write: true,
             mode: 'all'
         })
 
