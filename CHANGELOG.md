@@ -1,4 +1,24 @@
 
+## v0.0.7
+
+[compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.6...v0.0.7)
+
+### 💅 Refactors
+
+- **core:** Improve clearAuthData provider handling ([75ba6ac](https://github.com/4sllan/nuxt-umbu/commit/75ba6ac))
+
+### 📖 Documentation
+
+- **core:** Update CHANGELOG for cookie deletion method ([19c29d6](https://github.com/4sllan/nuxt-umbu/commit/19c29d6))
+
+### ✅ Tests
+
+- **passport:** Remove obsolete passport plugin tests ([0e97ac4](https://github.com/4sllan/nuxt-umbu/commit/0e97ac4))
+
+### ❤️ Contributors
+
+- Aslan.gama <aslan.gama@sixchains.com.br>
+
 ## v0.0.6
 
 [compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.5...v0.0.6)
