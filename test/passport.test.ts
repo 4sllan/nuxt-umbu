@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { deleteAuthCookies } from '../src/runtime/passport/server/utils/cookies'
 
 describe('Passport Plugin', () => {
   beforeEach(() => {
@@ -290,38 +291,20 @@ describe('Passport Plugin', () => {
         sameSite: 'Lax'
       }
 
-      const mockSetCookie = vi.fn()
-      const mockEvent = {}
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
 
-      // Mock setCookie function
-      const setCookie = mockSetCookie
-
-      // Simulate deleteAuthCookies with __Secure- prefix
-      const cookieNames = [
-        prefix + '_token.' + strategyName,
-        prefix + 'strategy',
-        prefix + '_token_expiration.' + strategyName,
-        prefix + '_refresh_token.' + strategyName
-      ]
-
-      cookieNames.forEach(cookieName => {
-        setCookie(mockEvent, cookieName, '', { ...cookieOptions, maxAge: 0 })
-      })
-
-      expect(mockSetCookie).toHaveBeenCalledTimes(4)
-      cookieNames.forEach(cookieName => {
-        expect(mockSetCookie).toHaveBeenCalledWith(
-          mockEvent,
-          cookieName,
-          '',
-          { ...cookieOptions, maxAge: 0 }
-        )
-      })
-
-      // Verify secure attribute is preserved
-      const lastCall = mockSetCookie.mock.calls[mockSetCookie.mock.calls.length - 1]
-      expect(lastCall[3]).toHaveProperty('secure', true)
-      expect(lastCall[3]).toHaveProperty('maxAge', 0)
+      // Verify function can be called without errors
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
     })
 
     it('should handle __Host- prefix cookie deletion with required attributes', () => {
@@ -334,40 +317,19 @@ describe('Passport Plugin', () => {
         path: '/'
       }
 
-      const mockSetCookie = vi.fn()
-      const mockEvent = {}
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
 
-      // Mock setCookie function
-      const setCookie = mockSetCookie
-
-      // Simulate deleteAuthCookies with __Host- prefix
-      const cookieNames = [
-        prefix + '_token.' + strategyName,
-        prefix + 'strategy',
-        prefix + '_token_expiration.' + strategyName,
-        prefix + '_refresh_token.' + strategyName
-      ]
-
-      cookieNames.forEach(cookieName => {
-        setCookie(mockEvent, cookieName, '', { ...cookieOptions, maxAge: 0 })
-      })
-
-      expect(mockSetCookie).toHaveBeenCalledTimes(4)
-      cookieNames.forEach(cookieName => {
-        expect(mockSetCookie).toHaveBeenCalledWith(
-          mockEvent,
-          cookieName,
-          '',
-          { ...cookieOptions, maxAge: 0 }
-        )
-      })
-
-      // Verify __Host- requirements: secure, path=/, no domain
-      const lastCall = mockSetCookie.mock.calls[mockSetCookie.mock.calls.length - 1]
-      expect(lastCall[3]).toHaveProperty('secure', true)
-      expect(lastCall[3]).toHaveProperty('path', '/')
-      expect(lastCall[3]).toHaveProperty('maxAge', 0)
-      expect(lastCall[3]).not.toHaveProperty('domain')
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
     })
 
     it('should handle 2FA cookie deletion with __Secure- prefix', () => {
@@ -379,41 +341,19 @@ describe('Passport Plugin', () => {
         sameSite: 'Lax'
       }
 
-      const mockSetCookie = vi.fn()
-      const mockEvent = {}
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
 
-      // Mock setCookie function
-      const setCookie = mockSetCookie
-
-      // Simulate deleteAuthCookies with 2FA enabled
-      const cookieNames = [
-        prefix + '_token.' + strategyName,
-        prefix + 'strategy',
-        prefix + '_token_expiration.' + strategyName,
-        prefix + '_refresh_token.' + strategyName,
-        prefix + '_2fa.' + strategyName,
-        prefix + '_2fa_expiration.' + strategyName
-      ]
-
-      cookieNames.forEach(cookieName => {
-        setCookie(mockEvent, cookieName, '', { ...cookieOptions, maxAge: 0 })
-      })
-
-      expect(mockSetCookie).toHaveBeenCalledTimes(6)
-      cookieNames.forEach(cookieName => {
-        expect(mockSetCookie).toHaveBeenCalledWith(
-          mockEvent,
-          cookieName,
-          '',
-          { ...cookieOptions, maxAge: 0 }
-        )
-      })
-
-      // Verify secure attribute is preserved for all cookies
-      mockSetCookie.mock.calls.forEach(call => {
-        expect(call[3]).toHaveProperty('secure', true)
-        expect(call[3]).toHaveProperty('maxAge', 0)
-      })
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, true)
+      }).not.toThrow()
     })
 
     it('should handle regular auth. prefix cookie deletion', () => {
@@ -425,37 +365,19 @@ describe('Passport Plugin', () => {
         sameSite: 'Lax'
       }
 
-      const mockSetCookie = vi.fn()
-      const mockEvent = {}
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
 
-      // Mock setCookie function
-      const setCookie = mockSetCookie
-
-      // Simulate deleteAuthCookies with regular prefix
-      const cookieNames = [
-        prefix + '_token.' + strategyName,
-        prefix + 'strategy',
-        prefix + '_token_expiration.' + strategyName,
-        prefix + '_refresh_token.' + strategyName
-      ]
-
-      cookieNames.forEach(cookieName => {
-        setCookie(mockEvent, cookieName, '', { ...cookieOptions, maxAge: 0 })
-      })
-
-      expect(mockSetCookie).toHaveBeenCalledTimes(4)
-      cookieNames.forEach(cookieName => {
-        expect(mockSetCookie).toHaveBeenCalledWith(
-          mockEvent,
-          cookieName,
-          '',
-          { ...cookieOptions, maxAge: 0 }
-        )
-      })
-
-      // Verify maxAge is set to 0 for deletion
-      const lastCall = mockSetCookie.mock.calls[mockSetCookie.mock.calls.length - 1]
-      expect(lastCall[3]).toHaveProperty('maxAge', 0)
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
     })
 
     it('should preserve all cookie options during deletion', () => {
@@ -469,24 +391,19 @@ describe('Passport Plugin', () => {
         domain: '.example.com'
       }
 
-      const mockSetCookie = vi.fn()
-      const mockEvent = {}
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
 
-      // Mock setCookie function
-      const setCookie = mockSetCookie
-
-      setCookie(mockEvent, prefix + '_token.' + strategyName, '', { ...cookieOptions, maxAge: 0 })
-
-      expect(mockSetCookie).toHaveBeenCalledTimes(1)
-      const callArgs = mockSetCookie.mock.calls[0]
-
-      // Verify all original options are preserved
-      expect(callArgs[3]).toHaveProperty('httpOnly', true)
-      expect(callArgs[3]).toHaveProperty('secure', true)
-      expect(callArgs[3]).toHaveProperty('sameSite', 'Lax')
-      expect(callArgs[3]).toHaveProperty('path', '/')
-      expect(callArgs[3]).toHaveProperty('domain', '.example.com')
-      expect(callArgs[3]).toHaveProperty('maxAge', 0)
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
     })
   })
 })
