@@ -56,7 +56,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
             return data;
         } catch (error: unknown) {
-            clearAuthData(prefix);
+            clearAuthData(prefix, 'passport');
             throw createError({
                 statusCode: (error && typeof error === 'object' && 'statusCode' in error) ? Number(error.statusCode) : 401,
                 statusMessage: 'Access denied',
@@ -112,7 +112,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         const headerNameT2fa = getStrategyConfig(strategyName)?.endpoints?.twoFactor?.headerName || '2fa';
         $headers.delete(headerNameT2fa);
 
-        clearAuthData(prefix);
+        clearAuthData(prefix, 'passport');
         await handleRedirect(strategyName, 'logout');
     };
 

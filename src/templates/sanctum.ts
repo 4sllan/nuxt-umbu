@@ -146,8 +146,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             // Clear authentication headers
             $headers.delete('X-XSRF-TOKEN');
             $headers.delete('Accept');
-            
-            clearAuthData(prefix);
+
+            clearAuthData(prefix, 'sanctum');
             await handleRedirect(strategyName, 'logout');
         }
     };
