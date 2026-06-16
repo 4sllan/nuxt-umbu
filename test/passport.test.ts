@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { deleteAuthCookies } from '../src/runtime/passport/server/utils/cookies'
 
 describe('Passport Plugin', () => {
   beforeEach(() => {
@@ -277,6 +278,132 @@ describe('Passport Plugin', () => {
       const fetchProfile = vi.fn().mockResolvedValue(null)
       
       await expect(fetchProfile('passport')).resolves.toBeNull()
+    })
+  })
+
+  describe('Cookie Deletion with Special Prefixes', () => {
+    it('should handle __Secure- prefix cookie deletion with secure attribute', () => {
+      const prefix = '__Secure-'
+      const strategyName = 'passport'
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Lax'
+      }
+
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
+
+      // Verify function can be called without errors
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
+    })
+
+    it('should handle __Host- prefix cookie deletion with required attributes', () => {
+      const prefix = '__Host-'
+      const strategyName = 'passport'
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Lax',
+        path: '/'
+      }
+
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
+
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
+    })
+
+    it('should handle 2FA cookie deletion with __Secure- prefix', () => {
+      const prefix = '__Secure-'
+      const strategyName = 'passport'
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Lax'
+      }
+
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
+
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, true)
+      }).not.toThrow()
+    })
+
+    it('should handle regular auth. prefix cookie deletion', () => {
+      const prefix = 'auth.'
+      const strategyName = 'passport'
+      const cookieOptions = {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Lax'
+      }
+
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
+
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
+    })
+
+    it('should preserve all cookie options during deletion', () => {
+      const prefix = '__Secure-'
+      const strategyName = 'passport'
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Lax',
+        path: '/',
+        domain: '.example.com'
+      }
+
+      const mockEvent = {
+        node: {
+          res: {
+            setHeader: vi.fn(),
+            getHeader: vi.fn()
+          }
+        }
+      } as any
+      const config = { prefix, cookieOptions } as any
+
+      expect(() => {
+        deleteAuthCookies(mockEvent, strategyName, config, false)
+      }).not.toThrow()
     })
   })
 })

@@ -1,4 +1,16 @@
 
+## v0.0.6
+
+[compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.5...v0.0.6)
+
+### 💅 Refactors
+
+- **core:** Replace cookie deletion method with setCookie  ([ff7017e](https://github.com/4sllan/nuxt-umbu/commit/ff7017e))
+
+### ❤️ Contributors
+
+- Aslan.gama <aslan.gama@sixchains.com.br>
+
 ## v0.0.5
 
 [compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.4...v0.0.5)
