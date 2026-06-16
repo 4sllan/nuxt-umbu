@@ -1,6 +1,6 @@
 {
   "name": "nuxt-umbu",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Authentication module simple for Nuxt.js",
   "repository": "https://github.com/4sllan/nuxt-umbu",
   "author": "Aslan Gama <@4slan>",
