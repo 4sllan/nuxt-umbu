@@ -5,7 +5,7 @@
 
 ### 💅 Refactors
 
-- **core:** Altera método de exclusão de cookies para setCookie ([ff7017e](https://github.com/4sllan/nuxt-umbu/commit/ff7017e))
+- **core:** Replace cookie deletion method with setCookie  ([ff7017e](https://github.com/4sllan/nuxt-umbu/commit/ff7017e))
 
 ### ❤️ Contributors
 
