@@ -1,4 +1,4 @@
-import { setCookie, deleteCookie, H3Event } from 'h3';
+import { setCookie, H3Event } from 'h3';
 import type { AuthConfig } from './config';
 
 /**
@@ -44,14 +44,14 @@ export function deleteAuthCookies(
 ): void {
   const { prefix, cookieOptions } = config;
 
-  deleteCookie(event, prefix + '_token.' + strategyName, cookieOptions);
-  deleteCookie(event, prefix + 'strategy', cookieOptions);
-  deleteCookie(event, prefix + '_token_expiration.' + strategyName, cookieOptions);
-  deleteCookie(event, prefix + '_refresh_token.' + strategyName, cookieOptions);
+  setCookie(event, prefix + '_token.' + strategyName, '', { ...cookieOptions, maxAge: 0 });
+  setCookie(event, prefix + 'strategy', '', { ...cookieOptions, maxAge: 0 });
+  setCookie(event, prefix + '_token_expiration.' + strategyName, '', { ...cookieOptions, maxAge: 0 });
+  setCookie(event, prefix + '_refresh_token.' + strategyName, '', { ...cookieOptions, maxAge: 0 });
 
   if (includeTwoFactor) {
-    deleteCookie(event, prefix + '_2fa.' + strategyName, cookieOptions);
-    deleteCookie(event, prefix + '_2fa_expiration.' + strategyName, cookieOptions);
+    setCookie(event, prefix + '_2fa.' + strategyName, '', { ...cookieOptions, maxAge: 0 });
+    setCookie(event, prefix + '_2fa_expiration.' + strategyName, '', { ...cookieOptions, maxAge: 0 });
   }
 }
 

@@ -188,28 +188,15 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
 
 
         // 3. Plugins Dinâmicos (Sem depender de arquivos físicos no dist)
-
-        // No setup do module.ts
-        const pluginPath = provider === 'passport'
-            ? './runtime/passport/plugin.ts'
-            : './runtime/sanctum/plugin.ts'
-
         addPluginTemplate({
-            src: resolve(pluginPath),
             filename: 'umbu-plugin.ts',
-            write: true, // Isso ajuda a debugar vendo o arquivo em .nuxt/
-            options
+            getContents: () => {
+                return provider === 'passport'
+                    ? templates.passportTemplate()
+                    : templates.sanctumTemplate()
+            },
+            mode: 'all'
         })
-
-        // addPluginTemplate({
-        //     filename: 'umbu-plugin.ts',
-        //     getContents: () => {
-        //         return provider === 'passport'
-        //             ? templates.passportTemplate()
-        //             : templates.sanctumTemplate()
-        //     },
-        //     mode: 'all'
-        // })
 
         // 4. Hook para o TypeScript (VS Code)
         nuxt.hook('prepare:types', ({ references, tsConfig }) => {

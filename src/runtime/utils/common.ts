@@ -81,16 +81,22 @@ export const useUmbuUtils = () => {
      * Clears authentication data including cookies and localStorage.
      * Resets the auth store and removes all auth-related storage entries.
      * @param prefix - The prefix used for authentication cookies and storage keys
+     * @param provider - The authentication provider ('passport' or 'sanctum')
+     *                    - 'passport': Only clears localStorage (cookies are deleted by backend)
+     *                    - 'sanctum': Clears both cookies and localStorage
      */
-    const clearAuthData = (prefix: string): void => {
+    const clearAuthData = (prefix: string, provider: 'passport' | 'sanctum' = 'sanctum'): void => {
         store.value = { user: null, loggedIn: false, strategy: '' }
 
-        // Limpa cookies do Nuxt
-        const strategyCookie = useCookie(`${prefix}strategy`)
-        strategyCookie.value = undefined
+        // Sanctum needs to clear cookies on client (XSRF-TOKEN and strategy cookie)
+        // Passport relies on backend to delete cookies (deleteAuthCookies is called on server)
+        if (provider === 'sanctum') {
+            const strategyCookie = useCookie(`${prefix}strategy`)
+            strategyCookie.value = undefined
 
-        const xsrfCookie = useCookie('XSRF-TOKEN')
-        xsrfCookie.value = undefined
+            const xsrfCookie = useCookie('XSRF-TOKEN')
+            xsrfCookie.value = undefined
+        }
 
         if (import.meta.client) {
             Object.keys(localStorage)
