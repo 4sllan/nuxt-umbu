@@ -21,4 +21,5 @@ It provides a secure and SSR-compatible authentication layer with built-in suppo
 - 🔑 Optional **Two-Factor Authentication (2FA)**
 - 🪝 Extensible for future authentication providers
 
+
 ---
