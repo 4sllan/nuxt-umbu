@@ -1,4 +1,28 @@
 
+## v0.0.8
+
+[compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.7...v0.0.8)
+
+### 💅 Refactors
+
+- **docs:** Improve authentication documentation examples ([2a14e86](https://github.com/4sllan/nuxt-umbu/commit/2a14e86))
+
+### 📖 Documentation
+
+- **passport:** Add comprehensive Laravel Passport guide ([f2c02c9](https://github.com/4sllan/nuxt-umbu/commit/f2c02c9))
+- **content:** Fix filename case for two-factor docs ([04ad18b](https://github.com/4sllan/nuxt-umbu/commit/04ad18b))
+- Refactors Sanctum config, moves user property, and renames 2FA endpoint. ([8017563](https://github.com/4sllan/nuxt-umbu/commit/8017563))
+- **passport:** Adiciona documentação completa para Passport ([2cbc115](https://github.com/4sllan/nuxt-umbu/commit/2cbc115))
+- **core:** Add npm version and downloads badges ([cff1867](https://github.com/4sllan/nuxt-umbu/commit/cff1867))
+- **passport:** Refactor authentication flow documentation ([5a98e6f](https://github.com/4sllan/nuxt-umbu/commit/5a98e6f))
+- **passport:** Update 2FA, middleware, and examples ([777fee8](https://github.com/4sllan/nuxt-umbu/commit/777fee8))
+- **passport:** Update 2FA, middleware, and examples ([4f19a94](https://github.com/4sllan/nuxt-umbu/commit/4f19a94))
+- **passport:** Update 2FA, middleware, and examples ([22d09e8](https://github.com/4sllan/nuxt-umbu/commit/22d09e8))
+
+### ❤️ Contributors
+
+- Aslan.gama <aslan.gama@sixchains.com.br>
+
 ## v0.0.7
 
 [compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.6...v0.0.7)
