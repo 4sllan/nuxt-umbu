@@ -1,11 +1,11 @@
 ---
 title: Middleware
-description: Route and server middleware for authentication in Nuxt Umbu
+description: Route middleware for protecting application routes in Nuxt Umbu
 navigation:
   icon: i-lucide-shield-check
 ---
 
-Nuxt Umbu provides middleware to protect your routes and server endpoints, ensuring only authenticated users can access specific areas of your application.
+Nuxt Umbu provides route middleware to protect your application routes, ensuring only authenticated users can access specific areas of your application. Note that API and server endpoints require separate server-side authentication checks on your backend.
 
 ## Available Middleware
 
@@ -14,7 +14,7 @@ Nuxt Umbu provides middleware to protect your routes and server endpoints, ensur
 
 ## Overview
 
-Middleware in Nuxt Umbu provides automatic authentication validation for both client-side and server-side scenarios. They handle session validation, token expiration, strategy consistency, and automatic logout when authentication fails.
+Middleware in Nuxt Umbu provides automatic authentication validation for application routes in both client-side and server-side rendering contexts. They handle session validation, token expiration, strategy consistency, and automatic logout when authentication fails. For securing API endpoints or server-side routes, implement authentication checks directly on your backend server.
 
 ### Quick Start
 
@@ -69,13 +69,11 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
 ```typescript
 definePageMeta({
-  middleware: (to) => {
-    if (to.meta.requiresAuth) {
-      return 'umbu:auth'
-    }
-  }
+  middleware: 'umbu:auth'
 })
 ```
+
+For conditional middleware logic, implement the branching within a custom middleware function or check conditions in your page component before applying protection.
 
 ## How It Works
 
