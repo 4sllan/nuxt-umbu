@@ -20,9 +20,6 @@ importers:
       h3:
         specifier: ^1.15.4
         version: 1.15.10
-      lodash.kebabcase:
-        specifier: ^4.1.1
-        version: 4.1.1
       ofetch:
         specifier: ^1.5.1
         version: 1.5.1
@@ -42,9 +39,6 @@ importers:
       '@nuxt/test-utils':
         specifier: ^3.23.0
         version: 3.23.0(happy-dom@20.8.9)(magicast@0.5.2)(typescript@5.9.3)(vitest@3.2.4(@types/node@25.5.0)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.3))
-      '@types/lodash.kebabcase':
-        specifier: ^4.1.9
-        version: 4.1.9
       '@types/node':
         specifier: ^25.3.0
         version: 25.5.0
@@ -1605,12 +1599,6 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/lodash.kebabcase@4.1.9':
-    resolution: {integrity: sha512-kPrrmcVOhSsjAVRovN0lRfrbuidfg0wYsrQa5IYuoQO1fpHHGSme66oyiYA/5eQPVl8Z95OA3HG0+d2SvYC85w==}
-
-  '@types/lodash@4.17.24':
-    resolution: {integrity: sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ==}
-
   '@types/node@25.5.0':
     resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
 
@@ -3110,9 +3098,6 @@ packages:
 
   lodash.isarguments@3.1.0:
     resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
-
-  lodash.kebabcase@4.1.1:
-    resolution: {integrity: sha512-N8XRTIMMqqDgSy4VLKPnJ/+hpGZN+PHQiJnSenYqPaVV/NCqEogTnAdZLQiGKhxX+JCs8waWq2t1XHWKOmlY8g==}
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -5989,12 +5974,6 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/lodash.kebabcase@4.1.9':
-    dependencies:
-      '@types/lodash': 4.17.24
-
-  '@types/lodash@4.17.24': {}
-
   '@types/node@25.5.0':
     dependencies:
       undici-types: 7.18.2
@@ -7588,8 +7567,6 @@ snapshots:
   lodash.defaults@4.2.0: {}
 
   lodash.isarguments@3.1.0: {}
-
-  lodash.kebabcase@4.1.1: {}
 
   lodash.memoize@4.1.2: {}
 
