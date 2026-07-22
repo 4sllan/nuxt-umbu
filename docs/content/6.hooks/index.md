@@ -2,7 +2,7 @@
 title: Hooks
 description: Nuxt hooks used by Nuxt Umbu for module integration
 navigation:
-  icon: i-lucide-hook
+  icon: i-lucide-webhook
 ---
 
 Nuxt Umbu uses Nuxt hooks to integrate seamlessly with the Nuxt ecosystem, providing automatic type generation, configuration, and runtime setup.
