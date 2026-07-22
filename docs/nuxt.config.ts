@@ -82,17 +82,17 @@ export default defineNuxtConfig({
                 ]
             },
             {
-                title: 'Route Middleware',
+                title: 'Middleware',
                 contentCollection: 'docs',
                 contentFilters: [
                     {field: 'path', operator: 'LIKE', value: '/middleware%'}
                 ]
             },
             {
-                title: 'Security',
+                title: 'Hooks',
                 contentCollection: 'docs',
                 contentFilters: [
-                    {field: 'path', operator: 'LIKE', value: '/security%'}
+                    {field: 'path', operator: 'LIKE', value: '/hooks%'}
                 ]
             },
             {
@@ -102,13 +102,6 @@ export default defineNuxtConfig({
                     {field: 'path', operator: 'LIKE', value: '/advanced%'}
                 ]
             },
-            {
-                title: 'Troubleshooting',
-                contentCollection: 'docs',
-                contentFilters: [
-                    {field: 'path', operator: 'LIKE', value: '/troubleshooting%'}
-                ]
-            }
         ]
     },
 
