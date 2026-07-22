@@ -25,7 +25,23 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Debug
+        run: |
+          echo "Before: ${{ github.event.before }}"
+          echo "Sha:    ${{ github.sha }}"
+
+          echo "===== Commits ====="
+          git log --oneline --graph --decorate -10
+
+          echo "===== Changed files ====="
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+
+          echo "===== Event ====="
+          cat "$GITHUB_EVENT_PATH"
 
       - name: Check for docs changes
         id: check
