@@ -1,0 +1,59 @@
+---
+title: Advanced
+description: Advanced configuration and customization options for Nuxt Umbu
+navigation:
+  icon: i-lucide-settings-2
+---
+
+Advanced configuration options for Nuxt Umbu, covering custom setups, TypeScript integration, security features, and runtime configuration.
+
+## Available Topics
+
+- **[Custom Configuration](./1.custom-configuration.md)** - Deep customization of module options
+- **[Cookie Configuration](./2.cookie-configuration.md)** - Advanced cookie settings and security
+- **[TypeScript Integration](./3.typescript-integration.md)** - Type system and IDE support
+- **[Module Aliases](./4.module-aliases.md)** - Using #auth-utils and #auth-types
+- **[Security Features](./5.security-features.md)** - CSRF protection and 2FA implementation
+- **[Runtime Configuration](./6.runtime-configuration.md)** - Runtime config and secrets management
+
+## Overview
+
+The advanced section covers topics that go beyond basic setup and usage. These features allow you to:
+
+- Fine-tune authentication behavior for specific requirements
+- Implement advanced security measures
+- Leverage TypeScript for type-safe development
+- Customize cookie behavior for different environments
+- Manage runtime configuration and secrets securely
+
+## When to Use Advanced Features
+
+You should explore this section when:
+
+- You need custom authentication flows beyond the default
+- You're working in a production environment with strict security requirements
+- You want to leverage TypeScript for better developer experience
+- You need to integrate with existing authentication systems
+- You require custom cookie behavior for specific use cases
+
+## Prerequisites
+
+Before diving into advanced features, ensure you have:
+
+- Completed the [Getting Started](../1.getting-started) guide
+- Configured either [Sanctum](../2.sanctum) or [Passport](../3.passport) provider
+- Understanding of basic [Composables](../4.composables) and [Middleware](../5.middleware)
+
+## Security Considerations
+
+When implementing advanced features, always consider:
+
+- Keep sensitive data in runtime config, not public config
+- Use secure cookie settings in production
+- Implement proper CSRF protection
+- Enable 2FA for sensitive applications
+- Regularly update dependencies for security patches
+
+## Next Steps
+
+Choose a topic from the list above to learn more about specific advanced features.
