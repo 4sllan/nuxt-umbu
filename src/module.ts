@@ -39,7 +39,7 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
         const provider = options.provider || 'sanctum';
 
         const kebabCase = (str: string) => str
-            .replace(/([a-z])([A-Z])/g, '$1-$2')
+            ?.replace(/([a-z])([A-Z])/g, '$1-$2')
             .replace(/[\s_]+/g, '-')
             .toLowerCase();
 
