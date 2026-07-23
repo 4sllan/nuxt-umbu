@@ -1,4 +1,48 @@
 
+## v0.0.9
+
+[compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.8...v0.0.9)
+
+### 🚀 Enhancements
+
+- **docs:** Add comprehensive documentation for core features ([a0c87ec](https://github.com/4sllan/nuxt-umbu/commit/a0c87ec))
+
+### 🩹 Fixes
+
+- **core:** Update docs workflow to use checkout@v5 ([213e400](https://github.com/4sllan/nuxt-umbu/commit/213e400))
+- **core:** Update docs workflow to use checkout@v5 ([bfd7577](https://github.com/4sllan/nuxt-umbu/commit/bfd7577))
+- **docs:** Remove unused navigation files ([553aa17](https://github.com/4sllan/nuxt-umbu/commit/553aa17))
+- **core:** Update sameSite cookie option to 'Lax' ([6c7bd2e](https://github.com/4sllan/nuxt-umbu/commit/6c7bd2e))
+
+### 💅 Refactors
+
+- **core:** Remove lodash.kebabcase dependency ([ffb4184](https://github.com/4sllan/nuxt-umbu/commit/ffb4184))
+- **core:** Remove lodash.kebabcase dependency ([c6096b1](https://github.com/4sllan/nuxt-umbu/commit/c6096b1))
+- **core:** Remove lodash.kebabcase dependency ([5f7f5b4](https://github.com/4sllan/nuxt-umbu/commit/5f7f5b4))
+- **core:** Update nuxt.config.ts for doc structure ([a8a6a1d](https://github.com/4sllan/nuxt-umbu/commit/a8a6a1d))
+- **core:** Adjust kebabCase logic in module.ts ([eb10114](https://github.com/4sllan/nuxt-umbu/commit/eb10114))
+
+### 📖 Documentation
+
+- **core:** Update README deployment documentation ([dc495dc](https://github.com/4sllan/nuxt-umbu/commit/dc495dc))
+- **core:** Update README deployment documentation ([adfdd51](https://github.com/4sllan/nuxt-umbu/commit/adfdd51))
+- **core:** Update README deployment documentation ([24eba8f](https://github.com/4sllan/nuxt-umbu/commit/24eba8f))
+- **advanced:** Refactor and update documentation ([7427618](https://github.com/4sllan/nuxt-umbu/commit/7427618))
+- **core:** Reorganize content files for better structure ([2be1a43](https://github.com/4sllan/nuxt-umbu/commit/2be1a43))
+- **core:** Update advanced guide links ([ed60fb8](https://github.com/4sllan/nuxt-umbu/commit/ed60fb8))
+- **core:** Update advanced guide links ([c2a7d93](https://github.com/4sllan/nuxt-umbu/commit/c2a7d93))
+- **core:** Update advanced guide links ([aa3ae20](https://github.com/4sllan/nuxt-umbu/commit/aa3ae20))
+- **core:** Update advanced guide links ([dcdd6bb](https://github.com/4sllan/nuxt-umbu/commit/dcdd6bb))
+- **core:** Add documentation badge to README ([fba12ad](https://github.com/4sllan/nuxt-umbu/commit/fba12ad))
+
+### 🏡 Chore
+
+- **ci:** Refactor docs workflow for clarity and control ([48db244](https://github.com/4sllan/nuxt-umbu/commit/48db244))
+
+### ❤️ Contributors
+
+- Aslan.gama <aslan.gama@sixchains.com.br>
+
 ## v0.0.8
 
 [compare changes](https://github.com/4sllan/nuxt-umbu/compare/v0.0.7...v0.0.8)
