@@ -54,7 +54,6 @@
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/schema": "^4.2.2",
     "@nuxt/test-utils": "^3.23.0",
-    "@types/lodash.kebabcase": "^4.1.9",
     "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "changelogen": "^0.6.2",
@@ -70,7 +69,6 @@
     "@vueuse/core": "^14.1.0",
     "defu": "^6.1.4",
     "h3": "^1.15.4",
-    "lodash.kebabcase": "^4.1.1",
     "ofetch": "^1.5.1",
     "unstorage": "^1.17.3"
   }

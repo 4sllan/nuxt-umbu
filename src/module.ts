@@ -9,7 +9,6 @@ import {
     addImportsDir,
 } from '@nuxt/kit';
 import {defu} from 'defu';
-import kebabCase from 'lodash.kebabcase';
 
 import * as templates from './templates' // Importa tudo da pasta de templates
 
@@ -38,6 +37,14 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
         const {resolve} = createResolver(import.meta.url);
         const isDev = nuxt.options.dev;
         const provider = options.provider || 'sanctum';
+
+        const kebabCase = (str?: string | null): string =>
+            (str ?? '')
+                .trim()
+                .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+                .replace(/[^a-z0-9]+/gi, '-')
+                .replace(/^-+|-+$/g, '')
+                .toLowerCase();
 
         options = defu(options, {
             cookie: {
