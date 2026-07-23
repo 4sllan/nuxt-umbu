@@ -40,8 +40,10 @@ export default defineNuxtModule<ModuleOptions & { twoFactorAuth: boolean }>({
 
         const kebabCase = (str?: string | null): string =>
             (str ?? '')
-                .replace(/([a-z])([A-Z])/g, '$1-$2')
-                .replace(/[\s_]+/g, '-')
+                .trim()
+                .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+                .replace(/[^a-zA-Z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
                 .toLowerCase();
 
         options = defu(options, {
