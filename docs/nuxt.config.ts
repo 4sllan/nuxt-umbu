@@ -1,15 +1,6 @@
 export default defineNuxtConfig({
     app: {
         baseURL: '/nuxt-umbu/',
-        head: {
-            script: [
-                {
-                    src: 'https://media.bitterbrains.com/main.js?from=ARTEM&type=top',
-                    defer: true,
-                    async: true
-                }
-            ]
-        }
     },
 
     devtools: {
@@ -115,4 +106,13 @@ export default defineNuxtConfig({
             }
         }
     },
+
+    vite: {
+        optimizeDeps: {
+            include: [
+                '@vue/devtools-core',
+                '@vue/devtools-kit',
+            ]
+        }
+    }
 })

@@ -52,23 +52,23 @@
   "devDependencies": {
     "@nuxt/eslint-config": "^1.12.1",
     "@nuxt/module-builder": "^1.0.2",
-    "@nuxt/schema": "^4.2.2",
+    "@nuxt/schema": "4.4.8",
     "@nuxt/test-utils": "^4.0.3",
     "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "changelogen": "^0.6.2",
     "eslint": "^10.7.0",
     "happy-dom": "^20.7.0",
-    "nuxt": "^4.2.2",
+    "nuxt": "4.4.8",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "@nuxt/kit": "^4.2.2",
+    "@nuxt/kit": "4.4.8",
     "@vueuse/core": "^14.1.0",
     "defu": "^6.1.4",
-    "h3": "^1.15.4",
+    "h3": "^1.15.11",
     "ofetch": "^1.5.1",
     "unstorage": "^1.17.3"
   }
