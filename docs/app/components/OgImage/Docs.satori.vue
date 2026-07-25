@@ -1,18 +1,9 @@
 <script lang="ts" setup>
-interface ComponentProps {
+const props = defineProps<{
   title?: string
   description?: string,
   headline?: string
-}
-
-const props = withDefaults(
-  defineProps<ComponentProps>(),
-  {
-    title: 'title',
-    description: 'description',
-    headline: 'headline'
-  }
-)
+}>();
 
 const title = computed(() => (props.title || '').slice(0, 60))
 const description = computed(() => (props.description || '').slice(0, 200))

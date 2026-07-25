@@ -16,12 +16,15 @@ useSeoMeta({
   ogDescription: description
 })
 
-defineOgImageComponent(
-  'Docs',
-  {
-    headline: 'Nuxt Umbuzeiro'
-  }
+defineOgImage(
+    'Docs',
+    {
+      title,
+      description,
+      headline: 'Nuxt Umbuzeiro'
+    }
 )
+
 </script>
 
 <template>
