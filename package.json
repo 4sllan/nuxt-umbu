@@ -62,7 +62,7 @@
     "nuxt": "^4.2.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@nuxt/kit": "^4.2.2",
