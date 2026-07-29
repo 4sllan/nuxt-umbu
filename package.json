@@ -2,8 +2,21 @@
   "name": "nuxt-umbu",
   "version": "0.0.9",
   "description": "Authentication module simple for Nuxt.js",
-  "repository": "https://github.com/4sllan/nuxt-umbu",
-  "author": "Aslan Gama <@4slan>",
+  "author": "4sllan (https://github.com/4sllan)",
+  "homepage": "https://4sllan.github.io/nuxt-umbu/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4sllan/nuxt-umbu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/4sllan/nuxt-umbu/issues"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/4sllan"
+    }
+  ],
   "keywords": [
     "Nuxt authentication",
     "Laravel Passport integration",
