@@ -17,7 +17,7 @@ useSeoMeta({
 })
 
 defineOgImage(
-    'Docs',
+    'Nuxt.satori',
     {
       title,
       description,

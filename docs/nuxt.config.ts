@@ -3,6 +3,11 @@ export default defineNuxtConfig({
         baseURL: '/nuxt-umbu/',
     },
 
+    site: {
+        url: 'https://4sllan.github.io',
+        name: 'Nuxt Umbu'
+    },
+
     devtools: {
         enabled: true
     },
