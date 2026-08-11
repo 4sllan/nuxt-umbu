@@ -17,6 +17,9 @@
       "url": "https://github.com/sponsors/4sllan"
     }
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "keywords": [
     "Nuxt authentication",
     "Laravel Passport integration",
